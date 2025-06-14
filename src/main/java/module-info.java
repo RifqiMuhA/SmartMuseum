@@ -25,7 +25,7 @@ module org.example.smartmuseum {
 
     // Open packages for reflection (untuk FXML)
     opens org.example.smartmuseum to javafx.fxml;
-    opens org.example.smartmuseum.controller to javafx.fxml;
+//    opens org.example.smartmuseum.controller to javafx.fxml;
     opens org.example.smartmuseum.model.entity to javafx.base;
     opens org.example.smartmuseum.model.enums to javafx.base;
     exports org.example.smartmuseum.view;
