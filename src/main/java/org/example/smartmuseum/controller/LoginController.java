@@ -1,55 +1,68 @@
 package org.example.smartmuseum.controller;
 
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Node;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
-import javafx.scene.control.PasswordField;
-import javafx.scene.control.TextField;
-import javafx.stage.Stage;
+import javafx.scene.control.*;
+import org.example.smartmuseum.database.DatabaseConnection;
 
-import java.io.IOException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 
 public class LoginController {
+    @FXML private TextField usernameTextField;
+    @FXML private PasswordField enterPasswordField;
+    @FXML private Label invalidLoginLabel;
+    @FXML private Button loginButton;
 
     @FXML
-    private TextField usernameTextField;
+    private void initialize() {
+        loginButton.setOnAction(e -> loginUser());
+    }
 
-    @FXML
-    private PasswordField enterPasswordField;
-
-    @FXML
-    public void logginButton(ActionEvent event) {
-        // Ini hanya contoh, nanti bisa kamu isi dengan validasi username dan password
+    private void loginUser() {
         String username = usernameTextField.getText();
         String password = enterPasswordField.getText();
 
-        System.out.println("Login attempted by: " + username + " with password: " + password);
+        try {
+            Connection conn = DatabaseConnection.getInstance().getConnection();
+            String hashedPassword = hashPassword(password);
 
-        // Misalnya nanti kamu mau masuk ke halaman dashboard, bisa load fxml lain di sini
+            String sql = "SELECT * FROM users WHERE username = ? AND password_hash = ?";
+            PreparedStatement stmt = conn.prepareStatement(sql);
+            stmt.setString(1, username);
+            stmt.setString(2, hashedPassword);
+
+            ResultSet rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                invalidLoginLabel.setVisible(false);
+                showAlert(Alert.AlertType.INFORMATION, "Login berhasil sebagai " + rs.getString("role"));
+                // TODO: navigasi ke halaman sesuai role
+            } else {
+                invalidLoginLabel.setText("Invalid login! Please try again!");
+                invalidLoginLabel.setVisible(true);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            showAlert(Alert.AlertType.ERROR, "Terjadi kesalahan saat login: " + e.getMessage());
+        }
     }
 
-    @FXML
-    public void handleRegister(ActionEvent event) {
-        try {
-            // Load register.fxml
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/smartmuseum/view/register.fxml"));
-            Parent registerRoot = loader.load();
+    private String hashPassword(String password) throws NoSuchAlgorithmException {
+        MessageDigest md = MessageDigest.getInstance("SHA-256");
+        byte[] bytes = md.digest(password.getBytes());
+        StringBuilder sb = new StringBuilder();
+        for (byte b : bytes)
+            sb.append(String.format("%02x", b));
+        return sb.toString();
+    }
 
-            // Buka halaman register
-            Stage registerStage = new Stage();
-            registerStage.setTitle("SmartMuseum - Register");
-            registerStage.setScene(new Scene(registerRoot));
-            registerStage.show();
-
-            // Tutup halaman login
-            Stage loginStage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-            loginStage.close();
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    private void showAlert(Alert.AlertType type, String message) {
+        Alert alert = new Alert(type);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
     }
 }

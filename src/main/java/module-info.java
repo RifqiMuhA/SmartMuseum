@@ -7,7 +7,7 @@ module org.example.smartmuseum {
     // Database
     requires java.sql;
 
-    // QR Code
+    // QR Code (ZXing)
     requires com.google.zxing;
     requires com.google.zxing.javase;
     opens org.example.smartmuseum.controller to javafx.fxml;
