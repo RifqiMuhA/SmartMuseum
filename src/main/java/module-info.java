@@ -10,6 +10,8 @@ module org.example.smartmuseum {
     // QR Code
     requires com.google.zxing;
     requires com.google.zxing.javase;
+    opens org.example.smartmuseum.controller to javafx.fxml;
+    opens org.example.smartmuseum.view to javafx.fxml;
 
     // Java base modules
     requires java.desktop;
@@ -26,4 +28,5 @@ module org.example.smartmuseum {
     opens org.example.smartmuseum.controller to javafx.fxml;
     opens org.example.smartmuseum.model.entity to javafx.base;
     opens org.example.smartmuseum.model.enums to javafx.base;
+    exports org.example.smartmuseum.view;
 }
