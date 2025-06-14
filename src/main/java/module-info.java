@@ -7,26 +7,25 @@ module org.example.smartmuseum {
     // Database
     requires java.sql;
 
-    // QR Code
+    // QR Code (ZXing)
     requires com.google.zxing;
     requires com.google.zxing.javase;
-    opens org.example.smartmuseum.controller to javafx.fxml;
-    opens org.example.smartmuseum.view to javafx.fxml;
 
     // Java base modules
     requires java.desktop;
     requires java.base;
 
-    // Export packages to JavaFX FXML
-    exports org.example.smartmuseum to javafx.fxml, javafx.graphics;
-    exports org.example.smartmuseum.controller to javafx.fxml;
-    exports org.example.smartmuseum.model.entity to javafx.base;
-    exports org.example.smartmuseum.model.enums to javafx.base;
+    // Export packages
+    exports org.example.smartmuseum;
+    exports org.example.smartmuseum.controller;
+    exports org.example.smartmuseum.model.entity;
+    exports org.example.smartmuseum.model.enums;
+    exports org.example.smartmuseum.view;
 
-    // Open packages for reflection (untuk FXML)
+    // Open packages (untuk refleksi oleh FXMLLoader)
     opens org.example.smartmuseum to javafx.fxml;
     opens org.example.smartmuseum.controller to javafx.fxml;
+    opens org.example.smartmuseum.view to javafx.fxml;
     opens org.example.smartmuseum.model.entity to javafx.base;
     opens org.example.smartmuseum.model.enums to javafx.base;
-    exports org.example.smartmuseum.view;
 }

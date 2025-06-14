@@ -1,105 +1,78 @@
 package org.example.smartmuseum.controller;
 
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Node;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
-import javafx.scene.control.PasswordField;
-import javafx.scene.control.TextField;
-import javafx.stage.Stage;
+import javafx.scene.control.*;
+import org.example.smartmuseum.database.DatabaseConnection;
 
-import java.io.IOException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
 
 public class RegisterController {
-
-    @FXML
-    private TextField usernameTextField;
-
-    @FXML
-    private PasswordField setPasswordField;
-
-    @FXML
-    private PasswordField confirmPasswordField;
-
-    @FXML
-    private TextField emailField;
-
-    @FXML
-    private TextField noHPField;
-
-    @FXML
-    private Button registerButton;
-
-    @FXML
-    private Button closeButton;
+    @FXML private TextField usernameTextField;
+    @FXML private PasswordField setPasswordField;
+    @FXML private PasswordField confirmPasswordField;
+    @FXML private TextField emailField;
+    @FXML private TextField noHPField;
+    @FXML private Button registerButton;
 
     @FXML
     private void initialize() {
-        registerButton.setOnAction(this::handleRegister);
-        closeButton.setOnAction(this::handleClose);
+        registerButton.setOnAction(e -> registerUser());
     }
 
-    private void handleRegister(ActionEvent event) {
+    private void registerUser() {
         String username = usernameTextField.getText();
         String password = setPasswordField.getText();
         String confirmPassword = confirmPasswordField.getText();
         String email = emailField.getText();
-        String noHP = noHPField.getText();
-
-        // Validasi sederhana
-        if (username.isEmpty() || password.isEmpty() || confirmPassword.isEmpty() || email.isEmpty() || noHP.isEmpty()) {
-            showAlert(Alert.AlertType.ERROR, "Error", "Semua field harus diisi!");
-            return;
-        }
+        String phone = noHPField.getText();
 
         if (!password.equals(confirmPassword)) {
-            showAlert(Alert.AlertType.ERROR, "Error", "Password dan konfirmasi tidak cocok!");
+            showAlert(Alert.AlertType.WARNING, "Password dan konfirmasi tidak cocok.");
             return;
         }
 
-        if (!email.contains("@")) {
-            showAlert(Alert.AlertType.ERROR, "Error", "Format email tidak valid!");
-            return;
-        }
-
-        // Simulasi registrasi berhasil
-        showAlert(Alert.AlertType.INFORMATION, "Registrasi Berhasil", "Selamat, akun berhasil dibuat!");
-
-        // Bersihkan field
-        usernameTextField.clear();
-        setPasswordField.clear();
-        confirmPasswordField.clear();
-        emailField.clear();
-        noHPField.clear();
-    }
-
-    private void handleClose(ActionEvent event) {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/smartmuseum/view/login.fxml"));
-            Parent loginRoot = loader.load();
+            Connection conn = DatabaseConnection.getInstance().getConnection();
 
-            Stage stage = new Stage();
-            stage.setTitle("SmartMuseum - Login");
-            stage.setScene(new Scene(loginRoot));
-            stage.show();
+            String hashedPassword = hashPassword(password);
+            String sql = "INSERT INTO users (username, password_hash, email, phone, role) VALUES (?, ?, ?, ?, 'visitor')";
+            PreparedStatement stmt = conn.prepareStatement(sql);
+            stmt.setString(1, username);
+            stmt.setString(2, hashedPassword);
+            stmt.setString(3, email);
+            stmt.setString(4, phone);
 
-            // Tutup jendela register
-            Stage registerStage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-            registerStage.close();
+            stmt.executeUpdate();
 
-        } catch (IOException e) {
-            e.printStackTrace();
-            showAlert(Alert.AlertType.ERROR, "Load Error", "Gagal membuka halaman login.");
+            showAlert(Alert.AlertType.INFORMATION, "Registrasi berhasil!");
+
+            // Clear input fields
+            usernameTextField.clear();
+            setPasswordField.clear();
+            confirmPasswordField.clear();
+            emailField.clear();
+            noHPField.clear();
+
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            showAlert(Alert.AlertType.ERROR, "Terjadi kesalahan saat registrasi: " + ex.getMessage());
         }
     }
 
-    private void showAlert(Alert.AlertType alertType, String title, String message) {
-        Alert alert = new Alert(alertType);
-        alert.setTitle(title);
+    private String hashPassword(String password) throws NoSuchAlgorithmException {
+        MessageDigest md = MessageDigest.getInstance("SHA-256");
+        byte[] bytes = md.digest(password.getBytes());
+        StringBuilder sb = new StringBuilder();
+        for (byte b : bytes)
+            sb.append(String.format("%02x", b));
+        return sb.toString();
+    }
+
+    private void showAlert(Alert.AlertType type, String message) {
+        Alert alert = new Alert(type);
         alert.setHeaderText(null);
         alert.setContentText(message);
         alert.showAndWait();

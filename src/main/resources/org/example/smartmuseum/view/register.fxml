@@ -9,7 +9,7 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.smartmuseum.controller.RegisterController">
+<AnchorPane prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.smartmuseum.controller.Register">
 
    <children>
       <AnchorPane prefHeight="70.0" prefWidth="600.0" style="-fx-background-color: #D2B48C;">
@@ -42,7 +42,7 @@
          <font><Font size="15.0" /></font>
       </Button>
 
-      <Button fx:id="closeButton" layoutX="179.0" layoutY="327.0" minWidth="125.0" text="Login Here!">
+      <Button fx:id="loginButton" layoutX="179.0" layoutY="327.0" minWidth="125.0" text="Login Here!">
          <font><Font size="15.0" /></font>
       </Button>
       <Label layoutX="27.0" layoutY="331.0" text="Sudah punya akun?">

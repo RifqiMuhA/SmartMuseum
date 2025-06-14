@@ -47,7 +47,7 @@
                <font><Font size="15.0" /></font>
             </Label>
 
-            <Button fx:id="loginButton" layoutX="24.0" layoutY="270.0" onAction="#logginButton" prefWidth="300.0" style="-fx-background-color: #8B4513;" text="Login" textFill="WHITE" />
+            <Button fx:id="loginButton" layoutX="24.0" layoutY="270.0" onAction="#loginButton" prefWidth="300.0" style="-fx-background-color: #8B4513;" text="Login" textFill="WHITE" />
 
             <Button fx:id="registerPageButton" layoutX="111.0" layoutY="344.0" onAction="#handleRegister" prefWidth="125.0" text="Register Here!" />
             <Label layoutX="108.0" layoutY="311.0" text="Belum punya akun? ">
