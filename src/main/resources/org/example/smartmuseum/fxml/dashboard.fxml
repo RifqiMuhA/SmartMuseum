@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="org.example.smartmuseum.controller.DashboardController"
+            styleClass="dashboard-container">
+    <top>
+        <VBox>
+            <children>
+                <!-- Header -->
+                <HBox alignment="CENTER_LEFT" spacing="20.0" styleClass="header-section">
+                    <children>
+                        <Label text="🏛️ Smart Museum Dashboard" styleClass="dashboard-title" textFill="WHITE">
+                            <font>
+                                <Font name="System Bold" size="24.0" />
+                            </font>
+                        </Label>
+                        <Region HBox.hgrow="ALWAYS" />
+                        <Label fx:id="lblUserInfo" text="Logged in as: Admin" styleClass="user-info" textFill="WHITE">
+                            <font>
+                                <Font name="System Bold" size="14.0" />
+                            </font>
+                        </Label>
+                        <Label fx:id="lblCurrentTime" text="Loading..." styleClass="time-info" textFill="WHITE">
+                            <font>
+                                <Font name="System Bold" size="14.0" />
+                            </font>
+                        </Label>
+                    </children>
+                    <padding>
+                        <Insets bottom="15.0" left="20.0" right="20.0" top="15.0" />
+                    </padding>
+                </HBox>
+
+                <!-- Navigation Bar -->
+                <HBox alignment="CENTER_LEFT" spacing="15.0" styleClass="nav-section">
+                    <children>
+                        <Button fx:id="btnGoToWelcome" onAction="#handleGoToWelcome"
+                                styleClass="btn-nav" text="← Back to Welcome">
+                            <font>
+                                <Font name="System Bold" size="12.0" />
+                            </font>
+                        </Button>
+                        <Separator orientation="VERTICAL" />
+                        <Button onAction="#handleRefreshAll" styleClass="btn-nav" text="🔄 Refresh All">
+                            <font>
+                                <Font name="System Bold" size="12.0" />
+                            </font>
+                        </Button>
+                        <Button onAction="#handleLogout" styleClass="btn-nav-danger" text="🚪 Logout">
+                            <font>
+                                <Font name="System Bold" size="12.0" />
+                            </font>
+                        </Button>
+                    </children>
+                    <padding>
+                        <Insets bottom="10.0" left="20.0" right="20.0" top="10.0" />
+                    </padding>
+                </HBox>
+            </children>
+        </VBox>
+    </top>
+
+    <center>
+        <TabPane fx:id="tabPane" styleClass="main-tab-pane" tabClosingPolicy="UNAVAILABLE">
+            <tabs>
+                <!-- Attendance Tab -->
+                <Tab fx:id="tabAttendance" text="📷 QR Attendance Scanner">
+                    <content>
+                        <VBox fx:id="attendanceContent" styleClass="tab-content" />
+                    </content>
+                </Tab>
+
+                <!-- Employee Management Tab -->
+                <Tab fx:id="tabEmployeeManagement" text="👥 Employee Management">
+                    <content>
+                        <VBox fx:id="employeeContent" styleClass="tab-content" />
+                    </content>
+                </Tab>
+
+                <!-- QR Generator Tab -->
+                <Tab fx:id="tabQRGenerator" text="🏷️ QR Code Generator">
+                    <content>
+                        <VBox fx:id="qrGeneratorContent" styleClass="tab-content" />
+                    </content>
+                </Tab>
+            </tabs>
+        </TabPane>
+    </center>
+
+    <bottom>
+        <HBox alignment="CENTER" styleClass="footer-section">
+            <children>
+                <Label text="Smart Museum Dashboard - All systems operational" styleClass="footer-status">
+                    <font>
+                        <Font name="System Bold" size="12.0" />
+                    </font>
+                </Label>
+            </children>
+            <padding>
+                <Insets bottom="10.0" left="20.0" right="20.0" top="10.0" />
+            </padding>
+        </HBox>
+    </bottom>
+</BorderPane>

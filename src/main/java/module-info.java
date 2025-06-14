@@ -7,15 +7,15 @@ module org.example.smartmuseum {
     // Database
     requires java.sql;
 
-    // QR Code
+    // QR Code (ZXing)
     requires com.google.zxing;
     requires com.google.zxing.javase;
     opens org.example.smartmuseum.controller to javafx.fxml;
     opens org.example.smartmuseum.view to javafx.fxml;
 
     // Java base modules
-    requires java.desktop;
-    requires java.base;
+    requires org.bytedeco.javacv;
+    requires org.bytedeco.opencv;
 
     // Export packages to JavaFX FXML
     exports org.example.smartmuseum to javafx.fxml, javafx.graphics;

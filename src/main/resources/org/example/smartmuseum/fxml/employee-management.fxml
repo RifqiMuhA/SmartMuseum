@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<VBox xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="org.example.smartmuseum.controller.EmployeeManagementController"
+      spacing="20.0" styleClass="employee-container">
+
+    <children>
+        <!-- Header -->
+        <HBox alignment="CENTER_LEFT" spacing="20.0" styleClass="section-header">
+            <children>
+                <Label text="👥 Employee Management" styleClass="section-title">
+                    <font>
+                        <Font name="System Bold" size="20.0" />
+                    </font>
+                </Label>
+                <Region HBox.hgrow="ALWAYS" />
+                <Label fx:id="lblTotalEmployees" text="Total Employees: 0" styleClass="info-label">
+                    <font>
+                        <Font name="System Bold" size="14.0" />
+                    </font>
+                </Label>
+                <Button onAction="#handleRefresh" styleClass="btn-refresh-small" text="🔄 Refresh">
+                    <font>
+                        <Font name="System Bold" size="12.0" />
+                    </font>
+                </Button>
+            </children>
+        </HBox>
+
+        <HBox spacing="20.0">
+            <children>
+                <!-- Employee Form Section -->
+                <VBox prefWidth="350.0" spacing="20.0" styleClass="form-panel">
+                    <children>
+                        <Label text="Employee Information" styleClass="panel-title">
+                            <font>
+                                <Font name="System Bold" size="16.0" />
+                            </font>
+                        </Label>
+
+                        <!-- Form Fields -->
+                        <GridPane hgap="10.0" vgap="15.0">
+                            <columnConstraints>
+                                <ColumnConstraints maxWidth="100.0" minWidth="100.0" prefWidth="100.0" />
+                                <ColumnConstraints />
+                            </columnConstraints>
+                            <rowConstraints>
+                                <RowConstraints />
+                                <RowConstraints />
+                                <RowConstraints />
+                                <RowConstraints />
+                                <RowConstraints />
+                                <RowConstraints />
+                            </rowConstraints>
+                            <children>
+                                <Label text="Name:" styleClass="form-label" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+                                <TextField fx:id="txtName" promptText="Enter employee name"
+                                           GridPane.columnIndex="1" GridPane.rowIndex="0" />
+
+                                <Label text="Position:" styleClass="form-label" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+                                <TextField fx:id="txtPosition" promptText="Enter position"
+                                           GridPane.columnIndex="1" GridPane.rowIndex="1" />
+
+                                <Label text="Department:" styleClass="form-label" GridPane.columnIndex="0" GridPane.rowIndex="2" />
+                                <TextField fx:id="txtDepartment" promptText="Enter department"
+                                           GridPane.columnIndex="1" GridPane.rowIndex="2" />
+
+                                <Label text="Hire Date:" styleClass="form-label" GridPane.columnIndex="0" GridPane.rowIndex="3" />
+                                <DatePicker fx:id="dateHireDate" promptText="Select hire date"
+                                            GridPane.columnIndex="1" GridPane.rowIndex="3" />
+
+                                <Label text="Salary:" styleClass="form-label" GridPane.columnIndex="0" GridPane.rowIndex="4" />
+                                <TextField fx:id="txtSalary" promptText="Enter salary"
+                                           GridPane.columnIndex="1" GridPane.rowIndex="4" />
+
+                                <Label text="Active:" styleClass="form-label" GridPane.columnIndex="0" GridPane.rowIndex="5" />
+                                <CheckBox fx:id="chkActive" selected="true" text="Employee is active"
+                                          GridPane.columnIndex="1" GridPane.rowIndex="5" />
+                            </children>
+                        </GridPane>
+
+                        <!-- Action Buttons -->
+                        <HBox alignment="CENTER" spacing="10.0">
+                            <children>
+                                <Button fx:id="btnAdd" onAction="#handleAdd" prefHeight="35.0" prefWidth="70.0"
+                                        styleClass="btn-add" text="Add">
+                                    <font>
+                                        <Font name="System Bold" size="12.0" />
+                                    </font>
+                                </Button>
+                                <Button fx:id="btnUpdate" onAction="#handleUpdate" prefHeight="35.0" prefWidth="70.0"
+                                        styleClass="btn-update" text="Update">
+                                    <font>
+                                        <Font name="System Bold" size="12.0" />
+                                    </font>
+                                </Button>
+                                <Button fx:id="btnDelete" onAction="#handleDelete" prefHeight="35.0" prefWidth="70.0"
+                                        styleClass="btn-delete" text="Delete">
+                                    <font>
+                                        <Font name="System Bold" size="12.0" />
+                                    </font>
+                                </Button>
+                                <Button fx:id="btnClear" onAction="#handleClear" prefHeight="35.0" prefWidth="70.0"
+                                        styleClass="btn-clear" text="Clear">
+                                    <font>
+                                        <Font name="System Bold" size="12.0" />
+                                    </font>
+                                </Button>
+                            </children>
+                        </HBox>
+
+                        <Separator />
+
+                        <!-- QR Code Section -->
+                        <VBox alignment="CENTER" spacing="10.0">
+                            <children>
+                                <Label text="QR Code" styleClass="panel-subtitle">
+                                    <font>
+                                        <Font name="System Bold" size="14.0" />
+                                    </font>
+                                </Label>
+                                <StackPane prefHeight="150.0" prefWidth="150.0" styleClass="qr-container-small">
+                                    <children>
+                                        <ImageView fx:id="imgQRCode" fitHeight="140.0" fitWidth="140.0"
+                                                   pickOnBounds="true" preserveRatio="true" />
+                                        <Label text="QR Code will appear here" styleClass="qr-placeholder">
+                                            <font>
+                                                <Font size="11.0" />
+                                            </font>
+                                        </Label>
+                                    </children>
+                                </StackPane>
+                                <ScrollPane fitToWidth="true" maxHeight="60.0" prefWidth="300.0">
+                                    <content>
+                                        <Label fx:id="lblQRCodeText" alignment="CENTER" styleClass="qr-text-small"
+                                               text="" textAlignment="CENTER" wrapText="true">
+                                            <font>
+                                                <Font name="Courier New" size="10.0" />
+                                            </font>
+                                        </Label>
+                                    </content>
+                                </ScrollPane>
+                                <Button fx:id="btnGenerateQR" onAction="#handleGenerateQR"
+                                        styleClass="btn-generate-small" text="Generate QR">
+                                    <font>
+                                        <Font name="System Bold" size="12.0" />
+                                    </font>
+                                </Button>
+                            </children>
+                        </VBox>
+
+                        <!-- Status -->
+                        <Label fx:id="lblStatus" alignment="CENTER" prefHeight="40.0"
+                               styleClass="status-message" text="Ready to add new employee"
+                               textAlignment="CENTER" wrapText="true">
+                            <font>
+                                <Font size="12.0" />
+                            </font>
+                        </Label>
+                    </children>
+                    <padding>
+                        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+                    </padding>
+                </VBox>
+
+                <!-- Employee Table Section -->
+                <VBox HBox.hgrow="ALWAYS" spacing="15.0" styleClass="table-panel">
+                    <children>
+                        <Label text="Employee List" styleClass="panel-title">
+                            <font>
+                                <Font name="System Bold" size="16.0" />
+                            </font>
+                        </Label>
+
+                        <TableView fx:id="tableEmployees" VBox.vgrow="ALWAYS" styleClass="employee-table">
+                            <columns>
+                                <TableColumn fx:id="colEmployeeId" prefWidth="60.0" text="ID" />
+                                <TableColumn fx:id="colName" prefWidth="150.0" text="Name" />
+                                <TableColumn fx:id="colPosition" prefWidth="120.0" text="Position" />
+                                <TableColumn fx:id="colQRCode" prefWidth="100.0" text="QR Code" />
+                                <TableColumn fx:id="colHireDate" prefWidth="100.0" text="Hire Date" />
+                                <TableColumn fx:id="colActive" prefWidth="80.0" text="Status" />
+                            </columns>
+                        </TableView>
+                    </children>
+                    <padding>
+                        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+                    </padding>
+                </VBox>
+            </children>
+        </HBox>
+    </children>
+
+    <padding>
+        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+    </padding>
+</VBox>
