@@ -9,7 +9,7 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.smartmuseum.controller.Register">
+<AnchorPane prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/21.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.smartmuseum.controller.RegisterController">
 
    <children>
       <AnchorPane prefHeight="70.0" prefWidth="600.0" style="-fx-background-color: #D2B48C;">
@@ -38,11 +38,11 @@
       <Label layoutX="27.0" layoutY="255.0" text="No. HP"><font><Font size="15.0" /></font></Label>
       <TextField fx:id="noHPField" layoutX="203.0" layoutY="253.0" minWidth="350.0" promptText="No.HP" />
 
-      <Button fx:id="registerButton" layoutX="427.0" layoutY="326.0" minHeight="10.0" minWidth="130.0" prefHeight="31.0" prefWidth="130.0" style="-fx-background-color: #8B4513;" text="Registrasi" textFill="WHITE">
+      <Button fx:id="registerButton" layoutX="427.0" layoutY="326.0" minHeight="10.0" minWidth="130.0" prefHeight="31.0" prefWidth="130.0" onAction="#registerUser" style="-fx-background-color: #8B4513;" text="Registrasi" textFill="WHITE">
          <font><Font size="15.0" /></font>
       </Button>
 
-      <Button fx:id="loginButton" layoutX="179.0" layoutY="327.0" minWidth="125.0" text="Login Here!">
+      <Button fx:id="loginButton" layoutX="179.0" layoutY="327.0" minWidth="125.0" onAction="#handleLogin" text="Login Here!">
          <font><Font size="15.0" /></font>
       </Button>
       <Label layoutX="27.0" layoutY="331.0" text="Sudah punya akun?">

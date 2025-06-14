@@ -1,9 +1,14 @@
 package org.example.smartmuseum.controller;
 
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.stage.Stage;
 import org.example.smartmuseum.database.DatabaseConnection;
 
+import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.sql.Connection;
@@ -15,10 +20,57 @@ public class LoginController {
     @FXML private PasswordField enterPasswordField;
     @FXML private Label invalidLoginLabel;
     @FXML private Button loginButton;
+    @FXML private Button registerPageButton;
 
     @FXML
     private void initialize() {
-        loginButton.setOnAction(e -> loginUser());
+        // Remove the manual event handler since we're using onAction in FXML
+    }
+
+    // This method is called by the FXML onAction="#loginButton"
+    @FXML
+    private void loginButton() {
+        loginUser();
+    }
+
+    // This method is called by the FXML onAction="#handleRegister"
+    @FXML
+    private void handleRegister() {
+        try {
+            // Load register.fxml
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/smartmuseum/view/register.fxml"));
+            Parent root = loader.load();
+
+            // Get current stage
+            Stage stage = (Stage) registerPageButton.getScene().getWindow();
+
+            // Set new scene
+            stage.setScene(new Scene(root));
+            stage.setTitle("SmartMuseum - Register");
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            showAlert(Alert.AlertType.ERROR, "Error loading register page: " + e.getMessage());
+        }
+    }
+
+    private void handleWelcome(){
+        try {
+            // Load login.fxml
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/smartmuseum/fxml/welcome.fxml"));
+            Parent root = loader.load();
+
+            // Get current stage
+            Stage stage = (Stage) loginButton.getScene().getWindow();
+
+            // Set new scene
+            stage.setScene(new Scene(root));
+            stage.setTitle("SeniMatic - Welcome");
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            showAlert(Alert.AlertType.ERROR, "Error loading welcome page: " + e.getMessage());
+        }
     }
 
     private void loginUser() {
@@ -37,12 +89,16 @@ public class LoginController {
             ResultSet rs = stmt.executeQuery();
 
             if (rs.next()) {
-                invalidLoginLabel.setVisible(false);
+                if (invalidLoginLabel != null) {
+                    invalidLoginLabel.setVisible(false);
+                }
                 showAlert(Alert.AlertType.INFORMATION, "Login berhasil sebagai " + rs.getString("role"));
-                // TODO: navigasi ke halaman sesuai role
+                handleWelcome();
             } else {
-                invalidLoginLabel.setText("Invalid login! Please try again!");
-                invalidLoginLabel.setVisible(true);
+                if (invalidLoginLabel != null) {
+                    invalidLoginLabel.setText("Invalid login! Please try again!");
+                    invalidLoginLabel.setVisible(true);
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();

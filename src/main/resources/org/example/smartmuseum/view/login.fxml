@@ -10,7 +10,7 @@
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.text.Font?>
 
-<BorderPane prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.smartmuseum.controller.LoginController">
+<BorderPane prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/21.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.smartmuseum.controller.LoginController">
 
    <left>
       <AnchorPane prefHeight="400.0" prefWidth="250.0">
@@ -43,8 +43,8 @@
             </Label>
             <PasswordField fx:id="enterPasswordField" layoutX="128.0" layoutY="208.0" prefWidth="190.0" promptText="Password" />
 
-            <Label layoutX="75.0" layoutY="221.0" text="Invalid login! Please try again!" visible="false">
-               <font><Font size="15.0" /></font>
+            <Label fx:id="invalidLoginLabel" layoutX="75.0" layoutY="235.0" text="Invalid login! Please try again!" textFill="RED" visible="false">
+               <font><Font size="12.0" /></font>
             </Label>
 
             <Button fx:id="loginButton" layoutX="24.0" layoutY="270.0" onAction="#loginButton" prefWidth="300.0" style="-fx-background-color: #8B4513;" text="Login" textFill="WHITE" />

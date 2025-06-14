@@ -19,11 +19,11 @@ public class SmartMuseumAttendanceApp extends Application {
             showWelcomeScreen();
 
             // Configure stage
-            primaryStage.setTitle("Smart Museum - Sistem Presensi QR Code");
+            primaryStage.setTitle("SeniMatic - Sistem Presensi QR Code");
             primaryStage.setMaximized(true);
             primaryStage.show();
 
-            System.out.println("✅ Smart Museum Application started successfully!");
+            System.out.println("✅ SeniMatic Application started successfully!");
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -40,7 +40,7 @@ public class SmartMuseumAttendanceApp extends Application {
                     SmartMuseumAttendanceApp.class.getResource("/org/example/smartmuseum/css/main-style.css").toExternalForm());
 
             primaryStage.setScene(scene);
-            primaryStage.setTitle("Smart Museum - Welcome");
+            primaryStage.setTitle("SeniMatic - Welcome");
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -56,7 +56,7 @@ public class SmartMuseumAttendanceApp extends Application {
                     SmartMuseumAttendanceApp.class.getResource("/org/example/smartmuseum/css/main-style.css").toExternalForm());
 
             primaryStage.setScene(scene);
-            primaryStage.setTitle("Smart Museum - Dashboard");
+            primaryStage.setTitle("SeniMatic - Dashboard");
 
         } catch (Exception e) {
             e.printStackTrace();

@@ -1,9 +1,14 @@
 package org.example.smartmuseum.controller;
 
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.stage.Stage;
 import org.example.smartmuseum.database.DatabaseConnection;
 
+import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.sql.Connection;
@@ -16,18 +21,27 @@ public class RegisterController {
     @FXML private TextField emailField;
     @FXML private TextField noHPField;
     @FXML private Button registerButton;
+    @FXML private Button loginButton;
 
     @FXML
     private void initialize() {
-        registerButton.setOnAction(e -> registerUser());
+
     }
 
+    // This method is called by the FXML onAction="#registerUser"
+    @FXML
     private void registerUser() {
         String username = usernameTextField.getText();
         String password = setPasswordField.getText();
         String confirmPassword = confirmPasswordField.getText();
         String email = emailField.getText();
         String phone = noHPField.getText();
+
+        // Validation
+        if (username.isEmpty() || password.isEmpty() || email.isEmpty() || phone.isEmpty()) {
+            showAlert(Alert.AlertType.WARNING, "Semua field harus diisi.");
+            return;
+        }
 
         if (!password.equals(confirmPassword)) {
             showAlert(Alert.AlertType.WARNING, "Password dan konfirmasi tidak cocok.");
@@ -47,7 +61,7 @@ public class RegisterController {
 
             stmt.executeUpdate();
 
-            showAlert(Alert.AlertType.INFORMATION, "Registrasi berhasil!");
+            showAlert(Alert.AlertType.INFORMATION, "Registrasi berhasil! Silakan login.");
 
             // Clear input fields
             usernameTextField.clear();
@@ -56,9 +70,33 @@ public class RegisterController {
             emailField.clear();
             noHPField.clear();
 
+            // Otomatis pindah ke halaman login
+            handleLogin();
+
         } catch (Exception ex) {
             ex.printStackTrace();
             showAlert(Alert.AlertType.ERROR, "Terjadi kesalahan saat registrasi: " + ex.getMessage());
+        }
+    }
+
+    // This method is called by the FXML onAction="#handleLogin"
+    @FXML
+    private void handleLogin() {
+        try {
+            // Load login.fxml
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/smartmuseum/view/login.fxml"));
+            Parent root = loader.load();
+
+            // Get current stage
+            Stage stage = (Stage) loginButton.getScene().getWindow();
+
+            // Set new scene
+            stage.setScene(new Scene(root));
+            stage.setTitle("SmartMuseum - Login");
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            showAlert(Alert.AlertType.ERROR, "Error loading login page: " + e.getMessage());
         }
     }
 
