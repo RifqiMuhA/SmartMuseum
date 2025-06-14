@@ -10,46 +10,48 @@
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.text.Font?>
 
+<BorderPane prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.smartmuseum.controller.LoginController">
 
-<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1">
    <left>
-      <AnchorPane prefHeight="400.0" prefWidth="250.0" BorderPane.alignment="CENTER">
+      <AnchorPane prefHeight="400.0" prefWidth="250.0">
          <children>
-            <ImageView fitHeight="400.0" fitWidth="250.0" layoutX="1.0" layoutY="5.0" pickOnBounds="true" preserveRatio="true">
+            <ImageView fitHeight="400.0" fitWidth="251.0" pickOnBounds="true" preserveRatio="true">
                <image>
-                  <Image url="@../../../../../../../../../../../../../Downloads/VBG%20Mentorship%20Berdaya.png" />
+                  <Image url="@../../../../img/seniMatic.png" />
                </image>
             </ImageView>
          </children>
       </AnchorPane>
    </left>
+
    <right>
-      <AnchorPane prefHeight="400.0" prefWidth="350.0" style="-fx-background-color: #ECECE7;" BorderPane.alignment="CENTER">
+      <AnchorPane prefHeight="400.0" prefWidth="350.0" style="-fx-background-color: #ECECE7;">
          <children>
-            <ImageView fitHeight="58.0" fitWidth="39.0" layoutX="154.0" layoutY="28.0" pickOnBounds="true" preserveRatio="true">
+            <ImageView fx:id="lockImage" fitHeight="58.0" fitWidth="39.0" layoutX="154.0" layoutY="51.0" pickOnBounds="true" preserveRatio="true">
                <image>
-                  <Image url="@../../../../../../../../gambar%20gembok.png" />
+                  <Image url="@../../../../img/gambarGembok.png" />
                </image>
             </ImageView>
-            <Label layoutX="20.0" layoutY="118.0" text="Username">
-               <font>
-                  <Font size="15.0" />
-               </font>
+
+            <Label layoutX="20.0" layoutY="156.0" text="Username">
+               <font><Font size="15.0" /></font>
             </Label>
-            <TextField fx:id="usernameTextField" layoutX="128.0" layoutY="116.0" prefHeight="21.0" prefWidth="190.0" promptText="Username" />
-            <Label layoutX="22.0" layoutY="172.0" text="Password">
-               <font>
-                  <Font size="15.0" />
-               </font>
+            <TextField fx:id="usernameTextField" layoutX="128.0" layoutY="154.0" prefWidth="190.0" promptText="Username" />
+
+            <Label layoutX="22.0" layoutY="210.0" text="Password">
+               <font><Font size="15.0" /></font>
             </Label>
-            <PasswordField fx:id="enterPasswordField" layoutX="128.0" layoutY="170.0" prefHeight="21.0" prefWidth="190.0" promptText="Password" />
-            <Label layoutX="75.0" layoutY="221.0" text="Invalid login! Please try again!">
-               <font>
-                  <Font size="15.0" />
-               </font>
+            <PasswordField fx:id="enterPasswordField" layoutX="128.0" layoutY="208.0" prefWidth="190.0" promptText="Password" />
+
+            <Label layoutX="75.0" layoutY="221.0" text="Invalid login! Please try again!" visible="false">
+               <font><Font size="15.0" /></font>
             </Label>
-            <Button fx:id="usernameTextField" layoutX="24.0" layoutY="270.0" mnemonicParsing="false" onAction="#logginButton" prefWidth="300.0" style="-fx-background-color: #8B4513;" text="LOGIN" textFill="WHITE" />
-            <Button layoutX="24.0" layoutY="322.0" mnemonicParsing="false" onAction="#cancelButton" prefWidth="300.0" style="-fx-background-color: #8B4513;" text="CANCEL" textFill="WHITE" />
+
+            <Button fx:id="loginButton" layoutX="24.0" layoutY="270.0" onAction="#logginButton" prefWidth="300.0" style="-fx-background-color: #8B4513;" text="LOGIN" textFill="WHITE" />
+
+            <Button fx:id="cancelButton" layoutX="24.0" layoutY="348.0" onAction="#cancelButton" prefWidth="300.0" style="-fx-background-color: #8B4513;" text="CANCEL" textFill="WHITE" />
+
+            <Button fx:id="registerPageButton" layoutX="25.0" layoutY="310.0" onAction="#handleRegister" prefWidth="300.0" style="-fx-background-color: #A0522D;" text="REGISTER" textFill="WHITE" />
          </children>
       </AnchorPane>
    </right>
