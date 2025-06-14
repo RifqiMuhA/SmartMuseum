@@ -2,6 +2,7 @@ package org.example.smartmuseum;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
+import org.example.smartmuseum.model.Boss;
 
 public class HelloController {
     @FXML
@@ -10,5 +11,11 @@ public class HelloController {
     @FXML
     protected void onHelloButtonClick() {
         welcomeText.setText("Welcome to JavaFX Application!");
+    }
+
+    Boss boss;
+
+    HelloController(){
+
     }
 }
