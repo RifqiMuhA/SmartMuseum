@@ -2,16 +2,16 @@ package org.example.smartmuseum.view;
 
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
-public class MainApp extends Application {
+public class MainApp2 extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception {
-        Parent root = FXMLLoader.load(getClass().getResource("/org/example/smartmuseum/view/login.fxml"));
-        primaryStage.setTitle("SmartMuseum - Login");
-        primaryStage.setScene(new Scene(root));
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/lelang/lelang.fxml"));
+        Scene scene = new Scene(loader.load());
+        primaryStage.setTitle("Lelang App");
+        primaryStage.setScene(scene);
         primaryStage.show();
     }
 

@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="org.example.smartmuseum.controller.WelcomeController"
+            styleClass="welcome-container">
+    <center>
+        <VBox alignment="CENTER" spacing="40.0" styleClass="welcome-content">
+            <children>
+                <!-- Logo/Title -->
+                <VBox alignment="CENTER" spacing="10.0">
+                    <children>
+                        <Label text="🏛️" styleClass="welcome-icon">
+                            <font>
+                                <Font size="72.0" />
+                            </font>
+                        </Label>
+                        <Label text="Smart Museum" styleClass="welcome-title">
+                            <font>
+                                <Font name="System Bold" size="48.0" />
+                            </font>
+                        </Label>
+                        <Label text="Sistem Presensi QR Code" styleClass="welcome-subtitle">
+                            <font>
+                                <Font name="System Bold" size="20.0" />
+                            </font>
+                        </Label>
+                    </children>
+                </VBox>
+
+                <!-- Welcome Message -->
+                <VBox alignment="CENTER" spacing="15.0" styleClass="message-container">
+                    <children>
+                        <Label fx:id="lblWelcomeMessage" text="Selamat datang!" styleClass="welcome-message">
+                            <font>
+                                <Font size="18.0" />
+                            </font>
+                        </Label>
+                        <Label fx:id="lblCurrentTime" text="Loading time..." styleClass="time-display">
+                            <font>
+                                <Font name="System Bold" size="16.0" />
+                            </font>
+                        </Label>
+                    </children>
+                </VBox>
+
+                <!-- Action Buttons -->
+                <VBox alignment="CENTER" spacing="20.0" styleClass="button-container">
+                    <children>
+                        <Button fx:id="btnGoToDashboard" onAction="#handleGoToDashboard"
+                                prefHeight="50.0" prefWidth="250.0" styleClass="btn-primary-large"
+                                text="Go to Dashboard">
+                            <font>
+                                <Font name="System Bold" size="16.0" />
+                            </font>
+                        </Button>
+                        <Button fx:id="btnExit" onAction="#handleExit"
+                                prefHeight="40.0" prefWidth="150.0" styleClass="btn-secondary"
+                                text="Exit Application">
+                            <font>
+                                <Font name="System Bold" size="14.0" />
+                            </font>
+                        </Button>
+                    </children>
+                </VBox>
+
+                <!-- Features Preview -->
+                <HBox alignment="CENTER" spacing="30.0" styleClass="features-container">
+                    <children>
+                        <VBox alignment="CENTER" spacing="8.0" styleClass="feature-item">
+                            <children>
+                                <Label text="📷" styleClass="feature-icon">
+                                    <font>
+                                        <Font size="24.0" />
+                                    </font>
+                                </Label>
+                                <Label text="Camera QR Scanner" styleClass="feature-text">
+                                    <font>
+                                        <Font name="System Bold" size="12.0" />
+                                    </font>
+                                </Label>
+                            </children>
+                        </VBox>
+                        <VBox alignment="CENTER" spacing="8.0" styleClass="feature-item">
+                            <children>
+                                <Label text="👥" styleClass="feature-icon">
+                                    <font>
+                                        <Font size="24.0" />
+                                    </font>
+                                </Label>
+                                <Label text="Employee Management" styleClass="feature-text">
+                                    <font>
+                                        <Font name="System Bold" size="12.0" />
+                                    </font>
+                                </Label>
+                            </children>
+                        </VBox>
+                        <VBox alignment="CENTER" spacing="8.0" styleClass="feature-item">
+                            <children>
+                                <Label text="⏰" styleClass="feature-icon">
+                                    <font>
+                                        <Font size="24.0" />
+                                    </font>
+                                </Label>
+                                <Label text="Real-time Attendance" styleClass="feature-text">
+                                    <font>
+                                        <Font name="System Bold" size="12.0" />
+                                    </font>
+                                </Label>
+                            </children>
+                        </VBox>
+                    </children>
+                </HBox>
+            </children>
+            <padding>
+                <Insets bottom="40.0" left="40.0" right="40.0" top="40.0" />
+            </padding>
+        </VBox>
+    </center>
+    <bottom>
+        <HBox alignment="CENTER" styleClass="footer-container">
+            <children>
+                <Label text="© 2024 Smart Museum - Attendance System v1.0" styleClass="footer-text">
+                    <font>
+                        <Font size="12.0" />
+                    </font>
+                </Label>
+            </children>
+            <padding>
+                <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+            </padding>
+        </HBox>
+    </bottom>
+</BorderPane>
