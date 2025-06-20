@@ -7,9 +7,6 @@ import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.stage.FileChooser;
-import org.example.smartmuseum.model.entity.Employee;
-import org.example.smartmuseum.model.service.UserService;
-import org.example.smartmuseum.util.QRCodeGenerator;
 
 import java.io.File;
 import java.net.URL;

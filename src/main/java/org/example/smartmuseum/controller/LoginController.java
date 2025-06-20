@@ -6,7 +6,6 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
-import org.example.smartmuseum.database.DatabaseConnection;
 
 import java.io.IOException;
 import java.security.MessageDigest;

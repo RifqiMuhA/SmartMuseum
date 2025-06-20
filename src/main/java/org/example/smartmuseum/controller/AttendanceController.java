@@ -7,9 +7,6 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
-import org.example.smartmuseum.model.entity.*;
-import org.example.smartmuseum.model.service.AttendanceService;
-import org.example.smartmuseum.model.service.UserService;
 
 import java.net.URL;
 import java.time.LocalDate;

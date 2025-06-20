@@ -8,9 +8,6 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import org.example.smartmuseum.model.entity.Employee;
-import org.example.smartmuseum.model.service.UserService;
-import org.example.smartmuseum.util.QRCodeGenerator;
 
 import java.net.URL;
 import java.time.LocalDate;

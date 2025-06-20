@@ -10,12 +10,6 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
-import javafx.scene.text.Font;
-import javafx.scene.text.FontWeight;
-import org.example.smartmuseum.model.entity.*;
-import org.example.smartmuseum.model.service.AttendanceService;
-import org.example.smartmuseum.model.service.UserService;
-import org.example.smartmuseum.util.CameraQRScanner;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
