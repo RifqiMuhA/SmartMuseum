@@ -9,7 +9,7 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/21.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.smartmuseum.controller.RegisterController">
+<AnchorPane prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.smartmuseum.controller.RegisterController">
 
    <children>
       <AnchorPane prefHeight="70.0" prefWidth="600.0" style="-fx-background-color: #D2B48C;">
@@ -29,7 +29,7 @@
       <Label layoutX="27.0" layoutY="131.0" text="Password"><font><Font size="15.0" /></font></Label>
       <PasswordField fx:id="setPasswordField" layoutX="203.0" layoutY="128.0" minWidth="350.0" promptText="Password berupa huruf dan angka" />
 
-      <Label layoutX="27.0" layoutY="173.0" text="Konfirmasi"><font><Font size="15.0" /></font></Label>
+      <Label layoutX="23.0" layoutY="172.0" text=" Konfirmasi Password"><font><Font size="15.0" /></font></Label>
       <PasswordField fx:id="confirmPasswordField" layoutX="203.0" layoutY="170.0" minWidth="350.0" promptText="Konfirmasi Password" />
 
       <Label layoutX="27.0" layoutY="213.0" text="Email"><font><Font size="15.0" /></font></Label>
@@ -38,7 +38,7 @@
       <Label layoutX="27.0" layoutY="255.0" text="No. HP"><font><Font size="15.0" /></font></Label>
       <TextField fx:id="noHPField" layoutX="203.0" layoutY="253.0" minWidth="350.0" promptText="No.HP" />
 
-      <Button fx:id="registerButton" layoutX="427.0" layoutY="326.0" minHeight="10.0" minWidth="130.0" prefHeight="31.0" prefWidth="130.0" onAction="#registerUser" style="-fx-background-color: #8B4513;" text="Registrasi" textFill="WHITE">
+      <Button fx:id="registerButton" layoutX="427.0" layoutY="326.0" minHeight="10.0" minWidth="130.0" onAction="#registerUser" prefHeight="31.0" prefWidth="130.0" style="-fx-background-color: #8B4513;" text="Registrasi" textFill="WHITE">
          <font><Font size="15.0" /></font>
       </Button>
 
