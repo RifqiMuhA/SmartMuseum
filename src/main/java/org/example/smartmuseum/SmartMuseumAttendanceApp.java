@@ -33,7 +33,7 @@ public class SmartMuseumAttendanceApp extends Application {
 
         // Load login scene
         FXMLLoader fxmlLoader = new FXMLLoader(SmartMuseumAttendanceApp.class.getResource("/org/example/smartmuseum/fxml/login.fxml"));
-        Scene scene = new Scene(fxmlLoader.load(), 800, 600);
+        Scene scene = new Scene(fxmlLoader.load(), 900, 600);
 
         stage.setTitle("Smart Museum - SeniMatic");
         stage.setScene(scene);

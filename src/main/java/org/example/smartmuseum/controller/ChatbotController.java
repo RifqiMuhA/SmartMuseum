@@ -219,6 +219,118 @@ public class ChatbotController implements Initializable {
     private void addBotMessageToUI(String message, LocalDateTime timestamp) {
         VBox messageBox = createMessageBox(message, false, timestamp);
         chatContainer.getChildren().add(messageBox);
+
+        // Check if we need to add navigation buttons
+        addNavigationButtonsIfNeeded(message);
+    }
+
+    /**
+     * Add navigation buttons based on bot response content
+     */
+    private void addNavigationButtonsIfNeeded(String message) {
+        // Check if this is artwork info response (option 1)
+        if (message.contains("Cari berdasarkan seniman") ||
+                message.contains("Cari berdasarkan kategori") ||
+                message.contains("Artwork terpopuler")) {
+
+            Button goToArtworkButton = new Button("🎨 Go to Artwork Gallery");
+            goToArtworkButton.setStyle("-fx-background-color: #4CAF50; -fx-text-fill: white; -fx-font-size: 14px; -fx-padding: 10 20; -fx-background-radius: 5;");
+            goToArtworkButton.setOnAction(e -> openArtworkList());
+
+            HBox buttonContainer = new HBox();
+            buttonContainer.setAlignment(Pos.CENTER_LEFT);
+            buttonContainer.setPadding(new Insets(10, 15, 5, 15));
+            buttonContainer.getChildren().add(goToArtworkButton);
+
+            chatContainer.getChildren().add(buttonContainer);
+        }
+
+        // Check if this is auction guide response (option 2)
+        else if (message.contains("Registrasi akun") ||
+                message.contains("Verifikasi identitas") ||
+                message.contains("Deposit jaminan") ||
+                message.contains("Mulai bidding")) {
+
+            Button goToAuctionButton = new Button("🔨 Go to Auction");
+            goToAuctionButton.setStyle("-fx-background-color: #FF9800; -fx-text-fill: white; -fx-font-size: 14px; -fx-padding: 10 20; -fx-background-radius: 5;");
+            goToAuctionButton.setOnAction(e -> openAuction());
+
+            HBox buttonContainer = new HBox();
+            buttonContainer.setAlignment(Pos.CENTER_LEFT);
+            buttonContainer.setPadding(new Insets(10, 15, 5, 15));
+            buttonContainer.getChildren().add(goToAuctionButton);
+
+            chatContainer.getChildren().add(buttonContainer);
+        }
+    }
+
+    /**
+     * Open artwork list window and close chatbot
+     */
+    private void openArtworkList() {
+        try {
+            // End chat session before closing
+            if (currentSession != null) {
+                chatbotService.endChatSession(currentUserId);
+            }
+
+            // Get current chatbot stage
+            Stage chatbotStage = (Stage) backButton.getScene().getWindow();
+
+            // Load artwork list
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/smartmuseum/view/artwork-list.fxml"));
+            Parent root = loader.load();
+
+            Stage artworkStage = new Stage();
+            Scene scene = new Scene(root);
+            scene.getStylesheets().add(getClass().getResource("/org/example/smartmuseum/css/artwork-style.css").toExternalForm());
+
+            artworkStage.setScene(scene);
+            artworkStage.setTitle("Smart Museum - Artwork Gallery");
+            artworkStage.setMaximized(true);
+
+            // Close chatbot and show artwork list
+            chatbotStage.close();
+            artworkStage.show();
+
+            System.out.println("Opened artwork list from chatbot and closed chatbot");
+        } catch (Exception e) {
+            showErrorAlert("Navigation Error", "Failed to open artwork gallery: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Open auction window and close chatbot
+     */
+    private void openAuction() {
+        try {
+            // End chat session before closing
+            if (currentSession != null) {
+                chatbotService.endChatSession(currentUserId);
+            }
+
+            // Get current chatbot stage
+            Stage chatbotStage = (Stage) backButton.getScene().getWindow();
+
+            // Load auction
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/smartmuseum/view/lelang.fxml"));
+            Parent root = loader.load();
+
+            Stage auctionStage = new Stage();
+            Scene scene = new Scene(root);
+
+            auctionStage.setScene(scene);
+            auctionStage.setTitle("SeniMatic - Auction");
+            auctionStage.setMaximized(true);
+
+            // Close chatbot and show auction
+            chatbotStage.close();
+            auctionStage.show();
+
+            System.out.println("Opened auction from chatbot and closed chatbot");
+        } catch (Exception e) {
+            showErrorAlert("Navigation Error", "Failed to open auction: " + e.getMessage());
+        }
     }
 
     /**

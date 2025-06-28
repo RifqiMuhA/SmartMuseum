@@ -104,26 +104,19 @@ public class WelcomeController implements Initializable {
                 clockTimer.cancel();
             }
 
-            // Load dashboard and navigate to auctions
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/smartmuseum/fxml/dashboard.fxml"));
+            // Load lelang.fxml directly
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/smartmuseum/view/lelang.fxml"));
             Parent root = loader.load();
-
-            // Get the controller and show auctions
-            DashboardController dashboardController = loader.getController();
 
             Stage stage = (Stage) btnGoToDashboard.getScene().getWindow();
             Scene scene = new Scene(root);
-            scene.getStylesheets().add(getClass().getResource("/org/example/smartmuseum/css/main-style.css").toExternalForm());
 
             stage.setScene(scene);
-            stage.setTitle("Smart Museum - Lelang Terkini");
+            stage.setTitle("SeniMatic - Auction");
             stage.setMaximized(true);
 
-            // Navigate to auctions after scene is set
-            Platform.runLater(() -> dashboardController.showAuctions());
-
         } catch (IOException e) {
-            System.err.println("Error loading auctions: " + e.getMessage());
+            System.err.println("Error loading lelang: " + e.getMessage());
             e.printStackTrace();
         }
     }
@@ -142,7 +135,7 @@ public class WelcomeController implements Initializable {
 
             Stage stage = (Stage) btnGoToDashboard.getScene().getWindow();
             Scene scene = new Scene(root);
-            scene.getStylesheets().add(getClass().getResource("/org/example/smartmuseum/css/main-style.css").toExternalForm());
+            scene.getStylesheets().add(getClass().getResource("/org/example/smartmuseum/css/artwork-style.css").toExternalForm());
 
             stage.setScene(scene);
             stage.setTitle("Smart Museum - List Artwork");
