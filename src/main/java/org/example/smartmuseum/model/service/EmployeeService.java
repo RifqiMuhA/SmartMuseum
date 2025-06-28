@@ -64,8 +64,70 @@ public class EmployeeService {
         return new ArrayList<>(employees.values());
     }
 
-    public void addEmployee(Employee employee) {
-        employees.put(employee.getEmployeeId(), employee);
+    // CHANGED: Now returns boolean for success/failure
+    public boolean addEmployee(Employee employee) {
+        try {
+            if (employee == null) {
+                System.out.println("Cannot add null employee");
+                return false;
+            }
+
+            if (employees.containsKey(employee.getEmployeeId())) {
+                System.out.println("Employee with ID " + employee.getEmployeeId() + " already exists");
+                return false;
+            }
+
+            employees.put(employee.getEmployeeId(), employee);
+            System.out.println("Employee added successfully: " + employee.getName());
+            return true;
+
+        } catch (Exception e) {
+            System.err.println("Error adding employee: " + e.getMessage());
+            return false;
+        }
+    }
+
+    // ADDED: Update employee method with boolean return
+    public boolean updateEmployee(Employee employee) {
+        try {
+            if (employee == null) {
+                System.out.println("Cannot update null employee");
+                return false;
+            }
+
+            if (!employees.containsKey(employee.getEmployeeId())) {
+                System.out.println("Employee with ID " + employee.getEmployeeId() + " not found");
+                return false;
+            }
+
+            employees.put(employee.getEmployeeId(), employee);
+            System.out.println("Employee updated successfully: " + employee.getName());
+            return true;
+
+        } catch (Exception e) {
+            System.err.println("Error updating employee: " + e.getMessage());
+            return false;
+        }
+    }
+
+    // ADDED: Delete employee method with boolean return
+    public boolean deleteEmployee(int employeeId) {
+        try {
+            Employee removedEmployee = employees.remove(employeeId);
+            if (removedEmployee != null) {
+                // Also remove attendance records for this employee
+                attendanceRecords.remove(employeeId);
+                System.out.println("Employee deleted successfully: " + removedEmployee.getName());
+                return true;
+            } else {
+                System.out.println("Employee with ID " + employeeId + " not found");
+                return false;
+            }
+
+        } catch (Exception e) {
+            System.err.println("Error deleting employee: " + e.getMessage());
+            return false;
+        }
     }
 
     public List<Attendance> getEmployeeAttendance(int employeeId) {

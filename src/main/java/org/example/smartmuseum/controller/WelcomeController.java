@@ -1,66 +1,186 @@
 package org.example.smartmuseum.controller;
 
+import javafx.application.Platform;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import org.example.smartmuseum.SmartMuseumAttendanceApp;
+import javafx.stage.Stage;
 
+import java.io.IOException;
 import java.net.URL;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ResourceBundle;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class WelcomeController implements Initializable {
 
+    @FXML private Label lblWelcomeMessage;
+    @FXML private Label lblCurrentTime;
     @FXML private Button btnGoToDashboard;
     @FXML private Button btnExit;
-    @FXML private Label lblCurrentTime;
-    @FXML private Label lblWelcomeMessage;
+
+    private Timer clockTimer;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        updateTime();
+        setupClock();
         setupWelcomeMessage();
-
-        // Update time every second
-        javafx.animation.Timeline timeline = new javafx.animation.Timeline(
-                new javafx.animation.KeyFrame(javafx.util.Duration.seconds(1), e -> updateTime())
-        );
-        timeline.setCycleCount(javafx.animation.Timeline.INDEFINITE);
-        timeline.play();
     }
 
-    private void updateTime() {
-        LocalDateTime now = LocalDateTime.now();
-        String timeString = now.format(DateTimeFormatter.ofPattern("EEEE, dd MMMM yyyy - HH:mm:ss"));
-        lblCurrentTime.setText(timeString);
+    private void setupClock() {
+        clockTimer = new Timer(true);
+        clockTimer.scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+                Platform.runLater(() -> {
+                    String currentTime = LocalDateTime.now()
+                            .format(DateTimeFormatter.ofPattern("EEEE, MMMM d, yyyy - HH:mm:ss"));
+                    lblCurrentTime.setText(currentTime);
+                });
+            }
+        }, 0, 1000);
     }
 
     private void setupWelcomeMessage() {
-        LocalDateTime now = LocalDateTime.now();
+        int hour = LocalDateTime.now().getHour();
         String greeting;
 
-        if (now.getHour() < 12) {
-            greeting = "Selamat Pagi";
-        } else if (now.getHour() < 17) {
-            greeting = "Selamat Siang";
+        if (hour < 12) {
+            greeting = "Selamat Pagi!";
+        } else if (hour < 17) {
+            greeting = "Selamat Siang!";
         } else {
-            greeting = "Selamat Sore";
+            greeting = "Selamat Malam!";
         }
 
-        lblWelcomeMessage.setText(greeting + "! Selamat datang di Smart Museum");
+        lblWelcomeMessage.setText(greeting + " Selamat datang di Smart Museum System.");
     }
 
     @FXML
     private void handleGoToDashboard() {
-        System.out.println("Navigating to Dashboard...");
-        SmartMuseumAttendanceApp.showDashboard();
+        try {
+            // Clean up timer
+            if (clockTimer != null) {
+                clockTimer.cancel();
+            }
+
+            // Load dashboard
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/smartmuseum/fxml/dashboard.fxml"));
+            Parent root = loader.load();
+
+            Stage stage = (Stage) btnGoToDashboard.getScene().getWindow();
+            Scene scene = new Scene(root);
+            scene.getStylesheets().add(getClass().getResource("/org/example/smartmuseum/css/main-style.css").toExternalForm());
+
+            stage.setScene(scene);
+            stage.setTitle("Smart Museum - Dashboard");
+            stage.setMaximized(true);
+
+        } catch (IOException e) {
+            System.err.println("Error loading dashboard: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
     @FXML
     private void handleExit() {
-        System.out.println("Exiting application...");
-        System.exit(0);
+        if (clockTimer != null) {
+            clockTimer.cancel();
+        }
+        Platform.exit();
+    }
+
+    @FXML
+    private void handleLelangTerkini() {
+        try {
+            // Clean up timer
+            if (clockTimer != null) {
+                clockTimer.cancel();
+            }
+
+            // Load dashboard and navigate to auctions
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/smartmuseum/fxml/dashboard.fxml"));
+            Parent root = loader.load();
+
+            // Get the controller and show auctions
+            DashboardController dashboardController = loader.getController();
+
+            Stage stage = (Stage) btnGoToDashboard.getScene().getWindow();
+            Scene scene = new Scene(root);
+            scene.getStylesheets().add(getClass().getResource("/org/example/smartmuseum/css/main-style.css").toExternalForm());
+
+            stage.setScene(scene);
+            stage.setTitle("Smart Museum - Lelang Terkini");
+            stage.setMaximized(true);
+
+            // Navigate to auctions after scene is set
+            Platform.runLater(() -> dashboardController.showAuctions());
+
+        } catch (IOException e) {
+            System.err.println("Error loading auctions: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
+    private void handleListArtwork() {
+        try {
+            // Clean up timer
+            if (clockTimer != null) {
+                clockTimer.cancel();
+            }
+
+            // Load artwork list directly
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/smartmuseum/view/artwork-list.fxml"));
+            Parent root = loader.load();
+
+            Stage stage = (Stage) btnGoToDashboard.getScene().getWindow();
+            Scene scene = new Scene(root);
+            scene.getStylesheets().add(getClass().getResource("/org/example/smartmuseum/css/main-style.css").toExternalForm());
+
+            stage.setScene(scene);
+            stage.setTitle("Smart Museum - List Artwork");
+            stage.setMaximized(true);
+
+        } catch (IOException e) {
+            System.err.println("Error loading artwork list: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
+    private void handleChatbot() {
+        try {
+            // Clean up timer
+            if (clockTimer != null) {
+                clockTimer.cancel();
+            }
+
+            // Close current welcome window
+            Stage currentStage = (Stage) btnGoToDashboard.getScene().getWindow();
+
+            // Load chatbot window
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/smartmuseum/fxml/chatbot.fxml"));
+            Parent chatbotWindow = loader.load();
+
+            Stage chatbotStage = new Stage();
+            chatbotStage.setTitle("Smart Museum - Chatbot Assistant");
+            Scene scene = new Scene(chatbotWindow, 800, 600);
+            chatbotStage.setScene(scene);
+
+            // Close welcome and show chatbot
+            currentStage.close();
+            chatbotStage.show();
+
+        } catch (IOException e) {
+            System.err.println("Error loading chatbot: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 }

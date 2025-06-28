@@ -1,74 +1,54 @@
 package org.example.smartmuseum.database;
 
-import org.example.smartmuseum.util.Constants;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
-/**
- * Singleton class for database connection management
- */
 public class DatabaseConnection {
     private static DatabaseConnection instance;
     private Connection connection;
 
+    // Database configuration
+    private static final String URL = "jdbc:mysql://localhost:3306/smartmuseum";
+    private static final String USERNAME = "root";
+    private static final String PASSWORD = "";
+
     private DatabaseConnection() {
         try {
-            Class.forName(Constants.DB_DRIVER);
-            this.connection = DriverManager.getConnection(
-                    Constants.DB_URL,
-                    Constants.DB_USERNAME,
-                    Constants.DB_PASSWORD
-            );
-            System.out.println("Database connection established");
+            Class.forName("com.mysql.cj.jdbc.Driver");
+            this.connection = DriverManager.getConnection(URL, USERNAME, PASSWORD);
+            System.out.println("Database connection established successfully!");
         } catch (ClassNotFoundException | SQLException e) {
-            System.err.println("Failed to establish database connection: " + e.getMessage());
-            throw new RuntimeException("Database connection failed", e);
+            System.err.println("Database connection failed: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
-    /**
-     * Get singleton instance
-     * @return DatabaseConnection instance
-     */
-    public static synchronized DatabaseConnection getInstance() {
+    public static DatabaseConnection getInstance() {
         if (instance == null) {
             instance = new DatabaseConnection();
         }
         return instance;
     }
 
-    /**
-     * Get database connection
-     * @return Active database connection
-     */
     public Connection getConnection() {
         try {
             if (connection == null || connection.isClosed()) {
-                connection = DriverManager.getConnection(
-                        Constants.DB_URL,
-                        Constants.DB_USERNAME,
-                        Constants.DB_PASSWORD
-                );
+                connection = DriverManager.getConnection(URL, USERNAME, PASSWORD);
             }
         } catch (SQLException e) {
-            System.err.println("Error getting database connection: " + e.getMessage());
-            throw new RuntimeException("Database connection error", e);
+            System.err.println("Error getting connection: " + e.getMessage());
         }
         return connection;
     }
 
-    /**
-     * Close database connection
-     */
     public void closeConnection() {
         try {
             if (connection != null && !connection.isClosed()) {
                 connection.close();
-                System.out.println("Database connection closed");
             }
         } catch (SQLException e) {
-            System.err.println("Error closing database connection: " + e.getMessage());
+            System.err.println("Error closing connection: " + e.getMessage());
         }
     }
 }

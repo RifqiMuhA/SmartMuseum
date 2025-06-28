@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns:fx="http://javafx.com/fxml"
+      fx:controller="org.example.smartmuseum.controller.ArtworkCardController"
+      spacing="12"
+      alignment="TOP_CENTER"
+      prefWidth="280"
+      styleClass="artwork-card">
+
+    <!-- Card Header with Badge and Sound Button -->
+    <HBox alignment="CENTER_LEFT" spacing="8">
+        <Label fx:id="typeBadge" styleClass="type-badge"/>
+        <Region HBox.hgrow="ALWAYS"/>
+        <Button fx:id="soundButton"
+                onAction="#handleSoundButton"
+                styleClass="sound-button"
+                text="🔊"
+                prefWidth="35"
+                prefHeight="35"/>
+        <Label fx:id="yearBadge" styleClass="year-badge"/>
+    </HBox>
+
+    <!-- Image Container -->
+    <StackPane styleClass="image-container">
+        <ImageView fx:id="artworkImage"
+                   fitWidth="250" fitHeight="180"
+                   preserveRatio="true"
+                   styleClass="artwork-image"/>
+        <!-- Image overlay for better text readability -->
+        <VBox alignment="BOTTOM_LEFT" styleClass="image-overlay">
+            <Label fx:id="titleOverlay" styleClass="title-overlay"/>
+        </VBox>
+    </StackPane>
+
+    <!-- Card Content -->
+    <VBox spacing="8" alignment="TOP_LEFT" styleClass="card-content">
+        <HBox alignment="CENTER_LEFT" spacing="8">
+            <Label text="📋 INFORMASI KARYA" styleClass="section-title"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Label fx:id="statusLabel" styleClass="status-label" text="🔇 Siap"/>
+        </HBox>
+
+        <VBox spacing="6">
+            <HBox spacing="8" alignment="CENTER_LEFT">
+                <Label text="🎨" styleClass="icon-label"/>
+                <Label fx:id="titleLabel" wrapText="true" styleClass="info-label"/>
+            </HBox>
+
+            <HBox spacing="8" alignment="CENTER_LEFT">
+                <Label text="👨‍🎨" styleClass="icon-label"/>
+                <Label fx:id="artistLabel" wrapText="true" styleClass="info-label"/>
+            </HBox>
+
+            <HBox spacing="8" alignment="CENTER_LEFT">
+                <Label text="🛠️" styleClass="icon-label"/>
+                <Label fx:id="techniqueLabel" wrapText="true" styleClass="info-label"/>
+            </HBox>
+        </VBox>
+
+        <Separator styleClass="card-separator"/>
+
+        <Label text="📝 Deskripsi:" styleClass="section-title"/>
+        <TextArea fx:id="descriptionText"
+                  editable="false"
+                  wrapText="true"
+                  prefRowCount="3"
+                  styleClass="description-area"/>
+    </VBox>
+</VBox>

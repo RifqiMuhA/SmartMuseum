@@ -53,6 +53,25 @@
             <version>${javafx.version}</version>
         </dependency>
 
+        <!-- Text-to-Speech Dependency -->
+        <dependency>
+            <groupId>net.sf.sociaal</groupId>
+            <artifactId>freetts</artifactId>
+            <version>1.2.2</version>
+        </dependency>
+
+        <!-- Logging -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>1.7.36</version>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+            <version>1.7.36</version>
+        </dependency>
+
         <!-- QR Code (ZXing) -->
         <dependency>
             <groupId>com.google.zxing</groupId>

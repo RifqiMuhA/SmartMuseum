@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane prefHeight="700.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.smartmuseum.controller.RegisterController">
+    <children>
+        <VBox prefHeight="700.0" prefWidth="800.0">
+            <children>
+                <!-- Header -->
+                <AnchorPane prefHeight="120.0" prefWidth="800.0" style="-fx-background-color: #2E86AB;">
+                    <children>
+                        <HBox alignment="CENTER_LEFT" layoutX="50.0" layoutY="30.0" spacing="20.0">
+                            <children>
+                                <!-- Register Icon - Using Unicode Symbol -->
+                                <Label text="📝" textFill="WHITE">
+                                    <font>
+                                        <Font size="50.0" />
+                                    </font>
+                                </Label>
+                                <Label text="User Registration" textFill="WHITE">
+                                    <font>
+                                        <Font name="System Bold" size="32.0" />
+                                    </font>
+                                </Label>
+                            </children>
+                        </HBox>
+                    </children>
+                </AnchorPane>
+
+                <!-- Form Content -->
+                <AnchorPane prefHeight="580.0" prefWidth="800.0" style="-fx-background-color: #E8F4F8;">
+                    <children>
+                        <VBox alignment="CENTER" layoutX="150.0" layoutY="50.0" prefHeight="480.0" prefWidth="500.0" spacing="20.0">
+                            <children>
+                                <!-- Username Field -->
+                                <HBox alignment="CENTER_LEFT" spacing="20.0">
+                                    <children>
+                                        <Label prefWidth="120.0" text="Username" textFill="#1B4F72">
+                                            <font>
+                                                <Font size="16.0" />
+                                            </font>
+                                        </Label>
+                                        <TextField fx:id="usernameField" prefHeight="40.0" prefWidth="350.0" style="-fx-border-color: #2E86AB; -fx-border-width: 2; -fx-background-radius: 5; -fx-border-radius: 5;">
+                                            <font>
+                                                <Font size="14.0" />
+                                            </font>
+                                        </TextField>
+                                    </children>
+                                </HBox>
+
+                                <!-- Password Field -->
+                                <HBox alignment="CENTER_LEFT" spacing="20.0">
+                                    <children>
+                                        <Label prefWidth="120.0" text="Password" textFill="#1B4F72">
+                                            <font>
+                                                <Font size="16.0" />
+                                            </font>
+                                        </Label>
+                                        <PasswordField fx:id="passwordField" prefHeight="40.0" prefWidth="350.0" promptText="Password berupa huruf dan angka" style="-fx-border-color: #5DADE2; -fx-border-width: 1; -fx-background-radius: 5; -fx-border-radius: 5;">
+                                            <font>
+                                                <Font size="14.0" />
+                                            </font>
+                                        </PasswordField>
+                                    </children>
+                                </HBox>
+
+                                <!-- Confirm Password Field -->
+                                <HBox alignment="CENTER_LEFT" spacing="20.0">
+                                    <children>
+                                        <Label prefWidth="120.0" text="Konfirmasi" textFill="#1B4F72">
+                                            <font>
+                                                <Font size="16.0" />
+                                            </font>
+                                        </Label>
+                                        <PasswordField fx:id="confirmPasswordField" prefHeight="40.0" prefWidth="350.0" promptText="Konfirmasi Password" style="-fx-border-color: #5DADE2; -fx-border-width: 1; -fx-background-radius: 5; -fx-border-radius: 5;">
+                                            <font>
+                                                <Font size="14.0" />
+                                            </font>
+                                        </PasswordField>
+                                    </children>
+                                </HBox>
+
+                                <!-- Email Field -->
+                                <HBox alignment="CENTER_LEFT" spacing="20.0">
+                                    <children>
+                                        <Label prefWidth="120.0" text="Email" textFill="#1B4F72">
+                                            <font>
+                                                <Font size="16.0" />
+                                            </font>
+                                        </Label>
+                                        <TextField fx:id="emailField" prefHeight="40.0" prefWidth="350.0" promptText="Email" style="-fx-border-color: #5DADE2; -fx-border-width: 1; -fx-background-radius: 5; -fx-border-radius: 5;">
+                                            <font>
+                                                <Font size="14.0" />
+                                            </font>
+                                        </TextField>
+                                    </children>
+                                </HBox>
+
+                                <!-- Phone Field -->
+                                <HBox alignment="CENTER_LEFT" spacing="20.0">
+                                    <children>
+                                        <Label prefWidth="120.0" text="No. HP" textFill="#1B4F72">
+                                            <font>
+                                                <Font size="16.0" />
+                                            </font>
+                                        </Label>
+                                        <TextField fx:id="phoneField" prefHeight="40.0" prefWidth="350.0" promptText="No.HP" style="-fx-border-color: #5DADE2; -fx-border-width: 1; -fx-background-radius: 5; -fx-border-radius: 5;">
+                                            <font>
+                                                <Font size="14.0" />
+                                            </font>
+                                        </TextField>
+                                    </children>
+                                </HBox>
+
+                                <!-- Error Label -->
+                                <Label fx:id="errorLabel" text="Error message" textFill="#E74C3C" visible="false">
+                                    <font>
+                                        <Font size="12.0" />
+                                    </font>
+                                </Label>
+
+                                <!-- Buttons -->
+                                <HBox alignment="CENTER" spacing="30.0">
+                                    <children>
+                                        <VBox alignment="CENTER" spacing="10.0">
+                                            <children>
+                                                <Label text="Sudah punya akun?" textFill="#5499C7">
+                                                    <font>
+                                                        <Font size="14.0" />
+                                                    </font>
+                                                </Label>
+                                                <Button fx:id="loginButton" onAction="#handleLogin" prefHeight="40.0" prefWidth="150.0" style="-fx-background-color: #AED6F1; -fx-background-radius: 5;" text="Login Here!" textFill="#1B4F72">
+                                                    <font>
+                                                        <Font size="14.0" />
+                                                    </font>
+                                                </Button>
+                                            </children>
+                                        </VBox>
+                                    </children>
+                                </HBox>
+
+                                <Button fx:id="registerButton" onAction="#handleRegister" prefHeight="50.0" prefWidth="180.0" style="-fx-background-color: #2E86AB; -fx-background-radius: 5;" text="Registrasi" textFill="WHITE">
+                                    <font>
+                                        <Font name="System Bold" size="16.0" />
+                                    </font>
+                                </Button>
+                            </children>
+                        </VBox>
+                    </children>
+                </AnchorPane>
+            </children>
+        </VBox>
+    </children>
+</AnchorPane>

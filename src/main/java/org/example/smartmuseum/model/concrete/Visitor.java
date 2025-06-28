@@ -1,40 +1,161 @@
 package org.example.smartmuseum.model.concrete;
 
 import org.example.smartmuseum.model.abstracts.BaseUser;
-import org.example.smartmuseum.model.interfaces.SystemObserver;
-import org.example.smartmuseum.model.entity.Auction;
-import org.example.smartmuseum.model.entity.Bid;
 import org.example.smartmuseum.model.entity.UserChatSession;
 import org.example.smartmuseum.model.enums.UserRole;
-import java.util.List;
-import java.util.ArrayList;
-import java.math.BigDecimal;
 
 /**
- * Visitor user class for gallery browsing and auction participation
+ * Visitor user class extending BaseUser
  */
-public class Visitor extends BaseUser implements SystemObserver {
-    private List<Auction> participatedAuctions;
+public class Visitor extends BaseUser {
+    private String name;
+    private String phoneNumber;
+    private boolean isRegistered;
+    private UserChatSession chatSession;
+    private String visitPurpose;
+
+    public Visitor() {
+        super();
+        this.role = UserRole.VISITOR;
+        this.isRegistered = false;
+    }
 
     public Visitor(int userId, String username) {
         super(userId, username, UserRole.VISITOR);
-        this.participatedAuctions = new ArrayList<>();
+        this.name = username;
+        this.isRegistered = true;
+    }
+
+    public Visitor(int visitorId, String name, String email) {
+        super(visitorId, name, UserRole.VISITOR);
+        this.name = name;
+        this.email = email;
+        this.isRegistered = true;
+    }
+
+    public Visitor(String name, String email, String phoneNumber) {
+        super();
+        this.role = UserRole.VISITOR;
+        this.name = name;
+        this.username = name;
+        this.email = email;
+        this.phoneNumber = phoneNumber;
+        this.isRegistered = false;
     }
 
     @Override
-    public boolean login(String username, String password) {
-        System.out.println("Visitor login: " + username);
-        return true; // Placeholder
+    public String getDisplayName() {
+        return name != null ? name : "Visitor " + userId;
     }
 
     @Override
-    public void logout() {
-        System.out.println("Visitor logged out: " + username);
+    public boolean hasPermission(String permission) {
+        // Visitors have very limited permissions
+        switch (permission.toLowerCase()) {
+            case "view_artworks":
+            case "use_chatbot":
+            case "view_gallery":
+            case "participate_auction":
+                return true;
+            case "manage_artworks":
+            case "view_reports":
+            case "manage_staff":
+                return false;
+            default:
+                return false;
+        }
+    }
+
+    // Getters and Setters
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getPhoneNumber() {
+        return phoneNumber;
+    }
+
+    public void setPhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
+    }
+
+    public boolean isRegistered() {
+        return isRegistered;
+    }
+
+    public void setRegistered(boolean registered) {
+        isRegistered = registered;
+    }
+
+    public UserChatSession getChatSession() {
+        return chatSession;
+    }
+
+    public void setChatSession(UserChatSession chatSession) {
+        this.chatSession = chatSession;
+    }
+
+    public String getVisitPurpose() {
+        return visitPurpose;
+    }
+
+    public void setVisitPurpose(String visitPurpose) {
+        this.visitPurpose = visitPurpose;
+    }
+
+    /**
+     * Get visitor ID (alias for getUserId for backward compatibility)
+     */
+    public int getVisitorId() {
+        return this.userId;
+    }
+
+    /**
+     * Set visitor ID (alias for setUserId for backward compatibility)
+     */
+    public void setVisitorId(int visitorId) {
+        this.userId = visitorId;
+    }
+
+    /**
+     * Initialize chat session for this visitor
+     */
+    public void initializeChatSession() {
+        this.chatSession = new UserChatSession(this.userId);
+    }
+
+    /**
+     * End chat session
+     */
+    public void endChatSession() {
+        if (this.chatSession != null) {
+            this.chatSession.endSession();
+        }
+    }
+
+    /**
+     * Visitor-specific methods
+     */
+    public boolean canParticipateInAuction() {
+        return isRegistered;
+    }
+
+    public boolean canAccessPremiumContent() {
+        return isRegistered;
     }
 
     @Override
-    public void updateProfile(Object profile) {
-        System.out.println("Visitor profile updated");
+    public String toString() {
+        return "Visitor{" +
+                "userId=" + userId +
+                ", name='" + name + '\'' +
+                ", email='" + email + '\'' +
+                ", isRegistered=" + isRegistered +
+                '}';
     }
 
     @Override
@@ -47,8 +168,8 @@ public class Visitor extends BaseUser implements SystemObserver {
     }
 
     @Override
-    public List<String> getAvailableActions() {
-        List<String> actions = new ArrayList<>();
+    public java.util.List<String> getAvailableActions() {
+        java.util.List<String> actions = new java.util.ArrayList<>();
         actions.add("Browse Artworks");
         actions.add("Place Bids");
         actions.add("View Auction Details");
@@ -57,42 +178,20 @@ public class Visitor extends BaseUser implements SystemObserver {
         return actions;
     }
 
-    public void browseArtworks() {
-        System.out.println("Browsing available artworks");
-    }
-
-    public Bid placeBid(Auction auction, BigDecimal amount) {
-        System.out.println("Placing bid of $" + amount + " on auction ID: " + auction.getAuctionId());
-        // Create and return bid object
-        return new Bid(0, auction.getAuctionId(), this.userId, amount, null);
-    }
-
-    public String viewArtworkDetails(int artworkId) {
-        System.out.println("Viewing details for artwork ID: " + artworkId);
-        return "Artwork details for ID: " + artworkId;
-    }
-
-    public UserChatSession startChatSession() {
-        System.out.println("Starting chat session for visitor: " + username);
-        return new UserChatSession(0, this.userId, 1, "", null, true);
-    }
-
-    public String sendChatInput(String input) {
-        System.out.println("Chat input from " + username + ": " + input);
-        return "Bot response to: " + input;
+    @Override
+    public boolean login(String username, String password) {
+        System.out.println("Visitor login: " + username);
+        this.updateLastLogin();
+        return true;
     }
 
     @Override
-    public void onBidPlaced(Object event) {
-        System.out.println("Visitor notified: New bid placed - " + event);
+    public void logout() {
+        System.out.println("Visitor logged out: " + username);
     }
 
     @Override
-    public void onAttendanceChanged(Object event) {
-        // Visitors may not need attendance notifications
+    public void updateProfile(Object profile) {
+        System.out.println("Visitor profile updated");
     }
-
-    // Getters and Setters
-    public List<Auction> getParticipatedAuctions() { return participatedAuctions; }
-    public void setParticipatedAuctions(List<Auction> participatedAuctions) { this.participatedAuctions = participatedAuctions; }
 }

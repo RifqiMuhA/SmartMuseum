@@ -1,101 +1,185 @@
 package org.example.smartmuseum.model.service;
 
-import org.example.smartmuseum.model.entity.ConversationFlow;
-import org.example.smartmuseum.model.entity.FlowNode;
-import org.example.smartmuseum.model.entity.NodeOption;
 import org.example.smartmuseum.model.entity.UserChatSession;
-import org.example.smartmuseum.model.enums.NodeType;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
+import org.example.smartmuseum.model.concrete.Visitor;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
+/**
+ * Chatbot engine for processing conversations
+ */
 public class ChatbotEngine {
-    private ConcurrentMap<Integer, ConversationFlow> activeFlows;
-    private ConcurrentMap<Integer, UserChatSession> activeSessions;
+
+    private Map<Integer, UserChatSession> activeSessions;
+    private Map<String, String> responses;
+    private ChatbotService chatbotService;
 
     public ChatbotEngine() {
-        this.activeFlows = new ConcurrentHashMap<>();
         this.activeSessions = new ConcurrentHashMap<>();
+        this.responses = new HashMap<>();
+        this.chatbotService = new ChatbotService();
+        initializeResponses();
     }
 
-    public String processUserInput(int userId, String input) {
-        UserChatSession session = getOrCreateSession(userId);
-
-        try {
-            int option = Integer.parseInt(input.trim());
-            FlowNode targetNode = navigateToOption(session, option);
-
-            if (targetNode != null) {
-                session.navigateToNode(targetNode.getNodeId());
-                return generateMenuResponse(targetNode);
-            } else {
-                return "Pilihan tidak valid. Silakan pilih nomor yang tersedia.";
-            }
-        } catch (NumberFormatException e) {
-            return "Mohon masukkan nomor pilihan yang valid.";
-        }
+    /**
+     * Initialize predefined responses
+     */
+    private void initializeResponses() {
+        responses.put("greeting", "Selamat datang di SeniMatic! Bagaimana saya bisa membantu Anda?");
+        responses.put("artwork_info", "Berikut informasi artwork yang tersedia...");
+        responses.put("auction_guide", "Panduan mengikuti lelang...");
+        responses.put("gallery_info", "Informasi galeri dan jam operasional...");
+        responses.put("technical_support", "Tim teknis siap membantu Anda...");
+        responses.put("goodbye", "Terima kasih telah menggunakan SeniMatic. Sampai jumpa!");
+        responses.put("default", "Maaf, saya tidak mengerti. Bisa diulang?");
     }
 
-    public String generateMenuResponse(FlowNode node) {
-        StringBuilder response = new StringBuilder();
-        response.append(node.getNodeText()).append("\n\n");
-
-        if (node.getNodeType() == NodeType.MENU) {
-            response.append("Pilihan tersedia:\n");
-            for (NodeOption option : node.getOptions()) {
-                if (option.isActive()) {
-                    response.append(option.getOptionNumber())
-                            .append(". ")
-                            .append(option.getOptionText())
-                            .append("\n");
-                }
-            }
-            response.append("0. Kembali\n99. Menu Utama\n");
-            response.append("\nKetik nomor pilihan Anda:");
+    /**
+     * Process message from visitor
+     */
+    public String processMessage(Visitor visitor, String message) {
+        if (visitor == null || message == null || message.trim().isEmpty()) {
+            return responses.get("default");
         }
 
-        return response.toString();
+        // Get or create session
+        UserChatSession session = getOrCreateSession(visitor);
+
+        // Update session activity
+        session.updateActivity();
+
+        // Process the message
+        return generateResponse(message, session);
     }
 
-    public FlowNode navigateToOption(UserChatSession session, int optionNumber) {
-        // In real implementation, would load current node from database
-        // For now, return a mock node
-        FlowNode mockNode = new FlowNode();
-        mockNode.setNodeId(optionNumber);
-        mockNode.setNodeType(NodeType.MENU);
-        mockNode.setNodeText("Mock response for option " + optionNumber);
-        return mockNode;
-    }
+    /**
+     * Get or create chat session for visitor
+     */
+    private UserChatSession getOrCreateSession(Visitor visitor) {
+        UserChatSession session = activeSessions.get(visitor.getVisitorId());
 
-    public UserChatSession initializeSession(int userId) {
-        UserChatSession session = new UserChatSession();
-        session.setUserId(userId);
-        session.setCurrentNodeId(1); // Root node
-        session.setActive(true);
+        if (session == null) {
+            session = new UserChatSession(visitor.getVisitorId());
+            activeSessions.put(visitor.getVisitorId(), session);
+            visitor.setChatSession(session);
+        }
 
-        activeSessions.put(userId, session);
         return session;
     }
 
-    public UserChatSession getOrCreateSession(int userId) {
-        return activeSessions.computeIfAbsent(userId, k -> initializeSession(userId));
+    /**
+     * Generate response based on message and session context
+     */
+    private String generateResponse(String message, UserChatSession session) {
+        String lowerMessage = message.toLowerCase().trim();
+
+        // Handle greetings
+        if (lowerMessage.contains("halo") || lowerMessage.contains("hai") ||
+                lowerMessage.contains("hello") || lowerMessage.contains("hi")) {
+            return responses.get("greeting");
+        }
+
+        // Handle goodbyes
+        if (lowerMessage.contains("bye") || lowerMessage.contains("selamat tinggal") ||
+                lowerMessage.contains("terima kasih")) {
+            return responses.get("goodbye");
+        }
+
+        // Handle menu selections
+        try {
+            int choice = Integer.parseInt(lowerMessage);
+            return handleMenuChoice(choice, session);
+        } catch (NumberFormatException e) {
+            // Handle text-based queries
+            return handleTextQuery(lowerMessage, session);
+        }
     }
 
-    public void loadFlows() {
-        // In real implementation, would load from database
-        ConversationFlow mainFlow = new ConversationFlow();
-        mainFlow.setFlowId(1);
-        mainFlow.setFlowName("Main Flow");
-        mainFlow.setActive(true);
+    /**
+     * Handle menu choice selections
+     */
+    private String handleMenuChoice(int choice, UserChatSession session) {
+        switch (choice) {
+            case 1:
+                session.setCurrentFlow("artwork_info");
+                return "        Informasi Artwork\n\n" +
+                        "Pilih kategori:\n" +
+                        "1. Cari berdasarkan seniman\n" +
+                        "2. Cari berdasarkan kategori\n" +
+                        "3. Artwork terpopuler\n\n" +
+                        "Ketik nomor pilihan:";
 
-        activeFlows.put(1, mainFlow);
-        System.out.println("Loaded conversation flows");
+            case 2:
+                session.setCurrentFlow("auction_guide");
+                return "       Cara Mengikuti Lelang\n\n" +
+                        "Langkah-langkah:\n" +
+                        "1. Registrasi akun\n" +
+                        "2. Verifikasi identitas\n" +
+                        "3. Deposit jaminan\n" +
+                        "4. Mulai bidding\n\n" +
+                        "Pilih nomor untuk detail:";
+
+            case 3:
+                session.setCurrentFlow("gallery_info");
+                return "        Info Galeri\n\n" +
+                        "Jam Operasional: 09:00 - 17:00\n" +
+                        "Lokasi: Jl. Seni Raya No. 123\n" +
+                        "Telp: (021) 1234-5678\n" +
+                        "Email: info@senimatic.com";
+
+            case 4:
+                session.setCurrentFlow("technical_support");
+                return "    Bantuan Teknis\n\n" +
+                        "1. Masalah login\n" +
+                        "2. Reset password\n" +
+                        "3. Hubungi admin\n\n" +
+                        "Ketik nomor untuk bantuan:";
+
+            default:
+                return "Pilihan tidak valid. Silakan ketik nomor 1-4.";
+        }
     }
 
-    public ConcurrentMap<Integer, ConversationFlow> getActiveFlows() {
-        return activeFlows;
+    /**
+     * Handle text-based queries
+     */
+    private String handleTextQuery(String query, UserChatSession session) {
+        if (query.contains("artwork") || query.contains("seni")) {
+            return responses.get("artwork_info");
+        } else if (query.contains("lelang") || query.contains("auction")) {
+            return responses.get("auction_guide");
+        } else if (query.contains("galeri") || query.contains("museum")) {
+            return responses.get("gallery_info");
+        } else if (query.contains("bantuan") || query.contains("help")) {
+            return responses.get("technical_support");
+        } else {
+            return responses.get("default");
+        }
     }
 
-    public ConcurrentMap<Integer, UserChatSession> getActiveSessions() {
-        return activeSessions;
+    /**
+     * End chat session
+     */
+    public void endSession(int visitorId) {
+        UserChatSession session = activeSessions.remove(visitorId);
+        if (session != null) {
+            session.endSession();
+        }
+    }
+
+    /**
+     * Get active session count
+     */
+    public int getActiveSessionCount() {
+        return activeSessions.size();
+    }
+
+    /**
+     * Get session for visitor
+     */
+    public UserChatSession getSession(int visitorId) {
+        return activeSessions.get(visitorId);
     }
 }

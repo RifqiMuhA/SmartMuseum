@@ -7,103 +7,364 @@
 
 <BorderPane xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="org.example.smartmuseum.controller.DashboardController"
-            styleClass="dashboard-container">
-    <top>
-        <VBox>
-            <children>
-                <!-- Header -->
-                <HBox alignment="CENTER_LEFT" spacing="20.0" styleClass="header-section">
-                    <children>
-                        <Label text="🏛️ Smart Museum Dashboard" styleClass="dashboard-title" textFill="WHITE">
-                            <font>
-                                <Font name="System Bold" size="24.0" />
-                            </font>
-                        </Label>
-                        <Region HBox.hgrow="ALWAYS" />
-                        <Label fx:id="lblUserInfo" text="Logged in as: Admin" styleClass="user-info" textFill="WHITE">
-                            <font>
-                                <Font name="System Bold" size="14.0" />
-                            </font>
-                        </Label>
-                        <Label fx:id="lblCurrentTime" text="Loading..." styleClass="time-info" textFill="WHITE">
-                            <font>
-                                <Font name="System Bold" size="14.0" />
-                            </font>
-                        </Label>
-                    </children>
-                    <padding>
-                        <Insets bottom="15.0" left="20.0" right="20.0" top="15.0" />
-                    </padding>
-                </HBox>
+            styleClass="dashboard-main"
+            stylesheets="@../css/main-style.css">
 
-                <!-- Navigation Bar -->
-                <HBox alignment="CENTER_LEFT" spacing="15.0" styleClass="nav-section">
+    <!-- Left Sidebar -->
+    <left>
+        <VBox styleClass="sidebar" prefWidth="280.0">
+            <children>
+                <!-- Logo Section -->
+                <VBox alignment="CENTER" spacing="10.0" styleClass="logo-section">
                     <children>
-                        <Button fx:id="btnGoToWelcome" onAction="#handleGoToWelcome"
-                                styleClass="btn-nav" text="← Back to Welcome">
+                        <Label text="🏛️" styleClass="logo-icon">
                             <font>
-                                <Font name="System Bold" size="12.0" />
+                                <Font size="32.0" />
+                            </font>
+                        </Label>
+                        <Label text="Smart Museum" styleClass="logo-text">
+                            <font>
+                                <Font name="System Bold" size="16.0" />
+                            </font>
+                        </Label>
+                    </children>
+                    <padding>
+                        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+                    </padding>
+                </VBox>
+
+                <!-- Navigation Menu -->
+                <VBox spacing="5.0" styleClass="nav-menu" VBox.vgrow="ALWAYS">
+                    <children>
+                        <Button fx:id="btnDashboard" onAction="#showDashboard"
+                                styleClass="nav-item,nav-item-active" text="🏠 Dashboard">
+                            <font>
+                                <Font name="System Bold" size="14.0" />
                             </font>
                         </Button>
-                        <Separator orientation="VERTICAL" />
-                        <Button onAction="#handleRefreshAll" styleClass="btn-nav" text="🔄 Refresh All">
+
+                        <Button fx:id="btnAttendance" onAction="#showAttendance"
+                                styleClass="nav-item" text="📊 Attendance">
                             <font>
-                                <Font name="System Bold" size="12.0" />
+                                <Font name="System Bold" size="14.0" />
                             </font>
                         </Button>
-                        <Button onAction="#handleLogout" styleClass="btn-nav-danger" text="🚪 Logout">
+
+                        <Button fx:id="btnEmployees" onAction="#showEmployees"
+                                styleClass="nav-item" text="👥 Employees">
                             <font>
-                                <Font name="System Bold" size="12.0" />
+                                <Font name="System Bold" size="14.0" />
+                            </font>
+                        </Button>
+
+                        <Button fx:id="btnUsers" onAction="#showUsers"
+                                styleClass="nav-item" text="👤 Users">
+                            <font>
+                                <Font name="System Bold" size="14.0" />
+                            </font>
+                        </Button>
+
+                        <Button fx:id="btnArtworks" onAction="#showArtworks"
+                                styleClass="nav-item" text="🎨 Artworks">
+                            <font>
+                                <Font name="System Bold" size="14.0" />
+                            </font>
+                        </Button>
+
+                        <Button fx:id="btnAuctions" onAction="#showAuctions"
+                                styleClass="nav-item" text="🔨 Auctions">
+                            <font>
+                                <Font name="System Bold" size="14.0" />
+                            </font>
+                        </Button>
+
+                        <Button fx:id="btnQRGenerator" onAction="#showQRGenerator"
+                                styleClass="nav-item" text="🏷️ QR Generator">
+                            <font>
+                                <Font name="System Bold" size="14.0" />
+                            </font>
+                        </Button>
+
+                        <Separator styleClass="nav-separator" />
+
+                        <Button fx:id="btnProfile" onAction="#showProfile"
+                                styleClass="nav-item" text="👤 Profile">
+                            <font>
+                                <Font name="System Bold" size="14.0" />
                             </font>
                         </Button>
                     </children>
                     <padding>
-                        <Insets bottom="10.0" left="20.0" right="20.0" top="10.0" />
+                        <Insets bottom="10.0" left="15.0" right="15.0" top="10.0" />
                     </padding>
-                </HBox>
+                </VBox>
+
+                <!-- User Info Section -->
+                <VBox alignment="CENTER" spacing="10.0" styleClass="user-section">
+                    <children>
+                        <Label text="👨‍💼" styleClass="user-avatar">
+                            <font>
+                                <Font size="24.0" />
+                            </font>
+                        </Label>
+                        <Label fx:id="lblUserInfo" text="Admin User" styleClass="user-name">
+                            <font>
+                                <Font name="System Bold" size="12.0" />
+                            </font>
+                        </Label>
+                        <Button onAction="#handleBackToWelcome" styleClass="nav-item" text="🏠 Welcome">
+                            <font>
+                                <Font size="11.0" />
+                            </font>
+                        </Button>
+                        <Button onAction="#handleLogout" styleClass="logout-btn" text="🚪 Logout">
+                            <font>
+                                <Font size="11.0" />
+                            </font>
+                        </Button>
+                    </children>
+                    <padding>
+                        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+                    </padding>
+                </VBox>
             </children>
         </VBox>
-    </top>
+    </left>
 
+    <!-- Main Content Area -->
     <center>
-        <TabPane fx:id="tabPane" styleClass="main-tab-pane" tabClosingPolicy="UNAVAILABLE">
-            <tabs>
-                <!-- Attendance Tab -->
-                <Tab fx:id="tabAttendance" text="📷 QR Attendance Scanner">
-                    <content>
-                        <VBox fx:id="attendanceContent" styleClass="tab-content" />
-                    </content>
-                </Tab>
-
-                <!-- Employee Management Tab -->
-                <Tab fx:id="tabEmployeeManagement" text="👥 Employee Management">
-                    <content>
-                        <VBox fx:id="employeeContent" styleClass="tab-content" />
-                    </content>
-                </Tab>
-
-                <!-- QR Generator Tab -->
-                <Tab fx:id="tabQRGenerator" text="🏷️ QR Code Generator">
-                    <content>
-                        <VBox fx:id="qrGeneratorContent" styleClass="tab-content" />
-                    </content>
-                </Tab>
-            </tabs>
-        </TabPane>
-    </center>
-
-    <bottom>
-        <HBox alignment="CENTER" styleClass="footer-section">
+        <VBox styleClass="main-content">
             <children>
-                <Label text="Smart Museum Dashboard - All systems operational" styleClass="footer-status">
-                    <font>
-                        <Font name="System Bold" size="12.0" />
-                    </font>
-                </Label>
+                <!-- Top Header -->
+                <HBox alignment="CENTER_LEFT" spacing="20.0" styleClass="top-header">
+                    <children>
+                        <VBox spacing="5.0" HBox.hgrow="ALWAYS">
+                            <children>
+                                <Label fx:id="lblPageTitle" text="Hello! Smart Museum" styleClass="page-title">
+                                    <font>
+                                        <Font name="System Bold" size="28.0" />
+                                    </font>
+                                </Label>
+                                <Label fx:id="lblPageSubtitle" text="Never put off till tomorrow what can be done today!" styleClass="page-subtitle">
+                                    <font>
+                                        <Font size="14.0" />
+                                    </font>
+                                </Label>
+                            </children>
+                        </VBox>
+
+                        <!-- Search and Actions -->
+                        <HBox alignment="CENTER_RIGHT" spacing="15.0">
+                            <children>
+                                <TextField promptText="🔍 Search..." styleClass="search-field" prefWidth="250.0" />
+                                <Button styleClass="header-btn" text="⚙️">
+                                    <font>
+                                        <Font size="16.0" />
+                                    </font>
+                                </Button>
+                                <Button styleClass="header-btn" text="🔔">
+                                    <font>
+                                        <Font size="16.0" />
+                                    </font>
+                                </Button>
+                                <Label fx:id="lblCurrentTime" text="Loading..." styleClass="time-display">
+                                    <font>
+                                        <Font name="Courier New" size="12.0" />
+                                    </font>
+                                </Label>
+                            </children>
+                        </HBox>
+                    </children>
+                    <padding>
+                        <Insets bottom="20.0" left="30.0" right="30.0" top="20.0" />
+                    </padding>
+                </HBox>
+
+                <!-- Content Container -->
+                <ScrollPane fitToWidth="true" styleClass="content-scroll" VBox.vgrow="ALWAYS">
+                    <content>
+                        <StackPane fx:id="contentArea" styleClass="content-area">
+                            <children>
+                                <!-- Default Dashboard Content -->
+                                <VBox fx:id="dashboardContent" spacing="20.0" styleClass="dashboard-overview">
+                                    <children>
+                                        <!-- Statistics Cards -->
+                                        <HBox spacing="20.0" styleClass="stats-container">
+                                            <children>
+                                                <VBox styleClass="stat-card,stat-card-blue" HBox.hgrow="ALWAYS">
+                                                    <children>
+                                                        <Label text="👥" styleClass="stat-icon">
+                                                            <font>
+                                                                <Font size="24.0" />
+                                                            </font>
+                                                        </Label>
+                                                        <Label fx:id="lblTotalUsers" text="0" styleClass="stat-number">
+                                                            <font>
+                                                                <Font name="System Bold" size="32.0" />
+                                                            </font>
+                                                        </Label>
+                                                        <Label text="Total Users" styleClass="stat-label">
+                                                            <font>
+                                                                <Font size="12.0" />
+                                                            </font>
+                                                        </Label>
+                                                        <ProgressBar progress="0.75" styleClass="stat-progress" />
+                                                    </children>
+                                                    <padding>
+                                                        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+                                                    </padding>
+                                                </VBox>
+
+                                                <VBox styleClass="stat-card,stat-card-green" HBox.hgrow="ALWAYS">
+                                                    <children>
+                                                        <Label text="🎨" styleClass="stat-icon">
+                                                            <font>
+                                                                <Font size="24.0" />
+                                                            </font>
+                                                        </Label>
+                                                        <Label fx:id="lblTotalArtworks" text="0" styleClass="stat-number">
+                                                            <font>
+                                                                <Font name="System Bold" size="32.0" />
+                                                            </font>
+                                                        </Label>
+                                                        <Label text="Barang Museum" styleClass="stat-label">
+                                                            <font>
+                                                                <Font size="12.0" />
+                                                            </font>
+                                                        </Label>
+                                                        <ProgressBar progress="0.60" styleClass="stat-progress" />
+                                                    </children>
+                                                    <padding>
+                                                        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+                                                    </padding>
+                                                </VBox>
+
+                                                <VBox styleClass="stat-card,stat-card-orange" HBox.hgrow="ALWAYS">
+                                                    <children>
+                                                        <Label text="🔨" styleClass="stat-icon">
+                                                            <font>
+                                                                <Font size="24.0" />
+                                                            </font>
+                                                        </Label>
+                                                        <Label fx:id="lblActiveAuctions" text="0" styleClass="stat-number">
+                                                            <font>
+                                                                <Font name="System Bold" size="32.0" />
+                                                            </font>
+                                                        </Label>
+                                                        <Label text="Lelang Terkini" styleClass="stat-label">
+                                                            <font>
+                                                                <Font size="12.0" />
+                                                            </font>
+                                                        </Label>
+                                                        <ProgressBar progress="0.40" styleClass="stat-progress" />
+                                                    </children>
+                                                    <padding>
+                                                        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+                                                    </padding>
+                                                </VBox>
+
+                                                <VBox styleClass="stat-card,stat-card-purple" HBox.hgrow="ALWAYS">
+                                                    <children>
+                                                        <Label text="📊" styleClass="stat-icon">
+                                                            <font>
+                                                                <Font size="24.0" />
+                                                            </font>
+                                                        </Label>
+                                                        <Label fx:id="lblTodayAttendance" text="0" styleClass="stat-number">
+                                                            <font>
+                                                                <Font name="System Bold" size="32.0" />
+                                                            </font>
+                                                        </Label>
+                                                        <Label text="Today Attendance" styleClass="stat-label">
+                                                            <font>
+                                                                <Font size="12.0" />
+                                                            </font>
+                                                        </Label>
+                                                        <ProgressBar progress="0.90" styleClass="stat-progress" />
+                                                    </children>
+                                                    <padding>
+                                                        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+                                                    </padding>
+                                                </VBox>
+                                            </children>
+                                        </HBox>
+
+                                        <!-- Quick Actions -->
+                                        <HBox spacing="20.0" styleClass="quick-actions-row">
+                                            <children>
+                                                <!-- Lelang Terkini Card -->
+                                                <VBox styleClass="action-card,action-card-auction" HBox.hgrow="ALWAYS" onMouseClicked="#showAuctions">
+                                                    <children>
+                                                        <Label text="🔨" styleClass="action-icon">
+                                                            <font>
+                                                                <Font size="48.0" />
+                                                            </font>
+                                                        </Label>
+                                                        <Label text="Lelang Terkini" styleClass="action-title">
+                                                            <font>
+                                                                <Font name="System Bold" size="18.0" />
+                                                            </font>
+                                                        </Label>
+                                                        <Label text="Lihat dan kelola lelang yang sedang berlangsung" styleClass="action-description">
+                                                            <font>
+                                                                <Font size="12.0" />
+                                                            </font>
+                                                        </Label>
+                                                    </children>
+                                                    <padding>
+                                                        <Insets bottom="30.0" left="30.0" right="30.0" top="30.0" />
+                                                    </padding>
+                                                </VBox>
+
+                                                <!-- Barang Museum Card -->
+                                                <VBox styleClass="action-card,action-card-museum" HBox.hgrow="ALWAYS" onMouseClicked="#showArtworks">
+                                                    <children>
+                                                        <Label text="🎨" styleClass="action-icon">
+                                                            <font>
+                                                                <Font size="48.0" />
+                                                            </font>
+                                                        </Label>
+                                                        <Label text="Barang Museum" styleClass="action-title">
+                                                            <font>
+                                                                <Font name="System Bold" size="18.0" />
+                                                            </font>
+                                                        </Label>
+                                                        <Label text="Kelola koleksi seni dan artefak museum" styleClass="action-description">
+                                                            <font>
+                                                                <Font size="12.0" />
+                                                            </font>
+                                                        </Label>
+                                                    </children>
+                                                    <padding>
+                                                        <Insets bottom="30.0" left="30.0" right="30.0" top="30.0" />
+                                                    </padding>
+                                                </VBox>
+                                            </children>
+                                        </HBox>
+
+                                        <!-- Recent Activity -->
+                                        <VBox spacing="15.0" styleClass="recent-activity">
+                                            <children>
+                                                <Label text="Aktivitas Terbaru" styleClass="section-title">
+                                                    <font>
+                                                        <Font name="System Bold" size="18.0" />
+                                                    </font>
+                                                </Label>
+                                                <VBox fx:id="activityList" spacing="10.0" styleClass="activity-list">
+                                                    <!-- Activity items will be loaded dynamically -->
+                                                </VBox>
+                                            </children>
+                                        </VBox>
+                                    </children>
+                                    <padding>
+                                        <Insets bottom="30.0" left="30.0" right="30.0" top="0.0" />
+                                    </padding>
+                                </VBox>
+                            </children>
+                        </StackPane>
+                    </content>
+                </ScrollPane>
             </children>
-            <padding>
-                <Insets bottom="10.0" left="20.0" right="20.0" top="10.0" />
-            </padding>
-        </HBox>
-    </bottom>
+        </VBox>
+    </center>
 </BorderPane>

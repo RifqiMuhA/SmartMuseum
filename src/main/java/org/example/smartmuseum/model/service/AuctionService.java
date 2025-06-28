@@ -59,17 +59,17 @@ public class AuctionService {
                 .collect(Collectors.toList());
     }
 
-    public Auction createAuction(Artwork artwork) {
+    public Auction createAuction(int artworkId, String artworkTitle, BigDecimal startingBid) {
         Auction auction = new Auction();
         auction.setAuctionId(generateAuctionId());
-        auction.setArtworkId(artwork.getArtworkId());
-        auction.setStartingBid(new BigDecimal("100.00")); // Default starting bid
-        auction.setCurrentBid(new BigDecimal("100.00"));
+        auction.setArtworkId(artworkId);
+        auction.setStartingBid(startingBid);
+        auction.setCurrentBid(startingBid);
         auction.setStatus(AuctionStatus.UPCOMING);
         auction.setCreatedAt(new Timestamp(System.currentTimeMillis()));
 
         activeAuctions.put(auction.getAuctionId(), auction);
-        System.out.println("Created auction for artwork: " + artwork.getTitle());
+        System.out.println("Created auction for artwork: " + artworkTitle);
 
         return auction;
     }
@@ -110,6 +110,10 @@ public class AuctionService {
                 }
             }
         }
+    }
+
+    public List<Auction> getAllAuctions() {
+        return new ArrayList<>(activeAuctions.values());
     }
 
     private int generateAuctionId() {

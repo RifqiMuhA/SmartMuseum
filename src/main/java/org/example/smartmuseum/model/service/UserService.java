@@ -1,11 +1,19 @@
 package org.example.smartmuseum.model.service;
 
+import org.example.smartmuseum.database.DatabaseConnection;
 import org.example.smartmuseum.model.abstracts.BaseUser;
 import org.example.smartmuseum.model.concrete.Boss;
 import org.example.smartmuseum.model.concrete.Staff;
 import org.example.smartmuseum.model.concrete.Visitor;
 import org.example.smartmuseum.model.entity.User;
 import org.example.smartmuseum.model.enums.UserRole;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -17,10 +25,48 @@ public class UserService {
     }
 
     public BaseUser authenticate(String username, String password) {
-        // In real implementation, this would check against database
         System.out.println("Authenticating user: " + username);
 
-        // Mock authentication - in real app, verify against database
+        // Try to authenticate from database first
+        try (Connection conn = DatabaseConnection.getInstance().getConnection()) {
+            String query = "SELECT * FROM users WHERE username = ? AND password_hash = ?";
+            PreparedStatement stmt = conn.prepareStatement(query);
+            stmt.setString(1, username);
+            stmt.setString(2, password); // In real app, hash the password first
+
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                User user = new User();
+                user.setUserId(rs.getInt("user_id"));
+                user.setUsername(rs.getString("username"));
+                user.setEmail(rs.getString("email"));
+                user.setPhone(rs.getString("phone"));
+                user.setRole(UserRole.fromString(rs.getString("role")));
+                user.setPasswordHash(rs.getString("password_hash"));
+                user.setCreatedAt(rs.getTimestamp("created_at"));
+
+                // Create appropriate BaseUser type
+                BaseUser baseUser;
+                switch (user.getRole()) {
+                    case BOSS:
+                        baseUser = new Boss(user.getUserId(), user.getUsername());
+                        break;
+                    case STAFF:
+                        baseUser = new Staff(user.getUserId(), user.getUsername(), "Staff Member");
+                        break;
+                    default:
+                        baseUser = new Visitor(user.getUserId(), user.getUsername());
+                        break;
+                }
+
+                activeUsers.put(user.getUserId(), baseUser);
+                return baseUser;
+            }
+        } catch (SQLException e) {
+            System.err.println("Database authentication failed: " + e.getMessage());
+        }
+
+        // Fallback to mock authentication
         if ("admin".equals(username)) {
             Boss boss = new Boss(1, username);
             activeUsers.put(1, boss);
@@ -40,8 +86,40 @@ public class UserService {
 
     public boolean register(User userData) {
         System.out.println("Registering new user: " + userData.getUsername());
-        // In real implementation, would save to database
-        return true;
+
+        try (Connection conn = DatabaseConnection.getInstance().getConnection()) {
+            String query = "INSERT INTO users (username, password_hash, email, phone, role, created_at) VALUES (?, ?, ?, ?, ?, NOW())";
+            PreparedStatement stmt = conn.prepareStatement(query);
+            stmt.setString(1, userData.getUsername());
+            stmt.setString(2, userData.getPasswordHash());
+            stmt.setString(3, userData.getEmail());
+            stmt.setString(4, userData.getPhone());
+            stmt.setString(5, userData.getRole().getValue());
+
+            return stmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            System.err.println("Error registering user: " + e.getMessage());
+            return false;
+        }
+    }
+
+    public boolean updateUser(User user) {
+        System.out.println("Updating user: " + user.getUsername());
+
+        try (Connection conn = DatabaseConnection.getInstance().getConnection()) {
+            String query = "UPDATE users SET username = ?, email = ?, phone = ?, password_hash = ? WHERE user_id = ?";
+            PreparedStatement stmt = conn.prepareStatement(query);
+            stmt.setString(1, user.getUsername());
+            stmt.setString(2, user.getEmail());
+            stmt.setString(3, user.getPhone());
+            stmt.setString(4, user.getPasswordHash());
+            stmt.setInt(5, user.getUserId());
+
+            return stmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            System.err.println("Error updating user: " + e.getMessage());
+            return false;
+        }
     }
 
     public BaseUser getUser(int userId) {
@@ -58,5 +136,47 @@ public class UserService {
 
     public ConcurrentMap<Integer, BaseUser> getActiveUsers() {
         return activeUsers;
+    }
+
+    public List<BaseUser> getAllUsers() {
+        List<BaseUser> users = new ArrayList<>();
+
+        try (Connection conn = DatabaseConnection.getInstance().getConnection()) {
+            String query = "SELECT * FROM users ORDER BY created_at DESC";
+            PreparedStatement stmt = conn.prepareStatement(query);
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                User user = new User();
+                user.setUserId(rs.getInt("user_id"));
+                user.setUsername(rs.getString("username"));
+                user.setEmail(rs.getString("email"));
+                user.setPhone(rs.getString("phone"));
+                user.setRole(UserRole.fromString(rs.getString("role")));
+                user.setCreatedAt(rs.getTimestamp("created_at"));
+
+                // Create appropriate BaseUser type
+                BaseUser baseUser;
+                switch (user.getRole()) {
+                    case BOSS:
+                        baseUser = new Boss(user.getUserId(), user.getUsername());
+                        break;
+                    case STAFF:
+                        baseUser = new Staff(user.getUserId(), user.getUsername(), "Staff Member");
+                        break;
+                    default:
+                        baseUser = new Visitor(user.getUserId(), user.getUsername());
+                        break;
+                }
+
+                users.add(baseUser);
+            }
+        } catch (SQLException e) {
+            System.err.println("Error loading users: " + e.getMessage());
+            // Return active users as fallback
+            return new ArrayList<>(activeUsers.values());
+        }
+
+        return users;
     }
 }

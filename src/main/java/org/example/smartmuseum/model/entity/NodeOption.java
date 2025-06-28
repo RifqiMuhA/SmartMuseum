@@ -1,46 +1,83 @@
 package org.example.smartmuseum.model.entity;
 
+/**
+ * Node option entity for conversation choices
+ */
 public class NodeOption {
     private int optionId;
     private int nodeId;
-    private int optionNumber;
     private String optionText;
-    private int targetNodeId;
+    private String optionValue;
+    private int nextNodeId;
+    private int orderIndex;
     private boolean isActive;
 
-    // Constructors
-    public NodeOption() {}
-
-    public NodeOption(int optionId, int nodeId, int optionNumber, String optionText, int targetNodeId, boolean isActive) {
-        this.optionId = optionId;
-        this.nodeId = nodeId;
-        this.optionNumber = optionNumber;
-        this.optionText = optionText;
-        this.targetNodeId = targetNodeId;
-        this.isActive = isActive;
+    public NodeOption() {
+        this.isActive = true;
     }
 
-    public int getOptionNumber() { return optionNumber; }
-    public String getOptionText() { return optionText; }
-    public FlowNode getTargetNode() {
-        // This would typically load from database
-        return null; // Placeholder
+    public NodeOption(int nodeId, String optionText, String optionValue, int nextNodeId) {
+        this();
+        this.nodeId = nodeId;
+        this.optionText = optionText;
+        this.optionValue = optionValue;
+        this.nextNodeId = nextNodeId;
     }
 
     // Getters and Setters
-    public int getOptionId() { return optionId; }
-    public void setOptionId(int optionId) { this.optionId = optionId; }
+    public int getOptionId() {
+        return optionId;
+    }
 
-    public int getNodeId() { return nodeId; }
-    public void setNodeId(int nodeId) { this.nodeId = nodeId; }
+    public void setOptionId(int optionId) {
+        this.optionId = optionId;
+    }
 
-    public void setOptionNumber(int optionNumber) { this.optionNumber = optionNumber; }
+    public int getNodeId() {
+        return nodeId;
+    }
 
-    public void setOptionText(String optionText) { this.optionText = optionText; }
+    public void setNodeId(int nodeId) {
+        this.nodeId = nodeId;
+    }
 
-    public int getTargetNodeId() { return targetNodeId; }
-    public void setTargetNodeId(int targetNodeId) { this.targetNodeId = targetNodeId; }
+    public String getOptionText() {
+        return optionText;
+    }
 
-    public boolean isActive() { return isActive; }
-    public void setActive(boolean active) { isActive = active; }
+    public void setOptionText(String optionText) {
+        this.optionText = optionText;
+    }
+
+    public String getOptionValue() {
+        return optionValue;
+    }
+
+    public void setOptionValue(String optionValue) {
+        this.optionValue = optionValue;
+    }
+
+    public int getNextNodeId() {
+        return nextNodeId;
+    }
+
+    public void setNextNodeId(int nextNodeId) {
+        this.nextNodeId = nextNodeId;
+    }
+
+    public int getOrderIndex() {
+        return orderIndex;
+    }
+
+    public void setOrderIndex(int orderIndex) {
+        this.orderIndex = orderIndex;
+    }
+
+    public boolean isActive() {
+        return isActive;
+    }
+
+    public void setActive(boolean active) {
+        isActive = active;
+    }
 }

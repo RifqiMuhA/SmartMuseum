@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="org.example.smartmuseum.controller.ArtworkListController"
+            stylesheets="@../css/artwork-style.css">
+
+    <!-- Header Section -->
+    <top>
+        <VBox>
+            <!-- Main Header -->
+            <HBox styleClass="header-bar" alignment="CENTER_LEFT" spacing="20">
+                <children>
+                    <VBox spacing="5" HBox.hgrow="ALWAYS">
+                        <children>
+                            <Label styleClass="title-label" text="🎨 List Barang Museum">
+                                <font>
+                                    <Font name="System Bold" size="24.0" />
+                                </font>
+                            </Label>
+                        </children>
+                    </VBox>
+
+                    <VBox alignment="CENTER_RIGHT" spacing="5">
+                        <children>
+                            <Label fx:id="clockLabel" styleClass="clock-label" text="Loading...">
+                                <font>
+                                    <Font name="Courier New Bold" size="18.0" />
+                                </font>
+                            </Label>
+                        </children>
+                    </VBox>
+                </children>
+                <padding>
+                    <Insets bottom="15.0" left="25.0" right="25.0" top="15.0" />
+                </padding>
+            </HBox>
+
+            <!-- Filter and Search Bar -->
+            <HBox styleClass="filter-bar" alignment="CENTER_LEFT" spacing="15">
+                <children>
+                    <Button fx:id="backButton" styleClass="back-button" text="← Kembali" onAction="#handleBackAction">
+                        <font>
+                            <Font name="System Bold" size="14.0" />
+                        </font>
+                    </Button>
+
+                    <Separator orientation="VERTICAL" />
+
+                    <Label styleClass="filter-label" text="🔍 Pencarian:">
+                        <font>
+                            <Font name="System Bold" size="14.0" />
+                        </font>
+                    </Label>
+
+                    <TextField fx:id="searchField" styleClass="search-field" promptText="Cari berdasarkan judul atau artist..." prefWidth="300.0">
+                        <font>
+                            <Font size="14.0" />
+                        </font>
+                    </TextField>
+
+                    <Label styleClass="filter-label" text="🏷️ Jenis:">
+                        <font>
+                            <Font name="System Bold" size="14.0" />
+                        </font>
+                    </Label>
+
+                    <ComboBox fx:id="typeFilterComboBox" styleClass="filter-combo" prefWidth="150.0" promptText="Semua Jenis" />
+
+                    <Button fx:id="resetFilterButton" styleClass="reset-button" text="Reset" onAction="#handleResetFilter">
+                        <font>
+                            <Font name="System Bold" size="12.0" />
+                        </font>
+                    </Button>
+
+                    <Region HBox.hgrow="ALWAYS" />
+
+                    <Label fx:id="countLabel" styleClass="count-label" text="Menampilkan: 0 karya">
+                        <font>
+                            <Font name="System Bold" size="14.0" />
+                        </font>
+                    </Label>
+                </children>
+                <padding>
+                    <Insets bottom="15.0" left="25.0" right="25.0" top="15.0" />
+                </padding>
+            </HBox>
+        </VBox>
+    </top>
+
+    <!-- Content Area -->
+    <center>
+        <ScrollPane styleClass="artwork-scrollpane" fitToWidth="true" fitToHeight="true">
+            <content>
+                <FlowPane fx:id="artworkFlowPane" styleClass="artwork-flowpane"
+                          hgap="20.0" vgap="20.0" alignment="TOP_CENTER"
+                          prefWrapLength="1200.0">
+                    <padding>
+                        <Insets bottom="25.0" left="25.0" right="25.0" top="25.0" />
+                    </padding>
+                </FlowPane>
+            </content>
+        </ScrollPane>
+    </center>
+</BorderPane>

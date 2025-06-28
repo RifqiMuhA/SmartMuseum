@@ -1,70 +1,83 @@
 package org.example.smartmuseum.model.entity;
 
-import org.example.smartmuseum.model.enums.NodeType;
-import java.sql.Timestamp;
-import java.util.List;
-import java.util.ArrayList;
-
+/**
+ * Flow node entity representing conversation nodes
+ */
 public class FlowNode {
     private int nodeId;
     private int flowId;
-    private Integer parentNodeId;
-    private NodeType nodeType;
-    private String nodeText;
-    private boolean isRoot;
-    private int orderPosition;
-    private List<NodeOption> options;
-    private Timestamp createdAt;
+    private String nodeType;
+    private String nodeContent;
+    private String nodeKey;
+    private int parentNodeId;
+    private boolean isActive;
 
-    // Constructors
     public FlowNode() {
-        this.options = new ArrayList<>();
+        this.isActive = true;
     }
 
-    public FlowNode(int nodeId, int flowId, Integer parentNodeId, NodeType nodeType, String nodeText, boolean isRoot, int orderPosition, Timestamp createdAt) {
-        this.nodeId = nodeId;
+    public FlowNode(int flowId, String nodeType, String nodeContent, String nodeKey) {
+        this();
         this.flowId = flowId;
-        this.parentNodeId = parentNodeId;
         this.nodeType = nodeType;
-        this.nodeText = nodeText;
-        this.isRoot = isRoot;
-        this.orderPosition = orderPosition;
-        this.createdAt = createdAt;
-        this.options = new ArrayList<>();
-    }
-
-    public String getNodeText() { return nodeText; }
-    public List<NodeOption> getOptions() { return options; }
-    public NodeType getNodeType() { return nodeType; }
-
-    public void addOption(NodeOption option) {
-        if (!options.contains(option)) {
-            options.add(option);
-        }
+        this.nodeContent = nodeContent;
+        this.nodeKey = nodeKey;
     }
 
     // Getters and Setters
-    public int getNodeId() { return nodeId; }
-    public void setNodeId(int nodeId) { this.nodeId = nodeId; }
+    public int getNodeId() {
+        return nodeId;
+    }
 
-    public int getFlowId() { return flowId; }
-    public void setFlowId(int flowId) { this.flowId = flowId; }
+    public void setNodeId(int nodeId) {
+        this.nodeId = nodeId;
+    }
 
-    public Integer getParentNodeId() { return parentNodeId; }
-    public void setParentNodeId(Integer parentNodeId) { this.parentNodeId = parentNodeId; }
+    public int getFlowId() {
+        return flowId;
+    }
 
-    public void setNodeType(NodeType nodeType) { this.nodeType = nodeType; }
+    public void setFlowId(int flowId) {
+        this.flowId = flowId;
+    }
 
-    public void setNodeText(String nodeText) { this.nodeText = nodeText; }
+    public String getNodeType() {
+        return nodeType;
+    }
 
-    public boolean isRoot() { return isRoot; }
-    public void setRoot(boolean root) { isRoot = root; }
+    public void setNodeType(String nodeType) {
+        this.nodeType = nodeType;
+    }
 
-    public int getOrderPosition() { return orderPosition; }
-    public void setOrderPosition(int orderPosition) { this.orderPosition = orderPosition; }
+    public String getNodeContent() {
+        return nodeContent;
+    }
 
-    public void setOptions(List<NodeOption> options) { this.options = options; }
+    public void setNodeContent(String nodeContent) {
+        this.nodeContent = nodeContent;
+    }
 
-    public Timestamp getCreatedAt() { return createdAt; }
-    public void setCreatedAt(Timestamp createdAt) { this.createdAt = createdAt; }
+    public String getNodeKey() {
+        return nodeKey;
+    }
+
+    public void setNodeKey(String nodeKey) {
+        this.nodeKey = nodeKey;
+    }
+
+    public int getParentNodeId() {
+        return parentNodeId;
+    }
+
+    public void setParentNodeId(int parentNodeId) {
+        this.parentNodeId = parentNodeId;
+    }
+
+    public boolean isActive() {
+        return isActive;
+    }
+
+    public void setActive(boolean active) {
+        isActive = active;
+    }
 }

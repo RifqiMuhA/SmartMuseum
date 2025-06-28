@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<VBox xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="org.example.smartmuseum.controller.QRGeneratorController"
+      spacing="20.0" styleClass="tab-content">
+
+    <children>
+        <!-- Header -->
+        <Label text="🏷️ QR Code Generator" styleClass="section-title">
+            <font>
+                <Font name="System Bold" size="20.0" />
+            </font>
+        </Label>
+
+        <!-- Main Content -->
+        <HBox spacing="20.0" VBox.vgrow="ALWAYS">
+            <children>
+                <!-- Left Panel - QR Generator Form -->
+                <VBox spacing="15.0" styleClass="form-panel" prefWidth="400.0">
+                    <children>
+                        <Label text="QR Code Configuration" styleClass="panel-title">
+                            <font>
+                                <Font name="System Bold" size="16.0" />
+                            </font>
+                        </Label>
+
+                        <!-- QR Type Selection -->
+                        <VBox spacing="10.0">
+                            <children>
+                                <Label text="Select QR Code Type:" styleClass="form-label">
+                                    <font>
+                                        <Font name="System Bold" size="14.0" />
+                                    </font>
+                                </Label>
+                                <RadioButton fx:id="rbEmployee" text="Employee QR Code" />
+                                <RadioButton fx:id="rbArtwork" text="Artwork QR Code" />
+                                <RadioButton fx:id="rbCustom" text="Custom QR Code" />
+                            </children>
+                        </VBox>
+
+                        <Separator />
+
+                        <!-- Employee QR Fields -->
+                        <VBox spacing="10.0">
+                            <children>
+                                <Label text="Employee Information:" styleClass="panel-subtitle">
+                                    <font>
+                                        <Font name="System Bold" size="14.0" />
+                                    </font>
+                                </Label>
+                                <GridPane hgap="10.0" vgap="10.0">
+                                    <columnConstraints>
+                                        <ColumnConstraints hgrow="NEVER" minWidth="100.0" />
+                                        <ColumnConstraints hgrow="ALWAYS" />
+                                    </columnConstraints>
+                                    <Label text="Employee ID:" styleClass="form-label" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+                                    <TextField fx:id="txtEmployeeId" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+                                    <Label text="Employee Name:" styleClass="form-label" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+                                    <TextField fx:id="txtEmployeeName" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                                </GridPane>
+                            </children>
+                        </VBox>
+
+                        <!-- Artwork QR Fields -->
+                        <VBox spacing="10.0">
+                            <children>
+                                <Label text="Artwork Information:" styleClass="panel-subtitle">
+                                    <font>
+                                        <Font name="System Bold" size="14.0" />
+                                    </font>
+                                </Label>
+                                <GridPane hgap="10.0" vgap="10.0">
+                                    <columnConstraints>
+                                        <ColumnConstraints hgrow="NEVER" minWidth="100.0" />
+                                        <ColumnConstraints hgrow="ALWAYS" />
+                                    </columnConstraints>
+                                    <Label text="Artwork ID:" styleClass="form-label" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+                                    <TextField fx:id="txtArtworkId" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+                                    <Label text="Artwork Title:" styleClass="form-label" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+                                    <TextField fx:id="txtArtworkTitle" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                                </GridPane>
+                            </children>
+                        </VBox>
+
+                        <!-- Custom QR Field -->
+                        <VBox spacing="10.0">
+                            <children>
+                                <Label text="Custom Data:" styleClass="panel-subtitle">
+                                    <font>
+                                        <Font name="System Bold" size="14.0" />
+                                    </font>
+                                </Label>
+                                <TextArea fx:id="txtCustomData" prefRowCount="3" promptText="Enter custom data for QR code..." />
+                            </children>
+                        </VBox>
+
+                        <!-- Action Buttons -->
+                        <HBox alignment="CENTER" spacing="15.0">
+                            <children>
+                                <Button fx:id="btnGenerate" onAction="#handleGenerate"
+                                        styleClass="btn-add" text="🔧 Generate QR">
+                                    <font>
+                                        <Font name="System Bold" size="12.0" />
+                                    </font>
+                                </Button>
+                                <Button onAction="#handleClear" styleClass="btn-clear" text="🔄 Clear">
+                                    <font>
+                                        <Font name="System Bold" size="12.0" />
+                                    </font>
+                                </Button>
+                            </children>
+                        </HBox>
+
+                        <!-- Status Message -->
+                        <Label fx:id="lblStatus" text="Ready to generate QR codes" styleClass="status-message" wrapText="true" />
+                    </children>
+                    <padding>
+                        <Insets bottom="15.0" left="15.0" right="15.0" top="15.0" />
+                    </padding>
+                </VBox>
+
+                <!-- Right Panel - QR Code Display -->
+                <VBox spacing="15.0" styleClass="form-panel" prefWidth="350.0" alignment="CENTER">
+                    <children>
+                        <Label text="Generated QR Code" styleClass="panel-title">
+                            <font>
+                                <Font name="System Bold" size="16.0" />
+                            </font>
+                        </Label>
+
+                        <!-- QR Code Display Area -->
+                        <VBox alignment="CENTER" spacing="15.0" styleClass="qr-container-small" prefHeight="300.0">
+                            <children>
+                                <ImageView fx:id="imgQRCode" fitHeight="200.0" fitWidth="200.0" preserveRatio="true" />
+                                <Label fx:id="lblQRCodeText" text="No QR code generated yet"
+                                       styleClass="qr-placeholder" textAlignment="CENTER" wrapText="true" />
+                            </children>
+                            <padding>
+                                <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+                            </padding>
+                        </VBox>
+
+                        <!-- QR Actions -->
+                        <HBox alignment="CENTER" spacing="10.0">
+                            <children>
+                                <Button fx:id="btnSaveQR" onAction="#handleSaveQR"
+                                        styleClass="btn-update" text="💾 Save QR">
+                                    <font>
+                                        <Font name="System Bold" size="12.0" />
+                                    </font>
+                                </Button>
+                            </children>
+                        </HBox>
+                    </children>
+                    <padding>
+                        <Insets bottom="15.0" left="15.0" right="15.0" top="15.0" />
+                    </padding>
+                </VBox>
+            </children>
+        </HBox>
+    </children>
+
+    <padding>
+        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+    </padding>
+</VBox>

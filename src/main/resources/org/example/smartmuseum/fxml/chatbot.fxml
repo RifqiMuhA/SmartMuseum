@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="org.example.smartmuseum.controller.ChatbotController"
+            stylesheets="@../css/application.css">
+    <top>
+        <VBox styleClass="header-section">
+            <children>
+                <HBox alignment="CENTER_LEFT" spacing="10.0">
+                    <children>
+                        <Label styleClass="title-label" text="🤖 SeniMatic Chat Assistant" />
+                        <Region HBox.hgrow="ALWAYS" />
+                        <Button fx:id="clearChatButton" onAction="#handleClearChat" text="Clear Chat" />
+                        <Button fx:id="backButton" onAction="#handleBack" text="Back to Welcome" />
+                    </children>
+                    <padding>
+                        <Insets bottom="10.0" left="20.0" right="20.0" top="10.0" />
+                    </padding>
+                </HBox>
+                <Separator />
+            </children>
+        </VBox>
+    </top>
+    <center>
+        <VBox spacing="10.0">
+            <children>
+                <ScrollPane fx:id="chatScrollPane" fitToWidth="true" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED" VBox.vgrow="ALWAYS">
+                    <content>
+                        <VBox fx:id="chatContainer" spacing="8.0">
+                            <padding>
+                                <Insets bottom="10.0" left="15.0" right="15.0" top="10.0" />
+                            </padding>
+                        </VBox>
+                    </content>
+                </ScrollPane>
+                <HBox alignment="CENTER_LEFT" spacing="10.0">
+                    <children>
+                        <TextField fx:id="userInputField" onAction="#handleSendMessage"
+                                   promptText="Ketik nomor pilihan atau pesan Anda..." HBox.hgrow="ALWAYS" />
+                        <Button fx:id="sendButton" onAction="#handleSendMessage" text="Send" />
+                    </children>
+                    <padding>
+                        <Insets bottom="15.0" left="15.0" right="15.0" top="5.0" />
+                    </padding>
+                </HBox>
+            </children>
+        </VBox>
+    </center>
+    <bottom>
+        <VBox styleClass="status-section">
+            <children>
+                <Separator />
+                <HBox alignment="CENTER_LEFT" spacing="10.0">
+                    <children>
+                        <Label fx:id="statusLabel" text="Status: Ready" />
+                        <Region HBox.hgrow="ALWAYS" />
+                        <Label fx:id="sessionLabel" text="Session: Active" />
+                    </children>
+                    <padding>
+                        <Insets bottom="8.0" left="20.0" right="20.0" top="8.0" />
+                    </padding>
+                </HBox>
+            </children>
+        </VBox>
+    </bottom>
+</BorderPane>

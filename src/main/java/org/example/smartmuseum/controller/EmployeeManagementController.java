@@ -6,73 +6,63 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import org.example.smartmuseum.model.entity.Employee;
+import org.example.smartmuseum.model.service.EmployeeService;
+import org.example.smartmuseum.util.QRCodeGenerator;
 
 import java.net.URL;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.Optional;
 import java.util.ResourceBundle;
 
 public class EmployeeManagementController implements Initializable {
 
-    // Table and data
-    @FXML private TableView<Employee> tableEmployees;
-    @FXML private TableColumn<Employee, Integer> colEmployeeId;
-    @FXML private TableColumn<Employee, String> colName;
-    @FXML private TableColumn<Employee, String> colPosition;
-    @FXML private TableColumn<Employee, String> colQRCode;
-    @FXML private TableColumn<Employee, LocalDate> colHireDate;
-    @FXML private TableColumn<Employee, Boolean> colActive;
-
-    // Form fields
+    @FXML private Label lblTotalEmployees;
     @FXML private TextField txtName;
     @FXML private TextField txtPosition;
     @FXML private TextField txtDepartment;
     @FXML private DatePicker dateHireDate;
     @FXML private TextField txtSalary;
     @FXML private CheckBox chkActive;
-
-    // Buttons
     @FXML private Button btnAdd;
     @FXML private Button btnUpdate;
     @FXML private Button btnDelete;
     @FXML private Button btnClear;
-    @FXML private Button btnGenerateQR;
-
-    // QR Code display
     @FXML private ImageView imgQRCode;
     @FXML private Label lblQRCodeText;
-
-    // Status
+    @FXML private Button btnGenerateQR;
     @FXML private Label lblStatus;
-    @FXML private Label lblTotalEmployees;
+    @FXML private TableView<EmployeeRecord> tableEmployees;
+    @FXML private TableColumn<EmployeeRecord, Integer> colEmployeeId;
+    @FXML private TableColumn<EmployeeRecord, String> colName;
+    @FXML private TableColumn<EmployeeRecord, String> colPosition;
+    @FXML private TableColumn<EmployeeRecord, String> colQRCode;
+    @FXML private TableColumn<EmployeeRecord, String> colHireDate;
+    @FXML private TableColumn<EmployeeRecord, String> colActive;
 
-    private UserService userService;
-    private ObservableList<Employee> employeeData;
-    private Employee selectedEmployee;
+    private EmployeeService employeeService;
+    private ObservableList<EmployeeRecord> employeeData;
+    private EmployeeRecord selectedEmployee;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        try {
-            userService = UserService.getInstance();
-            employeeData = FXCollections.observableArrayList();
+        employeeService = new EmployeeService();
+        employeeData = FXCollections.observableArrayList();
 
-            initializeTable();
-            loadEmployees();
-            setupFormValidation();
+        setupTableColumns();
+        setupTableSelection();
+        loadEmployees();
+        updateStatistics();
 
-            System.out.println("✅ Employee Management initialized");
-
-        } catch (Exception e) {
-            showStatus("Error initializing: " + e.getMessage(), "error");
-            e.printStackTrace();
-        }
+        // Initially disable update and delete buttons
+        btnUpdate.setDisable(true);
+        btnDelete.setDisable(true);
+        btnGenerateQR.setDisable(true);
     }
 
-    private void initializeTable() {
-        // Configure columns
+    private void setupTableColumns() {
         colEmployeeId.setCellValueFactory(new PropertyValueFactory<>("employeeId"));
         colName.setCellValueFactory(new PropertyValueFactory<>("name"));
         colPosition.setCellValueFactory(new PropertyValueFactory<>("position"));
@@ -80,84 +70,29 @@ public class EmployeeManagementController implements Initializable {
         colHireDate.setCellValueFactory(new PropertyValueFactory<>("hireDate"));
         colActive.setCellValueFactory(new PropertyValueFactory<>("active"));
 
-        // Style active column
-        colActive.setCellFactory(column -> new TableCell<Employee, Boolean>() {
-            @Override
-            protected void updateItem(Boolean item, boolean empty) {
-                super.updateItem(item, empty);
-                if (empty || item == null) {
-                    setText(null);
-                    setStyle("");
-                } else {
-                    setText(item ? "Active" : "Inactive");
-                    setStyle(item ? "-fx-text-fill: #27ae60; -fx-font-weight: bold;"
-                            : "-fx-text-fill: #e74c3c; -fx-font-weight: bold;");
+        tableEmployees.setItems(employeeData);
+    }
+
+    private void setupTableSelection() {
+        tableEmployees.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
+            selectedEmployee = newSelection;
+            if (newSelection != null) {
+                populateForm(newSelection);
+                btnUpdate.setDisable(false);
+                btnDelete.setDisable(false);
+                btnGenerateQR.setDisable(false);
+
+                // Display existing QR code if available
+                if (newSelection.getQrCode() != null && !newSelection.getQrCode().isEmpty()) {
+                    displayQRCode(newSelection.getQrCode());
                 }
+            } else {
+                btnUpdate.setDisable(true);
+                btnDelete.setDisable(true);
+                btnGenerateQR.setDisable(true);
+                clearQRCode();
             }
         });
-
-        // Set table data
-        tableEmployees.setItems(employeeData);
-
-        // Handle selection
-        tableEmployees.getSelectionModel().selectedItemProperty().addListener(
-                (obs, oldSelection, newSelection) -> {
-                    if (newSelection != null) {
-                        selectEmployee(newSelection);
-                    }
-                });
-    }
-
-    private void loadEmployees() {
-        try {
-            List<Employee> employees = userService.getAllEmployees();
-            employeeData.clear();
-            employeeData.addAll(employees);
-
-            lblTotalEmployees.setText("Total Employees: " + employees.size());
-            showStatus("Loaded " + employees.size() + " employees", "success");
-
-        } catch (Exception e) {
-            showStatus("Error loading employees: " + e.getMessage(), "error");
-            e.printStackTrace();
-        }
-    }
-
-    private void selectEmployee(Employee employee) {
-        selectedEmployee = employee;
-
-        // Populate form
-        txtName.setText(employee.getName());
-        txtPosition.setText(employee.getPosition());
-        dateHireDate.setValue(employee.getHireDate());
-        chkActive.setSelected(employee.isActive());
-
-        // Generate and show QR code
-        generateQRCodeForEmployee(employee);
-
-        // Enable update/delete buttons
-        btnUpdate.setDisable(false);
-        btnDelete.setDisable(false);
-        btnGenerateQR.setDisable(false);
-    }
-
-    private void generateQRCodeForEmployee(Employee employee) {
-        try {
-            if (employee.getQRCode() == null || employee.getQRCode().isEmpty()) {
-                employee.generateQRCode();
-            }
-
-            String qrCodeText = employee.getQRCode();
-            lblQRCodeText.setText(qrCodeText);
-
-            // Generate QR code image
-            Image qrImage = QRCodeGenerator.generateQRCodeImage(qrCodeText, 200, 200);
-            imgQRCode.setImage(qrImage);
-
-        } catch (Exception e) {
-            showStatus("Error generating QR code: " + e.getMessage(), "error");
-            e.printStackTrace();
-        }
     }
 
     @FXML
@@ -167,43 +102,33 @@ public class EmployeeManagementController implements Initializable {
         }
 
         try {
-            // Create new employee
+            EmployeeRecord newEmployee = createEmployeeFromForm();
+            newEmployee.setEmployeeId(employeeData.size() + 1); // Simple ID generation
+
+            // Add to service
             Employee employee = new Employee();
-            employee.setName(txtName.getText().trim());
-            employee.setPosition(txtPosition.getText().trim());
-            employee.setHireDate(dateHireDate.getValue());
-            employee.setActive(chkActive.isSelected());
+            employee.setEmployeeId(newEmployee.getEmployeeId());
+            employee.setName(newEmployee.getName());
+            employee.setPosition(newEmployee.getPosition());
 
-            // Add to database
-            Employee savedEmployee = userService.addEmployee(employee);
-            if (savedEmployee != null) {
-                // Auto-generate QR code
-                savedEmployee.generateQRCode();
-
-                // Add to table
-                employeeData.add(savedEmployee);
-
-                // Show QR code
-                generateQRCodeForEmployee(savedEmployee);
-
-                showStatus("Employee added successfully: " + savedEmployee.getName(), "success");
-                clearForm();
-                lblTotalEmployees.setText("Total Employees: " + employeeData.size());
-
+            if (employeeService.addEmployee(employee)) {
+                employeeData.add(newEmployee);
+                showSuccess("Employee added successfully: " + newEmployee.getName());
+                handleClear();
+                updateStatistics();
             } else {
-                showStatus("Failed to add employee", "error");
+                showError("Failed to add employee to database");
             }
 
         } catch (Exception e) {
-            showStatus("Error adding employee: " + e.getMessage(), "error");
-            e.printStackTrace();
+            showError("Error adding employee: " + e.getMessage());
         }
     }
 
     @FXML
     private void handleUpdate() {
         if (selectedEmployee == null) {
-            showStatus("Please select an employee to update", "warning");
+            showError("Please select an employee to update");
             return;
         }
 
@@ -212,165 +137,268 @@ public class EmployeeManagementController implements Initializable {
         }
 
         try {
-            // Update employee data
-            selectedEmployee.setName(txtName.getText().trim());
-            selectedEmployee.setPosition(txtPosition.getText().trim());
-            selectedEmployee.setHireDate(dateHireDate.getValue());
-            selectedEmployee.setActive(chkActive.isSelected());
+            updateEmployeeFromForm(selectedEmployee);
 
-            // TODO: Update in database
-            // userService.updateEmployee(selectedEmployee);
+            // Update in service
+            Employee employee = new Employee();
+            employee.setEmployeeId(selectedEmployee.getEmployeeId());
+            employee.setName(selectedEmployee.getName());
+            employee.setPosition(selectedEmployee.getPosition());
 
-            // Refresh table
-            tableEmployees.refresh();
-
-            showStatus("Employee updated successfully: " + selectedEmployee.getName(), "success");
+            if (employeeService.updateEmployee(employee)) {
+                tableEmployees.refresh();
+                showSuccess("Employee updated successfully: " + selectedEmployee.getName());
+                handleClear();
+            } else {
+                showError("Failed to update employee in database");
+            }
 
         } catch (Exception e) {
-            showStatus("Error updating employee: " + e.getMessage(), "error");
-            e.printStackTrace();
+            showError("Error updating employee: " + e.getMessage());
         }
     }
 
     @FXML
     private void handleDelete() {
         if (selectedEmployee == null) {
-            showStatus("Please select an employee to delete", "warning");
+            showError("Please select an employee to delete");
             return;
         }
 
-        // Confirmation dialog
-        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-        alert.setTitle("Confirm Delete");
-        alert.setHeaderText("Delete Employee");
-        alert.setContentText("Are you sure you want to delete employee: " + selectedEmployee.getName() + "?");
+        Alert confirmAlert = new Alert(Alert.AlertType.CONFIRMATION);
+        confirmAlert.setTitle("Confirm Delete");
+        confirmAlert.setHeaderText("Delete Employee");
+        confirmAlert.setContentText("Are you sure you want to delete employee: " + selectedEmployee.getName() + "?");
 
-        Optional<ButtonType> result = alert.showAndWait();
-        if (result.isPresent() && result.get() == ButtonType.OK) {
+        if (confirmAlert.showAndWait().orElse(ButtonType.CANCEL) == ButtonType.OK) {
             try {
-                // TODO: Delete from database
-                // userService.deleteEmployee(selectedEmployee.getEmployeeId());
-
-                // Remove from table
-                employeeData.remove(selectedEmployee);
-
-                showStatus("Employee deleted successfully", "success");
-                clearForm();
-                lblTotalEmployees.setText("Total Employees: " + employeeData.size());
+                if (employeeService.deleteEmployee(selectedEmployee.getEmployeeId())) {
+                    employeeData.remove(selectedEmployee);
+                    showSuccess("Employee deleted successfully: " + selectedEmployee.getName());
+                    handleClear();
+                    updateStatistics();
+                } else {
+                    showError("Failed to delete employee from database");
+                }
 
             } catch (Exception e) {
-                showStatus("Error deleting employee: " + e.getMessage(), "error");
-                e.printStackTrace();
+                showError("Error deleting employee: " + e.getMessage());
             }
         }
     }
 
     @FXML
     private void handleClear() {
-        clearForm();
+        txtName.clear();
+        txtPosition.clear();
+        txtDepartment.clear();
+        dateHireDate.setValue(null);
+        txtSalary.clear();
+        chkActive.setSelected(true);
+
+        tableEmployees.getSelectionModel().clearSelection();
+        selectedEmployee = null;
+        clearQRCode();
+
+        btnUpdate.setDisable(true);
+        btnDelete.setDisable(true);
+        btnGenerateQR.setDisable(true);
+
+        lblStatus.setText("Form cleared. Ready to add new employee.");
+        lblStatus.setStyle("-fx-text-fill: #666666;");
     }
 
     @FXML
     private void handleGenerateQR() {
         if (selectedEmployee == null) {
-            showStatus("Please select an employee first", "warning");
+            showError("Please select an employee to generate QR code");
             return;
         }
 
         try {
-            // Regenerate QR code
-            selectedEmployee.generateQRCode();
-            generateQRCodeForEmployee(selectedEmployee);
+            String qrData = "EMP" + selectedEmployee.getEmployeeId() + "_" +
+                    selectedEmployee.getName().replaceAll("\\s+", "_");
+            String qrCode = QRCodeGenerator.generateQRCode(qrData);
 
-            // Refresh table
+            selectedEmployee.setQrCode(qrCode);
             tableEmployees.refresh();
 
-            showStatus("QR Code regenerated for: " + selectedEmployee.getName(), "success");
+            displayQRCode(qrCode);
+
+            showSuccess("QR code generated for: " + selectedEmployee.getName());
 
         } catch (Exception e) {
-            showStatus("Error generating QR code: " + e.getMessage(), "error");
-            e.printStackTrace();
+            showError("Error generating QR code: " + e.getMessage());
         }
     }
 
     @FXML
     private void handleRefresh() {
         loadEmployees();
-        clearForm();
+        updateStatistics();
+        showSuccess("Employee data refreshed");
+    }
+
+    private void loadEmployees() {
+        employeeData.clear();
+
+        try {
+            List<Employee> employees = employeeService.getAllEmployees();
+
+            for (Employee emp : employees) {
+                EmployeeRecord record = new EmployeeRecord();
+                record.setEmployeeId(emp.getEmployeeId());
+                record.setName(emp.getName());
+                record.setPosition(emp.getPosition());
+                record.setQrCode(emp.getQRCode());
+                record.setHireDate("2024-01-01"); // Default date, would need to add to Employee entity
+                record.setActive("Active"); // Default status, would need to add to Employee entity
+
+                employeeData.add(record);
+            }
+        } catch (Exception e) {
+            System.err.println("Error loading employees: " + e.getMessage());
+            createSampleEmployees(); // Fallback to sample data
+        }
+    }
+
+    private void createSampleEmployees() {
+        // Sample employee 1
+        EmployeeRecord emp1 = new EmployeeRecord();
+        emp1.setEmployeeId(1);
+        emp1.setName("John Smith");
+        emp1.setPosition("Gallery Manager");
+        emp1.setQrCode("QR_EMP1_John_Smith_12345678");
+        emp1.setHireDate("2023-01-15");
+        emp1.setActive("Active");
+        employeeData.add(emp1);
+
+        // Sample employee 2
+        EmployeeRecord emp2 = new EmployeeRecord();
+        emp2.setEmployeeId(2);
+        emp2.setName("Sarah Johnson");
+        emp2.setPosition("Curator");
+        emp2.setQrCode("QR_EMP2_Sarah_Johnson_87654321");
+        emp2.setHireDate("2023-03-20");
+        emp2.setActive("Active");
+        employeeData.add(emp2);
+
+        // Sample employee 3
+        EmployeeRecord emp3 = new EmployeeRecord();
+        emp3.setEmployeeId(3);
+        emp3.setName("Mike Davis");
+        emp3.setPosition("Security Guard");
+        emp3.setQrCode("");
+        emp3.setHireDate("2023-06-10");
+        emp3.setActive("Active");
+        employeeData.add(emp3);
     }
 
     private boolean validateForm() {
-        if (txtName.getText().trim().isEmpty()) {
-            showStatus("Name is required", "warning");
-            txtName.requestFocus();
+        String name = txtName.getText().trim();
+        String position = txtPosition.getText().trim();
+
+        if (name.isEmpty()) {
+            showError("Employee name is required");
             return false;
         }
 
-        if (txtPosition.getText().trim().isEmpty()) {
-            showStatus("Position is required", "warning");
-            txtPosition.requestFocus();
-            return false;
-        }
-
-        if (dateHireDate.getValue() == null) {
-            showStatus("Hire date is required", "warning");
-            dateHireDate.requestFocus();
-            return false;
-        }
-
-        if (dateHireDate.getValue().isAfter(LocalDate.now())) {
-            showStatus("Hire date cannot be in the future", "warning");
-            dateHireDate.requestFocus();
+        if (position.isEmpty()) {
+            showError("Position is required");
             return false;
         }
 
         return true;
     }
 
-    private void clearForm() {
-        txtName.clear();
-        txtPosition.clear();
-        txtDepartment.clear();
-        txtSalary.clear();
-        dateHireDate.setValue(null);
-        chkActive.setSelected(true);
+    private EmployeeRecord createEmployeeFromForm() {
+        EmployeeRecord employee = new EmployeeRecord();
+        employee.setName(txtName.getText().trim());
+        employee.setPosition(txtPosition.getText().trim());
+        employee.setHireDate(dateHireDate.getValue() != null ?
+                dateHireDate.getValue().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")) : "");
+        employee.setActive(chkActive.isSelected() ? "Active" : "Inactive");
+        employee.setQrCode(""); // Will be generated separately
 
-        selectedEmployee = null;
-        btnUpdate.setDisable(true);
-        btnDelete.setDisable(true);
-        btnGenerateQR.setDisable(true);
-
-        imgQRCode.setImage(null);
-        lblQRCodeText.setText("");
-
-        tableEmployees.getSelectionModel().clearSelection();
+        return employee;
     }
 
-    private void setupFormValidation() {
-        btnUpdate.setDisable(true);
-        btnDelete.setDisable(true);
-        btnGenerateQR.setDisable(true);
-        chkActive.setSelected(true);
-        dateHireDate.setValue(LocalDate.now());
+    private void updateEmployeeFromForm(EmployeeRecord employee) {
+        employee.setName(txtName.getText().trim());
+        employee.setPosition(txtPosition.getText().trim());
+        employee.setHireDate(dateHireDate.getValue() != null ?
+                dateHireDate.getValue().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")) : "");
+        employee.setActive(chkActive.isSelected() ? "Active" : "Inactive");
     }
 
-    private void showStatus(String message, String type) {
-        lblStatus.setText(message);
+    private void populateForm(EmployeeRecord employee) {
+        txtName.setText(employee.getName());
+        txtPosition.setText(employee.getPosition());
 
-        switch (type.toLowerCase()) {
-            case "success":
-                lblStatus.setStyle("-fx-text-fill: #27ae60; -fx-font-weight: bold;");
-                break;
-            case "error":
-                lblStatus.setStyle("-fx-text-fill: #e74c3c; -fx-font-weight: bold;");
-                break;
-            case "warning":
-                lblStatus.setStyle("-fx-text-fill: #f39c12; -fx-font-weight: bold;");
-                break;
-            default:
-                lblStatus.setStyle("-fx-text-fill: #2c3e50;");
+        if (employee.getHireDate() != null && !employee.getHireDate().isEmpty()) {
+            try {
+                LocalDate hireDate = LocalDate.parse(employee.getHireDate());
+                dateHireDate.setValue(hireDate);
+            } catch (Exception e) {
+                dateHireDate.setValue(null);
+            }
         }
 
-        System.out.println("[" + type.toUpperCase() + "] " + message);
+        chkActive.setSelected("Active".equals(employee.getActive()));
+    }
+
+    private void displayQRCode(String qrCode) {
+        // In a real implementation, this would generate and display an actual QR code image
+        lblQRCodeText.setText(qrCode);
+        lblQRCodeText.setVisible(true);
+    }
+
+    private void clearQRCode() {
+        imgQRCode.setImage(null);
+        lblQRCodeText.setText("");
+        lblQRCodeText.setVisible(false);
+    }
+
+    private void updateStatistics() {
+        lblTotalEmployees.setText("Total Employees: " + employeeData.size());
+    }
+
+    private void showSuccess(String message) {
+        lblStatus.setText("✓ " + message);
+        lblStatus.setStyle("-fx-text-fill: #4CAF50;");
+    }
+
+    private void showError(String message) {
+        lblStatus.setText("✗ " + message);
+        lblStatus.setStyle("-fx-text-fill: #F44336;");
+    }
+
+    // Inner class for table data
+    public static class EmployeeRecord {
+        private int employeeId;
+        private String name;
+        private String position;
+        private String qrCode;
+        private String hireDate;
+        private String active;
+
+        // Getters and setters
+        public int getEmployeeId() { return employeeId; }
+        public void setEmployeeId(int employeeId) { this.employeeId = employeeId; }
+
+        public String getName() { return name; }
+        public void setName(String name) { this.name = name; }
+
+        public String getPosition() { return position; }
+        public void setPosition(String position) { this.position = position; }
+
+        public String getQrCode() { return qrCode; }
+        public void setQrCode(String qrCode) { this.qrCode = qrCode; }
+
+        public String getHireDate() { return hireDate; }
+        public void setHireDate(String hireDate) { this.hireDate = hireDate; }
+
+        public String getActive() { return active; }
+        public void setActive(String active) { this.active = active; }
     }
 }

@@ -2,6 +2,7 @@ package org.example.smartmuseum;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
+import org.example.smartmuseum.model.concrete.Boss;
 
 public class HelloController {
     @FXML
