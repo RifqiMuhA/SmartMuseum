@@ -1,5 +1,6 @@
 package org.example.smartmuseum.model.entity;
 
+import com.google.zxing.WriterException;
 import org.example.smartmuseum.util.QRCodeGenerator;
 
 public class Employee {
@@ -20,8 +21,8 @@ public class Employee {
         this.qrCode = qrCode;
     }
 
-    public void generateQRCode() {
-        this.qrCode = QRCodeGenerator.generateQRCode("EMP" + employeeId + "_" + name);
+    public void generateQRCode() throws WriterException {
+        this.qrCode = QRCodeGenerator.generateEmployeeQRData(employeeId, "EMP" + employeeId + "_" + name);
     }
 
     public String getQRCode() { return qrCode; }

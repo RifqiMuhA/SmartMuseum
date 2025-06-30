@@ -1,174 +1,240 @@
 package org.example.smartmuseum.controller;
 
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
+import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.stage.FileChooser;
+import org.example.smartmuseum.database.EmployeeDAO;
+import org.example.smartmuseum.model.entity.Employee;
 import org.example.smartmuseum.util.QRCodeGenerator;
 
+import java.awt.image.BufferedImage;
+import java.io.File;
 import java.net.URL;
+import java.util.List;
 import java.util.ResourceBundle;
 
 public class QRGeneratorController implements Initializable {
 
-    @FXML private TextField txtEmployeeId;
-    @FXML private TextField txtEmployeeName;
-    @FXML private TextField txtArtworkId;
-    @FXML private TextField txtArtworkTitle;
-    @FXML private TextField txtCustomData;
-    @FXML private RadioButton rbEmployee;
-    @FXML private RadioButton rbArtwork;
-    @FXML private RadioButton rbCustom;
-    @FXML private ToggleGroup qrTypeGroup;
+    @FXML private ComboBox<String> cmbQRType;
+    @FXML private ComboBox<String> cmbEmployee;
+    @FXML private TextArea txtCustomData;
     @FXML private Button btnGenerate;
+    @FXML private Button btnSave;
     @FXML private ImageView imgQRCode;
-    @FXML private Label lblQRCodeText;
-    @FXML private Button btnSaveQR;
+    @FXML private Label lblQRData;
     @FXML private Label lblStatus;
+
+    private BufferedImage currentQRImage;
+    private String currentQRData;
+    private EmployeeDAO employeeDAO;
+    private ObservableList<Employee> employees;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        setupToggleGroup();
-        setupInitialState();
+        employeeDAO = new EmployeeDAO();
+        employees = FXCollections.observableArrayList();
+
+        setupQRTypeComboBox();
+        loadEmployees();
+        setupEventHandlers();
+
+        // Initial state
+        btnSave.setDisable(true);
+        lblStatus.setText("Ready to generate QR codes");
     }
 
-    private void setupToggleGroup() {
-        qrTypeGroup = new ToggleGroup();
-        rbEmployee.setToggleGroup(qrTypeGroup);
-        rbArtwork.setToggleGroup(qrTypeGroup);
-        rbCustom.setToggleGroup(qrTypeGroup);
+    private void setupQRTypeComboBox() {
+        cmbQRType.setItems(FXCollections.observableArrayList(
+                "Employee QR Code",
+                "Custom Data QR Code"
+        ));
 
-        // Set default selection
-        rbEmployee.setSelected(true);
+        cmbQRType.setValue("Employee QR Code");
 
-        // Add listeners for toggle changes
-        qrTypeGroup.selectedToggleProperty().addListener((obs, oldToggle, newToggle) -> {
-            updateFormVisibility();
+        // Show/hide controls based on selection
+        cmbQRType.setOnAction(e -> {
+            String selectedType = cmbQRType.getValue();
+            boolean isEmployee = "Employee QR Code".equals(selectedType);
+
+            cmbEmployee.setVisible(isEmployee);
+            cmbEmployee.setManaged(isEmployee);
+            txtCustomData.setVisible(!isEmployee);
+            txtCustomData.setManaged(!isEmployee);
+
+            // Clear previous data
+            clearQRCode();
         });
     }
 
-    private void setupInitialState() {
-        updateFormVisibility();
-        btnSaveQR.setDisable(true);
-        clearQRDisplay();
-    }
+    private void loadEmployees() {
+        try {
+            employees.clear();
+            List<Employee> staffEmployees = employeeDAO.getAllStaffEmployees();
 
-    private void updateFormVisibility() {
-        // Reset all fields
-        txtEmployeeId.setDisable(true);
-        txtEmployeeName.setDisable(true);
-        txtArtworkId.setDisable(true);
-        txtArtworkTitle.setDisable(true);
-        txtCustomData.setDisable(true);
+            System.out.println("=== LOADING EMPLOYEES FOR QR GENERATOR ===");
 
-        // Enable relevant fields based on selection
-        if (rbEmployee.isSelected()) {
-            txtEmployeeId.setDisable(false);
-            txtEmployeeName.setDisable(false);
-        } else if (rbArtwork.isSelected()) {
-            txtArtworkId.setDisable(false);
-            txtArtworkTitle.setDisable(false);
-        } else if (rbCustom.isSelected()) {
-            txtCustomData.setDisable(false);
+            if (staffEmployees.isEmpty()) {
+                System.out.println("No staff employees found in database!");
+                lblStatus.setText("⚠️ No staff employees found in database");
+                cmbEmployee.setItems(FXCollections.observableArrayList("No employees found"));
+                cmbEmployee.setDisable(true);
+            } else {
+                employees.addAll(staffEmployees);
+
+                ObservableList<String> employeeNames = FXCollections.observableArrayList();
+                for (Employee emp : staffEmployees) {
+                    String displayText = emp.getEmployeeId() + " - " + emp.getName() + " (" + emp.getPosition() + ")";
+                    employeeNames.add(displayText);
+                    System.out.println("Loaded employee: " + displayText);
+                }
+
+                cmbEmployee.setItems(employeeNames);
+                cmbEmployee.setDisable(false);
+                lblStatus.setText("✅ " + staffEmployees.size() + " staff employees loaded");
+            }
+
+            System.out.println("=== END EMPLOYEE LOADING ===");
+
+        } catch (Exception e) {
+            System.err.println("Error loading employees: " + e.getMessage());
+            e.printStackTrace();
+            lblStatus.setText("❌ Error loading employees: " + e.getMessage());
         }
     }
 
-    @FXML
-    private void handleGenerate() {
-        try {
-            String qrData = buildQRData();
+    private void setupEventHandlers() {
+        btnGenerate.setOnAction(e -> generateQRCode());
+        btnSave.setOnAction(e -> saveQRCode());
+    }
 
-            if (qrData.isEmpty()) {
-                showError("Please fill in the required fields");
+    @FXML
+    private void generateQRCode() {
+        try {
+            String qrType = cmbQRType.getValue();
+            String qrData = null;
+
+            if ("Employee QR Code".equals(qrType)) {
+                String selectedEmployee = cmbEmployee.getValue();
+                if (selectedEmployee == null || selectedEmployee.equals("No employees found")) {
+                    lblStatus.setText("❌ Please select an employee");
+                    return;
+                }
+
+                // Extract employee ID from selection
+                int employeeId = Integer.parseInt(selectedEmployee.split(" - ")[0]);
+                Employee employee = employees.stream()
+                        .filter(emp -> emp.getEmployeeId() == employeeId)
+                        .findFirst()
+                        .orElse(null);
+
+                if (employee == null) {
+                    lblStatus.setText("❌ Employee not found");
+                    return;
+                }
+
+                // Generate QR data for employee
+                qrData = QRCodeGenerator.generateEmployeeQRData(employee.getEmployeeId(), employee.getName());
+
+                // Update employee QR code in database
+                boolean updated = employeeDAO.updateEmployeeQRCode(employee.getEmployeeId(), qrData);
+                if (!updated) {
+                    lblStatus.setText("⚠️ QR generated but failed to update database");
+                } else {
+                    System.out.println("Updated employee QR code in database: " + employee.getName() + " -> " + qrData);
+                }
+
+            } else if ("Custom Data QR Code".equals(qrType)) {
+                String customData = txtCustomData.getText().trim();
+                if (customData.isEmpty()) {
+                    lblStatus.setText("❌ Please enter custom data");
+                    return;
+                }
+
+                qrData = QRCodeGenerator.generateCustomQRData(customData);
+            }
+
+            if (qrData == null) {
+                lblStatus.setText("❌ Failed to generate QR data");
                 return;
             }
 
-            String qrCode = QRCodeGenerator.generateQRCode(qrData);
-            displayQRCode(qrCode);
+            // Generate QR code image
+            currentQRImage = QRCodeGenerator.generateQRCodeImage(qrData, 300, 300);
+            currentQRData = qrData;
 
-            btnSaveQR.setDisable(false);
-            showSuccess("QR code generated successfully");
+            // Display QR code
+            Image fxImage = SwingFXUtils.toFXImage(currentQRImage, null);
+            imgQRCode.setImage(fxImage);
+
+            // Show QR data
+            lblQRData.setText("QR Data: " + qrData);
+
+            // Enable save button
+            btnSave.setDisable(false);
+
+            lblStatus.setText("✅ QR Code generated successfully!");
+
+            System.out.println("Generated QR Code: " + qrData);
 
         } catch (Exception e) {
-            showError("Error generating QR code: " + e.getMessage());
+            lblStatus.setText("❌ Error generating QR code: " + e.getMessage());
+            System.err.println("QR generation error: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
-    private String buildQRData() {
-        if (rbEmployee.isSelected()) {
-            String id = txtEmployeeId.getText().trim();
-            String name = txtEmployeeName.getText().trim();
-
-            if (id.isEmpty() || name.isEmpty()) {
-                return "";
-            }
-
-            return "EMP" + id + "_" + name.replaceAll("\\s+", "_");
-
-        } else if (rbArtwork.isSelected()) {
-            String id = txtArtworkId.getText().trim();
-            String title = txtArtworkTitle.getText().trim();
-
-            if (id.isEmpty() || title.isEmpty()) {
-                return "";
-            }
-
-            return "ART" + id + "_" + title.replaceAll("\\s+", "_");
-
-        } else if (rbCustom.isSelected()) {
-            return txtCustomData.getText().trim();
+    @FXML
+    private void saveQRCode() {
+        if (currentQRImage == null) {
+            lblStatus.setText("❌ No QR code to save");
+            return;
         }
 
-        return "";
+        try {
+            FileChooser fileChooser = new FileChooser();
+            fileChooser.setTitle("Save QR Code");
+            fileChooser.getExtensionFilters().add(
+                    new FileChooser.ExtensionFilter("PNG Images", "*.png")
+            );
+
+            // Set default filename
+            String defaultName = "emp_qr_" + System.currentTimeMillis() + ".png";
+            fileChooser.setInitialFileName(defaultName);
+
+            File file = fileChooser.showSaveDialog(btnSave.getScene().getWindow());
+
+            if (file != null) {
+                boolean saved = QRCodeGenerator.saveQRCodeImage(currentQRImage, file.getAbsolutePath());
+                if (saved) {
+                    lblStatus.setText("✅ QR Code saved to: " + file.getName());
+                } else {
+                    lblStatus.setText("❌ Failed to save QR code");
+                }
+            }
+
+        } catch (Exception e) {
+            lblStatus.setText("❌ Error saving QR code: " + e.getMessage());
+            System.err.println("QR save error: " + e.getMessage());
+        }
     }
 
-    private void displayQRCode(String qrCode) {
-        // In a real implementation, this would generate and display an actual QR code image
-        lblQRCodeText.setText(qrCode);
-        lblQRCodeText.setVisible(true);
-
-        // For now, just show the text representation
-        // In production, you would use a QR code library to generate the actual image
+    @FXML
+    private void refreshEmployees() {
+        loadEmployees();
+        clearQRCode();
     }
 
-    private void clearQRDisplay() {
+    private void clearQRCode() {
         imgQRCode.setImage(null);
-        lblQRCodeText.setText("");
-        lblQRCodeText.setVisible(false);
-    }
-
-    @FXML
-    private void handleSaveQR() {
-        // In a real implementation, this would save the QR code image to file
-        showSuccess("QR code saved successfully (mock implementation)");
-    }
-
-    @FXML
-    private void handleClear() {
-        txtEmployeeId.clear();
-        txtEmployeeName.clear();
-        txtArtworkId.clear();
-        txtArtworkTitle.clear();
-        txtCustomData.clear();
-
-        clearQRDisplay();
-        btnSaveQR.setDisable(true);
-
-        showInfo("Form cleared");
-    }
-
-    private void showSuccess(String message) {
-        lblStatus.setText("✓ " + message);
-        lblStatus.setStyle("-fx-text-fill: #4CAF50;");
-    }
-
-    private void showError(String message) {
-        lblStatus.setText("✗ " + message);
-        lblStatus.setStyle("-fx-text-fill: #F44336;");
-    }
-
-    private void showInfo(String message) {
-        lblStatus.setText("ℹ " + message);
-        lblStatus.setStyle("-fx-text-fill: #2196F3;");
+        lblQRData.setText("QR Data: -");
+        btnSave.setDisable(true);
+        currentQRImage = null;
+        currentQRData = null;
     }
 }

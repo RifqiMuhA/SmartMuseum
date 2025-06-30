@@ -315,7 +315,7 @@ public class ArtworkManagementController implements Initializable {
         try {
             String qrData = "ART" + selectedArtwork.getArtworkId() + "_" +
                     selectedArtwork.getTitle().replaceAll("\\s+", "_");
-            String qrCode = QRCodeGenerator.generateQRCode(qrData);
+            String qrCode = QRCodeGenerator.generateCustomQRData(qrData);
 
             selectedArtwork.setQrCode(qrCode);
             tableArtworks.refresh();

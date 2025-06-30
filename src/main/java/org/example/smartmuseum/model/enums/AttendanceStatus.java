@@ -15,12 +15,14 @@ public enum AttendanceStatus {
         return value;
     }
 
-    public static AttendanceStatus fromString(String value) {
+    public static AttendanceStatus fromValue(String value) {
+        if (value == null) return ABSENT;
+
         for (AttendanceStatus status : AttendanceStatus.values()) {
             if (status.value.equalsIgnoreCase(value)) {
                 return status;
             }
         }
-        throw new IllegalArgumentException("Unknown attendance status: " + value);
+        return ABSENT; // Default fallback
     }
 }

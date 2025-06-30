@@ -12,8 +12,8 @@ public class Artwork {
     private String qrCode;
     private String imagePath;
     private Timestamp createdAt;
-    private String artistName;
-    private String artworkType; // New field for artwork type
+    private String artistName; // For JOIN queries with artists table
+    private String artworkType; // New field matching database
 
     // Constructors
     public Artwork() {}
@@ -31,8 +31,9 @@ public class Artwork {
     }
 
     public String getDisplayInfo() {
-        return String.format("Title: %s\nYear: %d\nTechnique: %s\nDescription: %s",
-                title, year, technique, description);
+        return String.format("Title: %s\nArtist: %s\nYear: %d\nType: %s\nTechnique: %s\nDescription: %s",
+                title, artistName != null ? artistName : "Unknown", year,
+                artworkType != null ? artworkType : "Unknown", technique, description);
     }
 
     // Badge color based on artwork type
@@ -51,12 +52,11 @@ public class Artwork {
         }
     }
 
-    public int getArtworkId() { return artworkId; }
-    public String getTitle() { return title; }
-
     // Getters and Setters
+    public int getArtworkId() { return artworkId; }
     public void setArtworkId(int artworkId) { this.artworkId = artworkId; }
 
+    public String getTitle() { return title; }
     public void setTitle(String title) { this.title = title; }
 
     public int getArtistId() { return artistId; }
@@ -80,19 +80,9 @@ public class Artwork {
     public Timestamp getCreatedAt() { return createdAt; }
     public void setCreatedAt(Timestamp createdAt) { this.createdAt = createdAt; }
 
-    public String getArtistName() {
-        return artistName;
-    }
+    public String getArtistName() { return artistName; }
+    public void setArtistName(String artistName) { this.artistName = artistName; }
 
-    public void setArtistName(String artistName) {
-        this.artistName = artistName;
-    }
-
-    public String getArtworkType() {
-        return artworkType;
-    }
-
-    public void setArtworkType(String artworkType) {
-        this.artworkType = artworkType;
-    }
+    public String getArtworkType() { return artworkType; }
+    public void setArtworkType(String artworkType) { this.artworkType = artworkType; }
 }

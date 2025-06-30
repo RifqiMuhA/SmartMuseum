@@ -218,7 +218,7 @@ public class EmployeeManagementController implements Initializable {
         try {
             String qrData = "EMP" + selectedEmployee.getEmployeeId() + "_" +
                     selectedEmployee.getName().replaceAll("\\s+", "_");
-            String qrCode = QRCodeGenerator.generateQRCode(qrData);
+            String qrCode = QRCodeGenerator.generateCustomQRData(qrData);
 
             selectedEmployee.setQrCode(qrCode);
             tableEmployees.refresh();

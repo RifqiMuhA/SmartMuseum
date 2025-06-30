@@ -1,106 +1,114 @@
 package org.example.smartmuseum.util;
 
 import com.google.zxing.BarcodeFormat;
-import com.google.zxing.EncodeHintType;
 import com.google.zxing.WriterException;
+import com.google.zxing.client.j2se.MatrixToImageWriter;
 import com.google.zxing.common.BitMatrix;
 import com.google.zxing.qrcode.QRCodeWriter;
-import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
 
-import java.awt.Color;
-import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
-import java.util.HashMap;
-import java.util.Map;
+import java.io.File;
+import java.io.IOException;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import javax.imageio.ImageIO;
 
 public class QRCodeGenerator {
 
-    private static final int DEFAULT_SIZE = 300;
-    private static final int MARGIN = 1;
-
-    public static String generateQRCode(String data) {
-        try {
-            // For demo purposes, return formatted QR code string
-            // In real implementation, this would generate actual QR code image
-            return "QR_" + data.toUpperCase().replaceAll("\\s+", "_") + "_" +
-                    System.currentTimeMillis() % 100000000;
-        } catch (Exception e) {
-            throw new RuntimeException("Error generating QR code: " + e.getMessage(), e);
-        }
+    public static String generateEmployeeQRData(int employeeId, String employeeName) {
+        // Format: emp_ID_NAME_DATE
+        String today = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
+        return "emp_" + employeeId + "_" + employeeName.replaceAll("\\s+", "_") + "_" + today;
     }
 
-    public static BufferedImage generateQRCodeImage(String data, int size) throws WriterException {
+    public static String generateCustomQRData(String customData) {
+        // Format: CUSTOM_DATA_TIMESTAMP
+        long timestamp = System.currentTimeMillis();
+        return "CUSTOM_" + customData.replaceAll("\\s+", "_") + "_" + timestamp;
+    }
+
+    public static BufferedImage generateQRCodeImage(String qrData, int width, int height) throws WriterException {
         QRCodeWriter qrCodeWriter = new QRCodeWriter();
+        BitMatrix bitMatrix = qrCodeWriter.encode(qrData, BarcodeFormat.QR_CODE, width, height);
+        return MatrixToImageWriter.toBufferedImage(bitMatrix);
+    }
 
-        Map<EncodeHintType, Object> hints = new HashMap<>();
-        hints.put(EncodeHintType.ERROR_CORRECTION, ErrorCorrectionLevel.M);
-        hints.put(EncodeHintType.MARGIN, MARGIN);
-
-        BitMatrix bitMatrix = qrCodeWriter.encode(data, BarcodeFormat.QR_CODE, size, size, hints);
-
-        BufferedImage image = new BufferedImage(size, size, BufferedImage.TYPE_INT_RGB);
-        Graphics2D graphics = image.createGraphics();
-
-        graphics.setColor(Color.WHITE);
-        graphics.fillRect(0, 0, size, size);
-        graphics.setColor(Color.BLACK);
-
-        for (int x = 0; x < size; x++) {
-            for (int y = 0; y < size; y++) {
-                if (bitMatrix.get(x, y)) {
-                    graphics.fillRect(x, y, 1, 1);
-                }
-            }
+    public static boolean saveQRCodeImage(BufferedImage qrImage, String filePath) {
+        try {
+            File outputFile = new File(filePath);
+            // Create parent directories if they don't exist
+            outputFile.getParentFile().mkdirs();
+            return ImageIO.write(qrImage, "PNG", outputFile);
+        } catch (IOException e) {
+            System.err.println("Error saving QR code image: " + e.getMessage());
+            return false;
         }
-
-        graphics.dispose();
-        return image;
     }
 
     public static boolean validateQRCode(String qrCode) {
         if (qrCode == null || qrCode.trim().isEmpty()) {
+            System.out.println("QR code is null or empty");
             return false;
         }
 
-        // Basic validation for employee QR codes
-        return qrCode.matches("^(EMP|ART)\\d+_.*") || qrCode.startsWith("QR_");
-    }
-
-    public static String extractEmployeeId(String qrCode) {
-        if (!validateQRCode(qrCode)) {
-            return null;
+        // Check if it starts with emp_ or CUSTOM_
+        if (!qrCode.startsWith("emp_") && !qrCode.startsWith("EMP_") && !qrCode.startsWith("CUSTOM_")) {
+            System.out.println("QR code doesn't start with emp_, EMP_, or CUSTOM_: " + qrCode);
+            return false;
         }
 
+        // Split by underscore
+        String[] parts = qrCode.split("_");
+        if (parts.length < 3) {
+            System.out.println("QR code doesn't have enough parts: " + qrCode);
+            return false;
+        }
+
+        System.out.println("QR code validation passed: " + qrCode);
+        return true;
+    }
+
+    public static Integer extractEmployeeId(String qrCode) {
         try {
-            if (qrCode.startsWith("EMP")) {
-                String[] parts = qrCode.split("_");
-                return parts[0].replace("EMP", "");
-            } else if (qrCode.startsWith("QR_EMP")) {
-                String[] parts = qrCode.split("_");
-                return parts[1].replace("EMP", "");
+            if (!validateQRCode(qrCode)) {
+                System.out.println("Invalid QR code: " + qrCode);
+                return null;
             }
-        } catch (Exception e) {
-            System.err.println("Error extracting employee ID: " + e.getMessage());
+
+            // Handle both formats: emp_ID_NAME_DATE and EMP_ID_NAME_TIMESTAMP
+            String[] parts = qrCode.split("_");
+            if (parts.length >= 2) {
+                // Check if it starts with emp or EMP
+                if (parts[0].equalsIgnoreCase("emp")) {
+                    int employeeId = Integer.parseInt(parts[1]);
+                    System.out.println("Extracted employee ID: " + employeeId + " from QR: " + qrCode);
+                    return employeeId;
+                }
+            }
+
+        } catch (NumberFormatException e) {
+            System.err.println("Error parsing employee ID from QR code: " + qrCode);
+            e.printStackTrace();
         }
 
         return null;
     }
 
-    public static String extractArtworkId(String qrCode) {
-        if (!validateQRCode(qrCode)) {
+    public static String extractCustomData(String qrCode) {
+        if (!validateQRCode(qrCode) || !qrCode.startsWith("CUSTOM_")) {
             return null;
         }
 
-        try {
-            if (qrCode.startsWith("ART")) {
-                String[] parts = qrCode.split("_");
-                return parts[0].replace("ART", "");
-            } else if (qrCode.startsWith("QR_ART")) {
-                String[] parts = qrCode.split("_");
-                return parts[1].replace("ART", "");
+        // Format: CUSTOM_DATA_TIMESTAMP
+        String[] parts = qrCode.split("_");
+        if (parts.length >= 3) {
+            // Reconstruct the custom data (everything between CUSTOM_ and the last _timestamp)
+            StringBuilder customData = new StringBuilder();
+            for (int i = 1; i < parts.length - 1; i++) {
+                if (i > 1) customData.append("_");
+                customData.append(parts[i]);
             }
-        } catch (Exception e) {
-            System.err.println("Error extracting artwork ID: " + e.getMessage());
+            return customData.toString().replace("_", " ");
         }
 
         return null;

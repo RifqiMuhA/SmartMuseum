@@ -33,4 +33,9 @@ public class Artist {
 
     public String getNationality() { return nationality; }
     public void setNationality(String nationality) { this.nationality = nationality; }
+
+    @Override
+    public String toString() {
+        return name + " (" + birthYear + ")";
+    }
 }
