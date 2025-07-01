@@ -53,17 +53,14 @@
                             <Label text="Position:" styleClass="form-label" GridPane.columnIndex="0" GridPane.rowIndex="1" />
                             <TextField fx:id="txtPosition" GridPane.columnIndex="1" GridPane.rowIndex="1" />
 
-                            <Label text="Department:" styleClass="form-label" GridPane.columnIndex="0" GridPane.rowIndex="2" />
-                            <TextField fx:id="txtDepartment" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                            <Label text="Hire Date:" styleClass="form-label" GridPane.columnIndex="0" GridPane.rowIndex="2" />
+                            <DatePicker fx:id="dateHireDate" GridPane.columnIndex="1" GridPane.rowIndex="2" />
 
-                            <Label text="Hire Date:" styleClass="form-label" GridPane.columnIndex="0" GridPane.rowIndex="3" />
-                            <DatePicker fx:id="dateHireDate" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                            <Label text="Salary:" styleClass="form-label" GridPane.columnIndex="0" GridPane.rowIndex="3" />
+                            <TextField fx:id="txtSalary" GridPane.columnIndex="1" GridPane.rowIndex="3" />
 
-                            <Label text="Salary:" styleClass="form-label" GridPane.columnIndex="0" GridPane.rowIndex="4" />
-                            <TextField fx:id="txtSalary" GridPane.columnIndex="1" GridPane.rowIndex="4" />
-
-                            <Label text="Active:" styleClass="form-label" GridPane.columnIndex="0" GridPane.rowIndex="5" />
-                            <CheckBox fx:id="chkActive" selected="true" GridPane.columnIndex="1" GridPane.rowIndex="5" />
+                            <Label text="Active:" styleClass="form-label" GridPane.columnIndex="0" GridPane.rowIndex="4" />
+                            <CheckBox fx:id="chkActive" selected="true" GridPane.columnIndex="1" GridPane.rowIndex="4" />
                         </GridPane>
 
                         <!-- Action Buttons -->
@@ -146,9 +143,9 @@
                                 <TableColumn fx:id="colEmployeeId" text="ID" prefWidth="50.0" />
                                 <TableColumn fx:id="colName" text="Name" prefWidth="150.0" />
                                 <TableColumn fx:id="colPosition" text="Position" prefWidth="120.0" />
-                                <TableColumn fx:id="colQRCode" text="QR Code" prefWidth="200.0" />
+                                <TableColumn fx:id="colQRCode" text="QR Code" prefWidth="150.0" />
                                 <TableColumn fx:id="colHireDate" text="Hire Date" prefWidth="100.0" />
-                                <TableColumn fx:id="colActive" text="Status" prefWidth="80.0" />
+                                <TableColumn fx:id="colSalary" text="Salary" prefWidth="100.0" />
                             </columns>
                         </TableView>
                     </children>

@@ -123,10 +123,10 @@ public class EmployeeService {
         }
 
         // Verify QR code belongs to this employee
-        System.out.println("Employee QR Code: " + employee.getQRCode());
+        System.out.println("Employee QR Code: " + employee.getQrCode());
         System.out.println("Scanned QR Code: " + qrCode);
 
-        if (employee.getQRCode() == null || !employee.getQRCode().equals(qrCode)) {
+        if (employee.getQrCode() == null || !employee.getQrCode().equals(qrCode)) {
             System.out.println("QR code mismatch!");
             return new AttendanceResult(false, "Invalid QR code for employee: " + employee.getName(), null);
         }

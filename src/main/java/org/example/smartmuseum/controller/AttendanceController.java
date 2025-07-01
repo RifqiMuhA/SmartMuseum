@@ -105,7 +105,7 @@ public class AttendanceController implements Initializable {
                     System.out.println("- ID: " + emp.getEmployeeId() +
                             ", Name: " + emp.getName() +
                             ", Position: " + emp.getPosition() +
-                            ", QR: " + (emp.getQRCode() != null ? emp.getQRCode() : "NOT SET"));
+                            ", QR: " + (emp.getQrCode() != null ? emp.getQrCode() : "NOT SET"));
                 }
                 lblScanResult.setText("📋 " + employees.size() + " staff employees available for attendance");
             }

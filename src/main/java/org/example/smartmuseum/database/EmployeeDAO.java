@@ -10,7 +10,7 @@ public class EmployeeDAO {
     public List<Employee> getAllStaffEmployees() {
         List<Employee> employees = new ArrayList<>();
         String sql = """
-            SELECT e.employee_id, e.user_id, e.name, e.position, e.qr_code 
+            SELECT e.employee_id, e.user_id, e.name, e.position, e.qr_code, e.hire_date, e.salary 
             FROM employees e 
             JOIN users u ON e.user_id = u.user_id 
             WHERE u.role = 'staff'
@@ -27,7 +27,9 @@ public class EmployeeDAO {
                         rs.getInt("user_id"),
                         rs.getString("name"),
                         rs.getString("position"),
-                        rs.getString("qr_code")
+                        rs.getString("qr_code"),
+                        rs.getDate("hire_date"),
+                        rs.getInt("salary")
                 );
                 employees.add(employee);
             }
@@ -42,7 +44,7 @@ public class EmployeeDAO {
 
     public Employee getEmployeeById(int employeeId) {
         String sql = """
-            SELECT e.employee_id, e.user_id, e.name, e.position, e.qr_code 
+            SELECT e.employee_id, e.user_id, e.name, e.position, e.qr_code, e.hire_date, e.salary 
             FROM employees e 
             JOIN users u ON e.user_id = u.user_id 
             WHERE e.employee_id = ? AND u.role = 'staff'
@@ -60,7 +62,9 @@ public class EmployeeDAO {
                         rs.getInt("user_id"),
                         rs.getString("name"),
                         rs.getString("position"),
-                        rs.getString("qr_code")
+                        rs.getString("qr_code"),
+                        rs.getDate("hire_date"),
+                        rs.getInt("salary")
                 );
             }
 
@@ -93,7 +97,7 @@ public class EmployeeDAO {
 
     public Employee getEmployeeByQRCode(String qrCode) {
         String sql = """
-            SELECT e.employee_id, e.user_id, e.name, e.position, e.qr_code 
+            SELECT e.employee_id, e.user_id, e.name, e.position, e.qr_code, e.hire_date, e.salary 
             FROM employees e 
             JOIN users u ON e.user_id = u.user_id 
             WHERE e.qr_code = ? AND u.role = 'staff'
@@ -111,7 +115,9 @@ public class EmployeeDAO {
                         rs.getInt("user_id"),
                         rs.getString("name"),
                         rs.getString("position"),
-                        rs.getString("qr_code")
+                        rs.getString("qr_code"),
+                        rs.getDate("hire_date"),
+                        rs.getInt("salary")
                 );
             }
 
@@ -124,7 +130,7 @@ public class EmployeeDAO {
     }
 
     public boolean addEmployee(Employee employee) {
-        String sql = "INSERT INTO employees (user_id, name, position, qr_code) VALUES (?, ?, ?, ?)";
+        String sql = "INSERT INTO employees (user_id, name, position, qr_code, hire_date, salary) VALUES (?, ?, ?, ?, ?, ?)";
 
         try (Connection conn = DatabaseConnection.getInstance().getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
@@ -132,7 +138,9 @@ public class EmployeeDAO {
             stmt.setInt(1, employee.getUserId());
             stmt.setString(2, employee.getName());
             stmt.setString(3, employee.getPosition());
-            stmt.setString(4, employee.getQRCode());
+            stmt.setString(4, employee.getQrCode());
+            stmt.setDate(5, employee.getHireDate());
+            stmt.setInt(6, employee.getSalary());
 
             int rowsAffected = stmt.executeUpdate();
 
@@ -171,15 +179,17 @@ public class EmployeeDAO {
     }
 
     public boolean updateEmployee(Employee employee) {
-        String sql = "UPDATE employees SET name = ?, position = ?, qr_code = ? WHERE employee_id = ?";
+        String sql = "UPDATE employees SET name = ?, position = ?, qr_code = ?, hire_date = ?, salary = ? WHERE employee_id = ?";
 
         try (Connection conn = DatabaseConnection.getInstance().getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setString(1, employee.getName());
             stmt.setString(2, employee.getPosition());
-            stmt.setString(3, employee.getQRCode());
-            stmt.setInt(4, employee.getEmployeeId());
+            stmt.setString(3, employee.getQrCode());
+            stmt.setDate(4, employee.getHireDate());
+            stmt.setInt(5, employee.getSalary());
+            stmt.setInt(6, employee.getEmployeeId());
 
             int rowsAffected = stmt.executeUpdate();
             return rowsAffected > 0;

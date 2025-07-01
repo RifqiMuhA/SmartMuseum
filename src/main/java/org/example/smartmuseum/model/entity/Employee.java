@@ -2,6 +2,7 @@ package org.example.smartmuseum.model.entity;
 
 import com.google.zxing.WriterException;
 import org.example.smartmuseum.util.QRCodeGenerator;
+import java.sql.Date;
 
 public class Employee {
     private int employeeId;
@@ -9,6 +10,8 @@ public class Employee {
     private String name;
     private String position;
     private String qrCode;
+    private Date hireDate;
+    private int salary;
 
     // Constructors
     public Employee() {}
@@ -21,24 +24,74 @@ public class Employee {
         this.qrCode = qrCode;
     }
 
+    public Employee(int employeeId, int userId, String name, String position, String qrCode, Date hireDate, int salary) {
+        this.employeeId = employeeId;
+        this.userId = userId;
+        this.name = name;
+        this.position = position;
+        this.qrCode = qrCode;
+        this.hireDate = hireDate;
+        this.salary = salary;
+    }
+
     public void generateQRCode() throws WriterException {
         this.qrCode = QRCodeGenerator.generateEmployeeQRData(employeeId, "EMP" + employeeId + "_" + name);
     }
 
-    public String getQRCode() { return qrCode; }
-    public String getName() { return name; }
-
     // Getters and Setters
-    public int getEmployeeId() { return employeeId; }
-    public void setEmployeeId(int employeeId) { this.employeeId = employeeId; }
+    public int getEmployeeId() {
+        return employeeId;
+    }
 
-    public int getUserId() { return userId; }
-    public void setUserId(int userId) { this.userId = userId; }
+    public void setEmployeeId(int employeeId) {
+        this.employeeId = employeeId;
+    }
 
-    public void setName(String name) { this.name = name; }
+    public int getUserId() {
+        return userId;
+    }
 
-    public String getPosition() { return position; }
-    public void setPosition(String position) { this.position = position; }
+    public void setUserId(int userId) {
+        this.userId = userId;
+    }
 
-    public void setQrCode(String qrCode) { this.qrCode = qrCode; }
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getPosition() {
+        return position;
+    }
+
+    public void setPosition(String position) {
+        this.position = position;
+    }
+
+    public String getQrCode() {
+        return qrCode;
+    }
+
+    public void setQrCode(String qrCode) {
+        this.qrCode = qrCode;
+    }
+
+    public Date getHireDate() {
+        return hireDate;
+    }
+
+    public void setHireDate(Date hireDate) {
+        this.hireDate = hireDate;
+    }
+
+    public int getSalary() {
+        return salary;
+    }
+
+    public void setSalary(int salary) {
+        this.salary = salary;
+    }
 }

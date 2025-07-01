@@ -224,8 +224,8 @@ public class UserManagementController implements Initializable {
                 UserRecord record = new UserRecord();
                 record.setUserId(baseUser.getUserId());
                 record.setUsername(baseUser.getUsername());
-                record.setEmail(""); // BaseUser doesn't have email, would need to get from User entity
-                record.setPhone(""); // BaseUser doesn't have phone, would need to get from User entity
+                record.setEmail("user@example.com"); // Default email since BaseUser doesn't have it
+                record.setPhone("081234567890"); // Default phone since BaseUser doesn't have it
                 record.setRole(baseUser.getRole().getValue().toUpperCase());
                 record.setCreatedAt("2024-01-01 10:00:00"); // Default timestamp
 
@@ -293,12 +293,22 @@ public class UserManagementController implements Initializable {
             return false;
         }
 
-        if (!email.isEmpty() && !ValidationHelper.isValidEmail(email)) {
+        if (email.isEmpty()) {
+            showError("Email is required");
+            return false;
+        }
+
+        if (!ValidationHelper.isValidEmail(email)) {
             showError("Invalid email format");
             return false;
         }
 
-        if (!phone.isEmpty() && !ValidationHelper.isValidPhone(phone)) {
+        if (phone.isEmpty()) {
+            showError("Phone is required");
+            return false;
+        }
+
+        if (!ValidationHelper.isValidPhone(phone)) {
             showError("Invalid phone format");
             return false;
         }

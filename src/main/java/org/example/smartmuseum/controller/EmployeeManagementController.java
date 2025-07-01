@@ -12,6 +12,7 @@ import org.example.smartmuseum.model.service.EmployeeService;
 import org.example.smartmuseum.util.QRCodeGenerator;
 
 import java.net.URL;
+import java.sql.Date;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -22,7 +23,6 @@ public class EmployeeManagementController implements Initializable {
     @FXML private Label lblTotalEmployees;
     @FXML private TextField txtName;
     @FXML private TextField txtPosition;
-    @FXML private TextField txtDepartment;
     @FXML private DatePicker dateHireDate;
     @FXML private TextField txtSalary;
     @FXML private CheckBox chkActive;
@@ -40,7 +40,7 @@ public class EmployeeManagementController implements Initializable {
     @FXML private TableColumn<EmployeeRecord, String> colPosition;
     @FXML private TableColumn<EmployeeRecord, String> colQRCode;
     @FXML private TableColumn<EmployeeRecord, String> colHireDate;
-    @FXML private TableColumn<EmployeeRecord, String> colActive;
+    @FXML private TableColumn<EmployeeRecord, Integer> colSalary;
 
     private EmployeeService employeeService;
     private ObservableList<EmployeeRecord> employeeData;
@@ -68,7 +68,7 @@ public class EmployeeManagementController implements Initializable {
         colPosition.setCellValueFactory(new PropertyValueFactory<>("position"));
         colQRCode.setCellValueFactory(new PropertyValueFactory<>("qrCode"));
         colHireDate.setCellValueFactory(new PropertyValueFactory<>("hireDate"));
-        colActive.setCellValueFactory(new PropertyValueFactory<>("active"));
+        colSalary.setCellValueFactory(new PropertyValueFactory<>("salary"));
 
         tableEmployees.setItems(employeeData);
     }
@@ -110,6 +110,8 @@ public class EmployeeManagementController implements Initializable {
             employee.setEmployeeId(newEmployee.getEmployeeId());
             employee.setName(newEmployee.getName());
             employee.setPosition(newEmployee.getPosition());
+            employee.setHireDate(Date.valueOf(dateHireDate.getValue()));
+            employee.setSalary(Integer.parseInt(txtSalary.getText().trim()));
 
             if (employeeService.addEmployee(employee)) {
                 employeeData.add(newEmployee);
@@ -144,6 +146,8 @@ public class EmployeeManagementController implements Initializable {
             employee.setEmployeeId(selectedEmployee.getEmployeeId());
             employee.setName(selectedEmployee.getName());
             employee.setPosition(selectedEmployee.getPosition());
+            employee.setHireDate(Date.valueOf(dateHireDate.getValue()));
+            employee.setSalary(selectedEmployee.getSalary());
 
             if (employeeService.updateEmployee(employee)) {
                 tableEmployees.refresh();
@@ -191,7 +195,6 @@ public class EmployeeManagementController implements Initializable {
     private void handleClear() {
         txtName.clear();
         txtPosition.clear();
-        txtDepartment.clear();
         dateHireDate.setValue(null);
         txtSalary.clear();
         chkActive.setSelected(true);
@@ -250,9 +253,9 @@ public class EmployeeManagementController implements Initializable {
                 record.setEmployeeId(emp.getEmployeeId());
                 record.setName(emp.getName());
                 record.setPosition(emp.getPosition());
-                record.setQrCode(emp.getQRCode());
-                record.setHireDate("2024-01-01"); // Default date, would need to add to Employee entity
-                record.setActive("Active"); // Default status, would need to add to Employee entity
+                record.setQrCode(emp.getQrCode());
+                record.setHireDate(emp.getHireDate() != null ? emp.getHireDate().toString() : "");
+                record.setSalary(emp.getSalary());
 
                 employeeData.add(record);
             }
@@ -270,7 +273,7 @@ public class EmployeeManagementController implements Initializable {
         emp1.setPosition("Gallery Manager");
         emp1.setQrCode("QR_EMP1_John_Smith_12345678");
         emp1.setHireDate("2023-01-15");
-        emp1.setActive("Active");
+        emp1.setSalary(5000000);
         employeeData.add(emp1);
 
         // Sample employee 2
@@ -280,7 +283,7 @@ public class EmployeeManagementController implements Initializable {
         emp2.setPosition("Curator");
         emp2.setQrCode("QR_EMP2_Sarah_Johnson_87654321");
         emp2.setHireDate("2023-03-20");
-        emp2.setActive("Active");
+        emp2.setSalary(4500000);
         employeeData.add(emp2);
 
         // Sample employee 3
@@ -290,13 +293,14 @@ public class EmployeeManagementController implements Initializable {
         emp3.setPosition("Security Guard");
         emp3.setQrCode("");
         emp3.setHireDate("2023-06-10");
-        emp3.setActive("Active");
+        emp3.setSalary(3000000);
         employeeData.add(emp3);
     }
 
     private boolean validateForm() {
         String name = txtName.getText().trim();
         String position = txtPosition.getText().trim();
+        String salary = txtSalary.getText().trim();
 
         if (name.isEmpty()) {
             showError("Employee name is required");
@@ -308,6 +312,23 @@ public class EmployeeManagementController implements Initializable {
             return false;
         }
 
+        if (dateHireDate.getValue() == null) {
+            showError("Hire date is required");
+            return false;
+        }
+
+        if (salary.isEmpty()) {
+            showError("Salary is required");
+            return false;
+        }
+
+        try {
+            Integer.parseInt(salary);
+        } catch (NumberFormatException e) {
+            showError("Salary must be a valid number");
+            return false;
+        }
+
         return true;
     }
 
@@ -315,9 +336,8 @@ public class EmployeeManagementController implements Initializable {
         EmployeeRecord employee = new EmployeeRecord();
         employee.setName(txtName.getText().trim());
         employee.setPosition(txtPosition.getText().trim());
-        employee.setHireDate(dateHireDate.getValue() != null ?
-                dateHireDate.getValue().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")) : "");
-        employee.setActive(chkActive.isSelected() ? "Active" : "Inactive");
+        employee.setHireDate(dateHireDate.getValue().toString());
+        employee.setSalary(Integer.parseInt(txtSalary.getText().trim()));
         employee.setQrCode(""); // Will be generated separately
 
         return employee;
@@ -326,14 +346,14 @@ public class EmployeeManagementController implements Initializable {
     private void updateEmployeeFromForm(EmployeeRecord employee) {
         employee.setName(txtName.getText().trim());
         employee.setPosition(txtPosition.getText().trim());
-        employee.setHireDate(dateHireDate.getValue() != null ?
-                dateHireDate.getValue().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")) : "");
-        employee.setActive(chkActive.isSelected() ? "Active" : "Inactive");
+        employee.setHireDate(dateHireDate.getValue().toString());
+        employee.setSalary(Integer.parseInt(txtSalary.getText().trim()));
     }
 
     private void populateForm(EmployeeRecord employee) {
         txtName.setText(employee.getName());
         txtPosition.setText(employee.getPosition());
+        txtSalary.setText(String.valueOf(employee.getSalary()));
 
         if (employee.getHireDate() != null && !employee.getHireDate().isEmpty()) {
             try {
@@ -343,8 +363,6 @@ public class EmployeeManagementController implements Initializable {
                 dateHireDate.setValue(null);
             }
         }
-
-        chkActive.setSelected("Active".equals(employee.getActive()));
     }
 
     private void displayQRCode(String qrCode) {
@@ -380,7 +398,7 @@ public class EmployeeManagementController implements Initializable {
         private String position;
         private String qrCode;
         private String hireDate;
-        private String active;
+        private int salary;
 
         // Getters and setters
         public int getEmployeeId() { return employeeId; }
@@ -398,7 +416,7 @@ public class EmployeeManagementController implements Initializable {
         public String getHireDate() { return hireDate; }
         public void setHireDate(String hireDate) { this.hireDate = hireDate; }
 
-        public String getActive() { return active; }
-        public void setActive(String active) { this.active = active; }
+        public int getSalary() { return salary; }
+        public void setSalary(int salary) { this.salary = salary; }
     }
 }

@@ -12,13 +12,15 @@ public class Artwork {
     private String qrCode;
     private String imagePath;
     private Timestamp createdAt;
-    private String artistName; // For JOIN queries with artists table
-    private String artworkType; // New field matching database
+    private String artworkType;
+    private String artistName;
 
     // Constructors
     public Artwork() {}
 
-    public Artwork(int artworkId, String title, int artistId, int year, String technique, String description, String qrCode, String imagePath, Timestamp createdAt) {
+    public Artwork(int artworkId, String title, int artistId, int year, String technique,
+                   String description, String qrCode, String imagePath, Timestamp createdAt,
+                   String artworkType, String artistName) {
         this.artworkId = artworkId;
         this.title = title;
         this.artistId = artistId;
@@ -28,28 +30,8 @@ public class Artwork {
         this.qrCode = qrCode;
         this.imagePath = imagePath;
         this.createdAt = createdAt;
-    }
-
-    public String getDisplayInfo() {
-        return String.format("Title: %s\nArtist: %s\nYear: %d\nType: %s\nTechnique: %s\nDescription: %s",
-                title, artistName != null ? artistName : "Unknown", year,
-                artworkType != null ? artworkType : "Unknown", technique, description);
-    }
-
-    // Badge color based on artwork type
-    public String getBadgeColor() {
-        if (artworkType == null) return "#6c757d"; // Default gray
-
-        switch (artworkType.toLowerCase()) {
-            case "lukisan": return "#e74c3c"; // Red
-            case "patung": return "#3498db"; // Blue
-            case "keramik": return "#f39c12"; // Orange
-            case "tekstil": return "#9b59b6"; // Purple
-            case "kaligrafi": return "#27ae60"; // Green
-            case "fotografi": return "#34495e"; // Dark gray
-            case "instalasi": return "#e67e22"; // Dark orange
-            default: return "#6c757d"; // Default gray
-        }
+        this.artworkType = artworkType;
+        this.artistName = artistName;
     }
 
     // Getters and Setters
@@ -80,9 +62,47 @@ public class Artwork {
     public Timestamp getCreatedAt() { return createdAt; }
     public void setCreatedAt(Timestamp createdAt) { this.createdAt = createdAt; }
 
+    public String getArtworkType() { return artworkType; }
+    public void setArtworkType(String artworkType) { this.artworkType = artworkType; }
+
     public String getArtistName() { return artistName; }
     public void setArtistName(String artistName) { this.artistName = artistName; }
 
-    public String getArtworkType() { return artworkType; }
-    public void setArtworkType(String artworkType) { this.artworkType = artworkType; }
+    public String getBadgeColor() {
+        if (artworkType == null) return "#6c757d";
+
+        switch (artworkType.toLowerCase()) {
+            case "lukisan":
+                return "#007bff";
+            case "patung":
+                return "#28a745";
+            case "keramik":
+                return "#dc3545";
+            case "batik":
+                return "#ffc107";
+            case "fotografi":
+                return "#6f42c1";
+            case "kaligrafi":
+                return "#fd7e14";
+            default:
+                return "#6c757d";
+        }
+    }
+
+    @Override
+    public String toString() {
+        return "Artwork{" +
+                "artworkId=" + artworkId +
+                ", title='" + title + '\'' +
+                ", artistId=" + artistId +
+                ", year=" + year +
+                ", technique='" + technique + '\'' +
+                ", description='" + description + '\'' +
+                ", qrCode='" + qrCode + '\'' +
+                ", imagePath='" + imagePath + '\'' +
+                ", createdAt=" + createdAt +
+                ", artworkType='" + artworkType + '\'' +
+                ", artistName='" + artistName + '\'' +
+                '}';
+    }
 }
