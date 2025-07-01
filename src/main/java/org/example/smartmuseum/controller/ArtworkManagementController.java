@@ -6,13 +6,14 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import org.example.smartmuseum.model.entity.Artist;
 import org.example.smartmuseum.model.entity.Artwork;
 import org.example.smartmuseum.model.service.ArtworkService;
-import org.example.smartmuseum.util.QRCodeGenerator;
+import org.example.smartmuseum.model.service.ArtistService;
 
 import java.io.File;
 import java.net.URL;
@@ -29,14 +30,14 @@ public class ArtworkManagementController implements Initializable {
     @FXML private TextField txtTechnique;
     @FXML private TextArea txtDescription;
     @FXML private TextField txtImagePath;
-    @FXML private ComboBox<String> cmbArtworkType; // New field for artwork type
+    @FXML private ComboBox<String> cmbArtworkType;
     @FXML private Button btnAdd;
     @FXML private Button btnUpdate;
     @FXML private Button btnDelete;
     @FXML private Button btnClear;
-    @FXML private ImageView imgQRCode;
-    @FXML private Label lblQRCodeText;
-    @FXML private Button btnGenerateQR;
+    @FXML private ImageView imgPreview;
+    @FXML private Label lblImageStatus;
+    @FXML private Button btnLoadImage;
     @FXML private Label lblStatus;
     @FXML private TableView<ArtworkRecord> tableArtworks;
     @FXML private TableColumn<ArtworkRecord, Integer> colArtworkId;
@@ -44,8 +45,8 @@ public class ArtworkManagementController implements Initializable {
     @FXML private TableColumn<ArtworkRecord, String> colArtist;
     @FXML private TableColumn<ArtworkRecord, Integer> colYear;
     @FXML private TableColumn<ArtworkRecord, String> colTechnique;
-    @FXML private TableColumn<ArtworkRecord, String> colArtworkType; // New column
-    @FXML private TableColumn<ArtworkRecord, String> colQRCode;
+    @FXML private TableColumn<ArtworkRecord, String> colArtworkType;
+    @FXML private TableColumn<ArtworkRecord, String> colImagePath;
 
     // Artist management fields
     @FXML private TextField txtArtistName;
@@ -54,6 +55,7 @@ public class ArtworkManagementController implements Initializable {
     @FXML private TextArea txtBiography;
 
     private ArtworkService artworkService;
+    private ArtistService artistService;
     private ObservableList<ArtworkRecord> artworkData;
     private ObservableList<ArtistItem> artistData;
     private ArtworkRecord selectedArtwork;
@@ -61,6 +63,7 @@ public class ArtworkManagementController implements Initializable {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         artworkService = new ArtworkService();
+        artistService = new ArtistService();
         artworkData = FXCollections.observableArrayList();
         artistData = FXCollections.observableArrayList();
 
@@ -68,14 +71,14 @@ public class ArtworkManagementController implements Initializable {
         setupTableColumns();
         setupTableSelection();
         setupArtistComboBox();
-        loadArtists();
+        loadArtistsFromDatabase();
         loadArtworks();
         updateStatistics();
 
         // Initially disable update and delete buttons
         btnUpdate.setDisable(true);
         btnDelete.setDisable(true);
-        btnGenerateQR.setDisable(true);
+        btnLoadImage.setDisable(true);
     }
 
     private void setupArtworkTypeComboBox() {
@@ -93,7 +96,7 @@ public class ArtworkManagementController implements Initializable {
         colYear.setCellValueFactory(new PropertyValueFactory<>("year"));
         colTechnique.setCellValueFactory(new PropertyValueFactory<>("technique"));
         colArtworkType.setCellValueFactory(new PropertyValueFactory<>("artworkType"));
-        colQRCode.setCellValueFactory(new PropertyValueFactory<>("qrCode"));
+        colImagePath.setCellValueFactory(new PropertyValueFactory<>("imagePath"));
 
         // Add custom cell factory for artwork type with colored badges
         colArtworkType.setCellFactory(column -> new TableCell<ArtworkRecord, String>() {
@@ -136,17 +139,17 @@ public class ArtworkManagementController implements Initializable {
                 populateForm(newSelection);
                 btnUpdate.setDisable(false);
                 btnDelete.setDisable(false);
-                btnGenerateQR.setDisable(false);
+                btnLoadImage.setDisable(false);
 
-                // Display existing QR code if available
-                if (newSelection.getQrCode() != null && !newSelection.getQrCode().isEmpty()) {
-                    displayQRCode(newSelection.getQrCode());
+                // Display existing image if available
+                if (newSelection.getImagePath() != null && !newSelection.getImagePath().isEmpty()) {
+                    loadImagePreview(newSelection.getImagePath());
                 }
             } else {
                 btnUpdate.setDisable(true);
                 btnDelete.setDisable(true);
-                btnGenerateQR.setDisable(true);
-                clearQRCode();
+                btnLoadImage.setDisable(true);
+                clearImagePreview();
             }
         });
     }
@@ -155,11 +158,35 @@ public class ArtworkManagementController implements Initializable {
         cmbArtist.setItems(artistData);
     }
 
+    private void loadArtistsFromDatabase() {
+        artistData.clear();
+
+        try {
+            // Load artists from database using service
+            List<Artist> artists = artistService.getAllArtists();
+
+            for (Artist artist : artists) {
+                ArtistItem artistItem = new ArtistItem();
+                artistItem.setArtistId(artist.getArtistId());
+                artistItem.setName(artist.getName());
+                artistItem.setNationality(artist.getNationality());
+                artistItem.setBirthYear(artist.getBirthYear());
+                artistItem.setBiography(artist.getBiography());
+
+                artistData.add(artistItem);
+            }
+
+        } catch (Exception e) {
+            System.err.println("Error loading artists from database: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
     private void loadArtworks() {
         artworkData.clear();
 
         try {
-            // Load from database using service
+            // Load from database using service (already includes JOIN for artist name)
             List<Artwork> artworks = artworkService.getAllArtworks();
 
             for (Artwork artwork : artworks) {
@@ -167,13 +194,12 @@ public class ArtworkManagementController implements Initializable {
                 record.setArtworkId(artwork.getArtworkId());
                 record.setTitle(artwork.getTitle());
                 record.setArtistId(artwork.getArtistId());
-                record.setArtistName(artwork.getArtistName());
+                record.setArtistName(artwork.getArtistName()); // Already joined in service
                 record.setYear(artwork.getYear());
                 record.setTechnique(artwork.getTechnique());
                 record.setDescription(artwork.getDescription());
                 record.setImagePath(artwork.getImagePath());
-                record.setQrCode(artwork.getQrCode());
-                record.setArtworkType(artwork.getArtworkType()); // New field
+                record.setArtworkType(artwork.getArtworkType());
 
                 artworkData.add(record);
             }
@@ -181,8 +207,6 @@ public class ArtworkManagementController implements Initializable {
         } catch (Exception e) {
             System.err.println("Error loading artworks: " + e.getMessage());
             e.printStackTrace();
-            // Fallback to sample data if database fails
-            createSampleArtworks();
         }
     }
 
@@ -194,25 +218,30 @@ public class ArtworkManagementController implements Initializable {
 
         try {
             ArtworkRecord newArtwork = createArtworkFromForm();
-            newArtwork.setArtworkId(artworkData.size() + 1);
 
-            // Create Artwork entity
+            // Create Artwork entity for database
             Artwork artwork = new Artwork();
-            artwork.setArtworkId(newArtwork.getArtworkId());
             artwork.setTitle(newArtwork.getTitle());
-            artwork.setArtistId(newArtwork.getArtistId());
+            artwork.setArtistId(newArtwork.getArtistId()); // Save foreign key
             artwork.setYear(newArtwork.getYear());
             artwork.setTechnique(newArtwork.getTechnique());
             artwork.setDescription(newArtwork.getDescription());
             artwork.setImagePath(newArtwork.getImagePath());
-            artwork.setArtworkType(newArtwork.getArtworkType()); // New field
+            artwork.setArtworkType(newArtwork.getArtworkType());
+            artwork.setQrCode(""); // Empty QR code
             artwork.setCreatedAt(new Timestamp(System.currentTimeMillis()));
 
-            artworkData.add(newArtwork);
+            // Save to database using service
+            boolean success = artworkService.addArtwork(artwork);
 
-            showSuccess("Artwork added successfully: " + newArtwork.getTitle());
-            handleClear();
-            updateStatistics();
+            if (success) {
+                showSuccess("Artwork added successfully: " + newArtwork.getTitle());
+                handleClear();
+                loadArtworks(); // Reload to get updated data with IDs
+                updateStatistics();
+            } else {
+                showError("Failed to add artwork to database");
+            }
 
         } catch (Exception e) {
             showError("Error adding artwork: " + e.getMessage());
@@ -232,10 +261,28 @@ public class ArtworkManagementController implements Initializable {
 
         try {
             updateArtworkFromForm(selectedArtwork);
-            tableArtworks.refresh();
 
-            showSuccess("Artwork updated successfully: " + selectedArtwork.getTitle());
-            handleClear();
+            // Update in database
+            Artwork artwork = new Artwork();
+            artwork.setArtworkId(selectedArtwork.getArtworkId());
+            artwork.setTitle(selectedArtwork.getTitle());
+            artwork.setArtistId(selectedArtwork.getArtistId()); // Save foreign key
+            artwork.setYear(selectedArtwork.getYear());
+            artwork.setTechnique(selectedArtwork.getTechnique());
+            artwork.setDescription(selectedArtwork.getDescription());
+            artwork.setImagePath(selectedArtwork.getImagePath());
+            artwork.setArtworkType(selectedArtwork.getArtworkType());
+            artwork.setQrCode(""); // Empty QR code
+
+            boolean success = artworkService.updateArtwork(artwork);
+
+            if (success) {
+                tableArtworks.refresh();
+                showSuccess("Artwork updated successfully: " + selectedArtwork.getTitle());
+                handleClear();
+            } else {
+                showError("Failed to update artwork in database");
+            }
 
         } catch (Exception e) {
             showError("Error updating artwork: " + e.getMessage());
@@ -256,10 +303,17 @@ public class ArtworkManagementController implements Initializable {
 
         if (confirmAlert.showAndWait().orElse(ButtonType.CANCEL) == ButtonType.OK) {
             try {
-                artworkData.remove(selectedArtwork);
-                showSuccess("Artwork deleted successfully: " + selectedArtwork.getTitle());
-                handleClear();
-                updateStatistics();
+                // Delete from database
+                boolean success = artworkService.deleteArtwork(selectedArtwork.getArtworkId());
+
+                if (success) {
+                    artworkData.remove(selectedArtwork);
+                    showSuccess("Artwork deleted successfully: " + selectedArtwork.getTitle());
+                    handleClear();
+                    updateStatistics();
+                } else {
+                    showError("Failed to delete artwork from database");
+                }
 
             } catch (Exception e) {
                 showError("Error deleting artwork: " + e.getMessage());
@@ -279,20 +333,20 @@ public class ArtworkManagementController implements Initializable {
 
         tableArtworks.getSelectionModel().clearSelection();
         selectedArtwork = null;
-        clearQRCode();
+        clearImagePreview();
 
         btnUpdate.setDisable(true);
         btnDelete.setDisable(true);
-        btnGenerateQR.setDisable(true);
+        btnLoadImage.setDisable(true);
 
         lblStatus.setText("Form cleared. Ready to add new artwork.");
         lblStatus.setStyle("-fx-text-fill: #666666;");
     }
 
     @FXML
-    private void handleBrowseImage() {
+    private void handleUploadImage() {
         FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Select Artwork Image");
+        fileChooser.setTitle("Upload Artwork Image");
         fileChooser.getExtensionFilters().addAll(
                 new FileChooser.ExtensionFilter("Image Files", "*.png", "*.jpg", "*.jpeg", "*.gif", "*.bmp")
         );
@@ -301,32 +355,25 @@ public class ArtworkManagementController implements Initializable {
         File selectedFile = fileChooser.showOpenDialog(stage);
 
         if (selectedFile != null) {
-            txtImagePath.setText(selectedFile.getAbsolutePath());
+            // Upload image to resources and set resource path
+            String resourcePath = uploadImageToResources(selectedFile);
+            if (resourcePath != null) {
+                txtImagePath.setText(resourcePath);
+                loadImagePreview(resourcePath);
+            }
         }
     }
 
     @FXML
-    private void handleGenerateQR() {
-        if (selectedArtwork == null) {
-            showError("Please select an artwork to generate QR code");
+    private void handleLoadImage() {
+        String imagePath = txtImagePath.getText().trim();
+
+        if (imagePath.isEmpty()) {
+            showError("Please enter an image path or browse for an image file");
             return;
         }
 
-        try {
-            String qrData = "ART" + selectedArtwork.getArtworkId() + "_" +
-                    selectedArtwork.getTitle().replaceAll("\\s+", "_");
-            String qrCode = QRCodeGenerator.generateCustomQRData(qrData);
-
-            selectedArtwork.setQrCode(qrCode);
-            tableArtworks.refresh();
-
-            displayQRCode(qrCode);
-
-            showSuccess("QR code generated for: " + selectedArtwork.getTitle());
-
-        } catch (Exception e) {
-            showError("Error generating QR code: " + e.getMessage());
-        }
+        loadImagePreview(imagePath);
     }
 
     @FXML
@@ -344,22 +391,30 @@ public class ArtworkManagementController implements Initializable {
         try {
             int birthYear = birthYearStr.isEmpty() ? 0 : Integer.parseInt(birthYearStr);
 
-            ArtistItem newArtist = new ArtistItem();
-            newArtist.setArtistId(artistData.size() + 1);
-            newArtist.setName(name);
-            newArtist.setNationality(nationality);
-            newArtist.setBirthYear(birthYear);
-            newArtist.setBiography(biography);
+            // Create Artist entity for database
+            Artist artist = new Artist();
+            artist.setName(name);
+            artist.setNationality(nationality);
+            artist.setBirthYear(birthYear);
+            artist.setBiography(biography);
 
-            artistData.add(newArtist);
+            // Save to database
+            boolean success = artistService.addArtist(artist);
 
-            // Clear artist form
-            txtArtistName.clear();
-            txtNationality.clear();
-            txtBirthYear.clear();
-            txtBiography.clear();
+            if (success) {
+                // Reload artists from database to get the new ID
+                loadArtistsFromDatabase();
 
-            showSuccess("Artist added successfully: " + name);
+                // Clear artist form
+                txtArtistName.clear();
+                txtNationality.clear();
+                txtBirthYear.clear();
+                txtBiography.clear();
+
+                showSuccess("Artist added successfully: " + name);
+            } else {
+                showError("Failed to add artist to database");
+            }
 
         } catch (NumberFormatException e) {
             showError("Invalid birth year format");
@@ -370,79 +425,293 @@ public class ArtworkManagementController implements Initializable {
 
     @FXML
     private void handleRefresh() {
+        loadArtistsFromDatabase(); // Reload from database
         loadArtworks();
-        loadArtists();
         updateStatistics();
         showSuccess("Artwork data refreshed");
     }
 
-    private void loadArtists() {
-        artistData.clear();
-        createSampleArtists();
+    private String uploadImageToResources(File sourceFile) {
+        try {
+            // Get the primary target directory
+            String primaryPath = getResourcesImagePath();
+
+            if (primaryPath == null) {
+                showError("Could not find resources/images directory");
+                return null;
+            }
+
+            System.out.println("Primary upload path: " + primaryPath);
+
+            // Create primary target directory
+            File primaryDir = new File(primaryPath);
+            if (!primaryDir.exists()) {
+                boolean created = primaryDir.mkdirs();
+                if (!created) {
+                    showError("Could not create primary images directory");
+                    return null;
+                }
+                System.out.println("Created primary directory: " + primaryDir.getAbsolutePath());
+            }
+
+            // Verify source file
+            if (!sourceFile.exists() || !sourceFile.canRead()) {
+                showError("Cannot read source file: " + sourceFile.getAbsolutePath());
+                return null;
+            }
+
+            // Generate unique filename
+            String originalFileName = sourceFile.getName();
+            String fileExtension = "";
+            String baseName = originalFileName;
+
+            int lastDotIndex = originalFileName.lastIndexOf('.');
+            if (lastDotIndex > 0) {
+                baseName = originalFileName.substring(0, lastDotIndex);
+                fileExtension = originalFileName.substring(lastDotIndex);
+            }
+
+            // Generate unique name if file already exists
+            File primaryTargetFile = new File(primaryDir, originalFileName);
+            int counter = 1;
+            while (primaryTargetFile.exists()) {
+                String newFileName = baseName + "_" + counter + fileExtension;
+                primaryTargetFile = new File(primaryDir, newFileName);
+                counter++;
+            }
+
+            String finalFileName = primaryTargetFile.getName();
+            System.out.println("Final filename: " + finalFileName);
+
+            // Copy to primary location
+            System.out.println("Copying to primary: " + primaryTargetFile.getAbsolutePath());
+            boolean primarySuccess = copyFile(sourceFile, primaryTargetFile);
+
+            if (!primarySuccess) {
+                showError("Failed to copy file to primary location");
+                return null;
+            }
+
+            // DUAL COPY: Also copy to both source and target if needed
+            String userDir = System.getProperty("user.dir");
+            String[] additionalPaths = {};
+
+            // If primary is target/classes, also copy to src/main/resources
+            if (primaryPath.contains("target/classes")) {
+                String sourcePath = primaryPath.replace("/target/classes/", "/src/main/resources/");
+                additionalPaths = new String[]{sourcePath};
+                System.out.println("Primary is target, will also copy to source: " + sourcePath);
+            }
+            // If primary is src/main/resources, also copy to target/classes
+            else if (primaryPath.contains("src/main/resources")) {
+                String targetPath = primaryPath.replace("/src/main/resources/", "/target/classes/");
+                File targetClassesCheck = new File(userDir + "/target/classes");
+                if (targetClassesCheck.exists()) {
+                    additionalPaths = new String[]{targetPath};
+                    System.out.println("Primary is source, will also copy to target: " + targetPath);
+                }
+            }
+
+            // Perform additional copies
+            for (String additionalPath : additionalPaths) {
+                try {
+                    File additionalDir = new File(additionalPath);
+                    if (!additionalDir.exists()) {
+                        additionalDir.mkdirs();
+                    }
+
+                    File additionalFile = new File(additionalDir, finalFileName);
+                    System.out.println("Additional copy to: " + additionalFile.getAbsolutePath());
+
+                    boolean additionalSuccess = copyFile(sourceFile, additionalFile);
+                    if (additionalSuccess) {
+                        System.out.println("Additional copy successful");
+                    } else {
+                        System.err.println("Additional copy failed, but primary copy succeeded");
+                    }
+                } catch (Exception e) {
+                    System.err.println("Additional copy error (non-fatal): " + e.getMessage());
+                }
+            }
+
+            // Verify primary copy
+            if (!primaryTargetFile.exists()) {
+                showError("File copy verification failed");
+                return null;
+            }
+
+            // Return resource path format
+            String resourcePath = "/images/" + finalFileName;
+            showSuccess("Image uploaded successfully: " + finalFileName);
+            System.out.println("Upload completed successfully!");
+            System.out.println("Resource path: " + resourcePath);
+            System.out.println("File size: " + primaryTargetFile.length() + " bytes");
+
+            return resourcePath;
+
+        } catch (Exception e) {
+            showError("Error uploading image: " + e.getMessage());
+            System.err.println("Error uploading image: " + e.getMessage());
+            e.printStackTrace();
+            return null;
+        }
     }
 
-    private void createSampleArtists() {
-        ArtistItem artist1 = new ArtistItem();
-        artist1.setArtistId(1);
-        artist1.setName("Leonardo da Vinci");
-        artist1.setNationality("Italian");
-        artist1.setBirthYear(1452);
-        artist1.setBiography("Renaissance polymath");
-        artistData.add(artist1);
+    private String getResourcesImagePath() {
+        try {
+            System.out.println("Looking for resources/images directory...");
 
-        ArtistItem artist2 = new ArtistItem();
-        artist2.setArtistId(2);
-        artist2.setName("Vincent van Gogh");
-        artist2.setNationality("Dutch");
-        artist2.setBirthYear(1853);
-        artist2.setBiography("Post-impressionist painter");
-        artistData.add(artist2);
+            String userDir = System.getProperty("user.dir");
+            System.out.println("User directory: " + userDir);
 
-        ArtistItem artist3 = new ArtistItem();
-        artist3.setArtistId(3);
-        artist3.setName("Pablo Picasso");
-        artist3.setNationality("Spanish");
-        artist3.setBirthYear(1881);
-        artist3.setBiography("Cubist painter and sculptor");
-        artistData.add(artist3);
+            // Priority 1: Upload to target/classes (immediately accessible)
+            String targetClassesPath = userDir + "/target/classes/images";
+            File targetDir = new File(targetClassesPath);
+
+            // Check if target/classes exists (Maven compiled project)
+            File targetClasses = new File(userDir + "/target/classes");
+            if (targetClasses.exists() && targetClasses.isDirectory()) {
+                System.out.println("Maven target/classes found, using: " + targetClassesPath);
+                return targetClassesPath;
+            }
+
+            // Priority 2: Check if we can find existing target structure
+            String[] targetPaths = {
+                    userDir + "/target/classes/images",
+                    userDir + "/target/classes/org/example/smartmuseum/images",
+                    userDir + "/build/classes/main/images",  // Gradle equivalent
+                    userDir + "/build/resources/main/images"
+            };
+
+            for (String path : targetPaths) {
+                File dir = new File(path);
+                File parent = dir.getParentFile();
+                if (parent != null && parent.exists()) {
+                    System.out.println("Found target directory parent, using: " + path);
+                    return path;
+                }
+            }
+
+            // Priority 3: Source paths (will need rebuild to be accessible)
+            String[] sourcePaths = {
+                    userDir + "/src/main/resources/images",
+                    userDir + "/src/main/resources/org/example/smartmuseum/images"
+            };
+
+            for (String path : sourcePaths) {
+                File dir = new File(path);
+                File parent = dir.getParentFile();
+                if (parent != null && parent.exists()) {
+                    System.out.println("Using source directory: " + path);
+
+                    // Also try to copy to target if it exists
+                    String correspondingTarget = path.replace("/src/main/resources/", "/target/classes/");
+                    File targetDirForSource = new File(correspondingTarget);
+                    if (new File(userDir + "/target/classes").exists()) {
+                        System.out.println("Will also copy to target: " + correspondingTarget);
+                        // We'll handle dual copy in the upload method
+                    }
+
+                    return path;
+                }
+            }
+
+            // Fallback: create in project root
+            String fallbackPath = userDir + "/target/classes/images";
+            System.out.println("Using fallback path: " + fallbackPath);
+            return fallbackPath;
+
+        } catch (Exception e) {
+            System.err.println("Error finding resources path: " + e.getMessage());
+            return System.getProperty("user.dir") + "/images";
+        }
     }
 
-    private void createSampleArtworks() {
-        ArtworkRecord artwork1 = new ArtworkRecord();
-        artwork1.setArtworkId(1);
-        artwork1.setTitle("Mona Lisa");
-        artwork1.setArtistId(1);
-        artwork1.setArtistName("Leonardo da Vinci");
-        artwork1.setYear(1503);
-        artwork1.setTechnique("Oil on poplar");
-        artwork1.setDescription("Famous portrait painting");
-        artwork1.setQrCode("QR_ART1_Mona_Lisa_12345678");
-        artwork1.setArtworkType("Lukisan");
-        artworkData.add(artwork1);
+    private boolean copyFile(File source, File target) {
+        try (java.io.FileInputStream fis = new java.io.FileInputStream(source);
+             java.io.FileOutputStream fos = new java.io.FileOutputStream(target);
+             java.nio.channels.FileChannel sourceChannel = fis.getChannel();
+             java.nio.channels.FileChannel targetChannel = fos.getChannel()) {
 
-        ArtworkRecord artwork2 = new ArtworkRecord();
-        artwork2.setArtworkId(2);
-        artwork2.setTitle("Starry Night");
-        artwork2.setArtistId(2);
-        artwork2.setArtistName("Vincent van Gogh");
-        artwork2.setYear(1889);
-        artwork2.setTechnique("Oil on canvas");
-        artwork2.setDescription("Post-impressionist masterpiece");
-        artwork2.setQrCode("QR_ART2_Starry_Night_87654321");
-        artwork2.setArtworkType("Lukisan");
-        artworkData.add(artwork2);
+            // Use NIO for more efficient file copying
+            long bytesTransferred = sourceChannel.transferTo(0, sourceChannel.size(), targetChannel);
 
-        ArtworkRecord artwork3 = new ArtworkRecord();
-        artwork3.setArtworkId(3);
-        artwork3.setTitle("David");
-        artwork3.setArtistId(3);
-        artwork3.setArtistName("Michelangelo");
-        artwork3.setYear(1504);
-        artwork3.setTechnique("Marble sculpture");
-        artwork3.setDescription("Renaissance sculpture masterpiece");
-        artwork3.setQrCode("");
-        artwork3.setArtworkType("Patung");
-        artworkData.add(artwork3);
+            System.out.println("Bytes transferred: " + bytesTransferred + " / " + source.length());
+
+            // Verify the copy was successful
+            boolean success = bytesTransferred == source.length() && target.exists() && target.length() == source.length();
+
+            if (success) {
+                System.out.println("File copy successful");
+            } else {
+                System.err.println("File copy verification failed");
+                System.err.println("Expected size: " + source.length() + ", Actual size: " + (target.exists() ? target.length() : "file not found"));
+            }
+
+            return success;
+
+        } catch (Exception e) {
+            System.err.println("Error copying file: " + e.getMessage());
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    private void loadImagePreview(String imagePath) {
+        try {
+            Image image = null;
+            String loadedFrom = "";
+
+            // Method 1: Try loading as resource (for images in resources folder)
+            URL imageUrl = getClass().getResource(imagePath);
+            if (imageUrl != null) {
+                image = new Image(imageUrl.toExternalForm());
+                loadedFrom = "Resource: " + imageUrl;
+                System.out.println("Image loaded successfully from resource: " + imageUrl);
+            } else {
+                // Method 2: Try alternative path without leading slash
+                String altPath = imagePath.startsWith("/") ? imagePath.substring(1) : imagePath;
+                imageUrl = getClass().getResource(altPath);
+                if (imageUrl != null) {
+                    image = new Image(imageUrl.toExternalForm());
+                    loadedFrom = "Alternative resource: " + imageUrl;
+                    System.out.println("Image loaded from alternative resource path: " + imageUrl);
+                } else {
+                    // Method 3: Try as absolute file path (for external files)
+                    File imageFile = new File(imagePath);
+                    if (imageFile.exists()) {
+                        image = new Image(imageFile.toURI().toString());
+                        loadedFrom = "File: " + imageFile.getName();
+                        System.out.println("Image loaded from file: " + imageFile.getAbsolutePath());
+                    }
+                }
+            }
+
+            // Set image if found
+            if (image != null && !image.isError()) {
+                imgPreview.setImage(image);
+                lblImageStatus.setText("Image loaded succesfully");
+                lblImageStatus.setStyle("-fx-text-fill: #4CAF50;");
+            } else {
+                clearImagePreview();
+                lblImageStatus.setText("Image not found: " + imagePath);
+                lblImageStatus.setStyle("-fx-text-fill: #F44336;");
+                System.err.println("Image resource not found: " + imagePath);
+            }
+
+        } catch (Exception e) {
+            clearImagePreview();
+            lblImageStatus.setText("Error loading image: " + e.getMessage());
+            lblImageStatus.setStyle("-fx-text-fill: #F44336;");
+            System.err.println("Error loading image: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    private void clearImagePreview() {
+        imgPreview.setImage(null);
+        lblImageStatus.setText("No image loaded");
+        lblImageStatus.setStyle("-fx-text-fill: #666666;");
     }
 
     private boolean validateForm() {
@@ -487,8 +756,7 @@ public class ArtworkManagementController implements Initializable {
         artwork.setTechnique(txtTechnique.getText().trim());
         artwork.setDescription(txtDescription.getText().trim());
         artwork.setImagePath(txtImagePath.getText().trim());
-        artwork.setArtworkType(cmbArtworkType.getValue()); // New field
-        artwork.setQrCode("");
+        artwork.setArtworkType(cmbArtworkType.getValue());
         return artwork;
     }
 
@@ -500,7 +768,7 @@ public class ArtworkManagementController implements Initializable {
         artwork.setTechnique(txtTechnique.getText().trim());
         artwork.setDescription(txtDescription.getText().trim());
         artwork.setImagePath(txtImagePath.getText().trim());
-        artwork.setArtworkType(cmbArtworkType.getValue()); // New field
+        artwork.setArtworkType(cmbArtworkType.getValue());
     }
 
     private void populateForm(ArtworkRecord artwork) {
@@ -509,26 +777,15 @@ public class ArtworkManagementController implements Initializable {
         txtTechnique.setText(artwork.getTechnique());
         txtDescription.setText(artwork.getDescription());
         txtImagePath.setText(artwork.getImagePath());
-        cmbArtworkType.setValue(artwork.getArtworkType()); // New field
+        cmbArtworkType.setValue(artwork.getArtworkType());
 
-        // Set artist
+        // Set artist using foreign key
         for (ArtistItem artist : artistData) {
             if (artist.getArtistId() == artwork.getArtistId()) {
                 cmbArtist.setValue(artist);
                 break;
             }
         }
-    }
-
-    private void displayQRCode(String qrCode) {
-        lblQRCodeText.setText(qrCode);
-        lblQRCodeText.setVisible(true);
-    }
-
-    private void clearQRCode() {
-        imgQRCode.setImage(null);
-        lblQRCodeText.setText("");
-        lblQRCodeText.setVisible(false);
     }
 
     private void updateStatistics() {
@@ -555,8 +812,7 @@ public class ArtworkManagementController implements Initializable {
         private String technique;
         private String description;
         private String imagePath;
-        private String qrCode;
-        private String artworkType; // New field
+        private String artworkType;
 
         // Getters and setters
         public int getArtworkId() { return artworkId; }
@@ -582,9 +838,6 @@ public class ArtworkManagementController implements Initializable {
 
         public String getImagePath() { return imagePath; }
         public void setImagePath(String imagePath) { this.imagePath = imagePath; }
-
-        public String getQrCode() { return qrCode; }
-        public void setQrCode(String qrCode) { this.qrCode = qrCode; }
 
         public String getArtworkType() { return artworkType; }
         public void setArtworkType(String artworkType) { this.artworkType = artworkType; }

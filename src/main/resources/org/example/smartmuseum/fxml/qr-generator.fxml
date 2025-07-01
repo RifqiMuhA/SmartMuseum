@@ -8,36 +8,35 @@
 
 <VBox xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="org.example.smartmuseum.controller.QRGeneratorController"
-      spacing="20.0" styleClass="tab-content">
+      spacing="20.0">
 
     <children>
-        <!-- Header -->
-        <Label text="🔲 QR Code Generator" styleClass="section-title">
-            <font>
-                <Font name="System Bold" size="20.0" />
-            </font>
-        </Label>
+        <!-- Blue Header -->
+        <HBox alignment="CENTER_LEFT" spacing="20.0" style="-fx-background-color: #3498db; -fx-padding: 20;">
+            <children>
+                <Label text="🔲 QR Code Generator" textFill="WHITE">
+                    <font>
+                        <Font name="System Bold" size="20.0" />
+                    </font>
+                </Label>
+                <Region HBox.hgrow="ALWAYS" />
+            </children>
+        </HBox>
 
         <!-- Main Content -->
         <HBox spacing="20.0" VBox.vgrow="ALWAYS">
             <children>
                 <!-- Left Panel - QR Generation Controls -->
-                <VBox spacing="15.0" styleClass="form-panel" prefWidth="400.0">
+                <VBox spacing="15.0"
+                      style="-fx-background-color: white; -fx-border-color: #dee2e6; -fx-border-width: 1; -fx-border-radius: 15; -fx-background-radius: 15; -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.1), 8, 0, 0, 2);"
+                      prefWidth="400.0">
                     <children>
-                        <Label text="QR Code Configuration" styleClass="panel-title">
-                            <font>
-                                <Font name="System Bold" size="16.0" />
-                            </font>
-                        </Label>
+                        <Label text="QR Code Configuration" style="-fx-font-size: 18px; -fx-font-weight: bold;" />
 
                         <!-- QR Type Selection -->
                         <VBox spacing="10.0">
                             <children>
-                                <Label text="QR Code Type:" styleClass="form-label">
-                                    <font>
-                                        <Font name="System Bold" size="14.0" />
-                                    </font>
-                                </Label>
+                                <Label text="QR Code Type:" style="-fx-font-weight: bold; -fx-font-size: 14px;" />
                                 <ComboBox fx:id="cmbQRType" prefWidth="350.0" />
                             </children>
                         </VBox>
@@ -45,11 +44,7 @@
                         <!-- Employee Selection (for Employee QR) -->
                         <VBox spacing="10.0">
                             <children>
-                                <Label text="Select Employee:" styleClass="form-label">
-                                    <font>
-                                        <Font name="System Bold" size="14.0" />
-                                    </font>
-                                </Label>
+                                <Label text="Select Employee:" style="-fx-font-weight: bold; -fx-font-size: 14px;" />
                                 <ComboBox fx:id="cmbEmployee" prefWidth="350.0" />
                             </children>
                         </VBox>
@@ -57,11 +52,7 @@
                         <!-- Custom Data Input (for Custom QR) -->
                         <VBox spacing="10.0">
                             <children>
-                                <Label text="Custom Data:" styleClass="form-label">
-                                    <font>
-                                        <Font name="System Bold" size="14.0" />
-                                    </font>
-                                </Label>
+                                <Label text="Custom Data:" style="-fx-font-weight: bold; -fx-font-size: 14px;" />
                                 <TextArea fx:id="txtCustomData" prefRowCount="4" prefWidth="350.0"
                                           promptText="Enter custom data for QR code..." />
                             </children>
@@ -70,12 +61,14 @@
                         <!-- Generation Controls -->
                         <HBox spacing="15.0" alignment="CENTER">
                             <children>
-                                <Button fx:id="btnGenerate" styleClass="btn-generate" text="🔲 Generate QR Code">
+                                <Button fx:id="btnGenerate" text="🔲 Generate QR Code"
+                                        style="-fx-background-color: #4CAF50; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 12 20 12 20;">
                                     <font>
                                         <Font name="System Bold" size="14.0" />
                                     </font>
                                 </Button>
-                                <Button fx:id="btnSave" styleClass="btn-save" text="💾 Save QR Code">
+                                <Button fx:id="btnSave" text="💾 Save QR Code"
+                                        style="-fx-background-color: #2196F3; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 12 20 12 20;">
                                     <font>
                                         <Font name="System Bold" size="14.0" />
                                     </font>
@@ -85,7 +78,8 @@
 
                         <!-- Status -->
                         <Label fx:id="lblStatus" text="Ready to generate QR codes"
-                               styleClass="status-message" wrapText="true" />
+                               style="-fx-background-color: #f8f9fa; -fx-border-color: #dee2e6; -fx-border-width: 1; -fx-border-radius: 8; -fx-background-radius: 8; -fx-padding: 12;"
+                               wrapText="true" />
                     </children>
                     <padding>
                         <Insets bottom="15.0" left="15.0" right="15.0" top="15.0" />
@@ -93,21 +87,22 @@
                 </VBox>
 
                 <!-- Right Panel - QR Code Display -->
-                <VBox spacing="15.0" styleClass="form-panel" prefWidth="400.0">
+                <VBox spacing="15.0"
+                      style="-fx-background-color: white; -fx-border-color: #dee2e6; -fx-border-width: 1; -fx-border-radius: 15; -fx-background-radius: 15; -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.1), 8, 0, 0, 2);"
+                      prefWidth="400.0">
                     <children>
-                        <Label text="Generated QR Code" styleClass="panel-title">
-                            <font>
-                                <Font name="System Bold" size="16.0" />
-                            </font>
-                        </Label>
+                        <Label text="Generated QR Code" style="-fx-font-size: 18px; -fx-font-weight: bold;" />
 
                         <!-- QR Code Image -->
-                        <VBox alignment="CENTER" spacing="15.0" styleClass="qr-display-container">
+                        <VBox alignment="CENTER" spacing="15.0"
+                              style="-fx-background-color: #f8f9fa; -fx-border-color: #dee2e6; -fx-border-width: 1; -fx-border-radius: 10; -fx-background-radius: 10;">
                             <children>
                                 <ImageView fx:id="imgQRCode" fitHeight="300.0" fitWidth="300.0"
-                                           preserveRatio="true" styleClass="qr-image" />
+                                           preserveRatio="true"
+                                           style="-fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.2), 10, 0, 0, 3);" />
 
-                                <Label fx:id="lblQRData" text="QR Data: -" styleClass="qr-data-label"
+                                <Label fx:id="lblQRData" text="QR Data: -"
+                                       style="-fx-background-color: white; -fx-background-radius: 5; -fx-padding: 8; -fx-font-weight: bold;"
                                        wrapText="true" prefWidth="350.0">
                                     <font>
                                         <Font name="System" size="11.0" />
@@ -122,16 +117,12 @@
                         <!-- Instructions -->
                         <VBox spacing="8.0">
                             <children>
-                                <Label text="📋 Instructions:" styleClass="panel-subtitle">
-                                    <font>
-                                        <Font name="System Bold" size="12.0" />
-                                    </font>
-                                </Label>
-                                <Label text="1. Select QR code type (Employee or Custom)" styleClass="instruction-text" />
-                                <Label text="2. Choose employee or enter custom data" styleClass="instruction-text" />
-                                <Label text="3. Click 'Generate QR Code'" styleClass="instruction-text" />
-                                <Label text="4. Save the QR code as PNG file" styleClass="instruction-text" />
-                                <Label text="5. Use QR code for attendance scanning" styleClass="instruction-text" />
+                                <Label text="📋 Instructions:" style="-fx-font-weight: bold; -fx-font-size: 14px;" />
+                                <Label text="1. Select QR code type (Employee or Custom)" style="-fx-font-size: 12px;" />
+                                <Label text="2. Choose employee or enter custom data" style="-fx-font-size: 12px;" />
+                                <Label text="3. Click 'Generate QR Code'" style="-fx-font-size: 12px;" />
+                                <Label text="4. Save the QR code as PNG file" style="-fx-font-size: 12px;" />
+                                <Label text="5. Use QR code for attendance scanning" style="-fx-font-size: 12px;" />
                             </children>
                         </VBox>
                     </children>
@@ -140,10 +131,9 @@
                     </padding>
                 </VBox>
             </children>
+            <padding>
+                <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+            </padding>
         </HBox>
     </children>
-
-    <padding>
-        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
-    </padding>
 </VBox>

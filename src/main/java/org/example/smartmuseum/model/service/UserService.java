@@ -12,6 +12,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
@@ -103,6 +104,80 @@ public class UserService {
         }
     }
 
+    public int addUser(User userData) {
+        System.out.println("Adding new user: " + userData.getUsername());
+
+        try (Connection conn = DatabaseConnection.getInstance().getConnection()) {
+            String query = "INSERT INTO users (username, password_hash, email, phone, role, created_at) VALUES (?, ?, ?, ?, ?, NOW())";
+            PreparedStatement stmt = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
+            stmt.setString(1, userData.getUsername());
+            stmt.setString(2, userData.getPasswordHash());
+            stmt.setString(3, userData.getEmail());
+            stmt.setString(4, userData.getPhone());
+            stmt.setString(5, userData.getRole().getValue());
+
+            int affectedRows = stmt.executeUpdate();
+            if (affectedRows > 0) {
+                ResultSet generatedKeys = stmt.getGeneratedKeys();
+                if (generatedKeys.next()) {
+                    return generatedKeys.getInt(1); // Return the generated user_id
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Error adding user: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return -1; // Return -1 if failed
+    }
+
+    public boolean deleteUser(int userId) {
+        System.out.println("Deleting user with ID: " + userId);
+
+        try (Connection conn = DatabaseConnection.getInstance().getConnection()) {
+            String query = "DELETE FROM users WHERE user_id = ?";
+            PreparedStatement stmt = conn.prepareStatement(query);
+            stmt.setInt(1, userId);
+
+            int affectedRows = stmt.executeUpdate();
+            if (affectedRows > 0) {
+                // Remove from active users if exists
+                activeUsers.remove(userId);
+                return true;
+            }
+        } catch (SQLException e) {
+            System.err.println("Error deleting user: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public User getUserById(int userId) {
+        System.out.println("Getting user by ID: " + userId);
+
+        try (Connection conn = DatabaseConnection.getInstance().getConnection()) {
+            String query = "SELECT * FROM users WHERE user_id = ?";
+            PreparedStatement stmt = conn.prepareStatement(query);
+            stmt.setInt(1, userId);
+
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                User user = new User();
+                user.setUserId(rs.getInt("user_id"));
+                user.setUsername(rs.getString("username"));
+                user.setEmail(rs.getString("email"));
+                user.setPhone(rs.getString("phone"));
+                user.setRole(UserRole.fromString(rs.getString("role")));
+                user.setPasswordHash(rs.getString("password_hash"));
+                user.setCreatedAt(rs.getTimestamp("created_at"));
+                return user;
+            }
+        } catch (SQLException e) {
+            System.err.println("Error getting user by ID: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return null;
+    }
+
     public boolean updateUser(User user) {
         System.out.println("Updating user: " + user.getUsername());
 
@@ -150,9 +225,9 @@ public class UserService {
                 User user = new User();
                 user.setUserId(rs.getInt("user_id"));
                 user.setUsername(rs.getString("username"));
+                user.setRole(UserRole.fromString(rs.getString("role")));
                 user.setEmail(rs.getString("email"));
                 user.setPhone(rs.getString("phone"));
-                user.setRole(UserRole.fromString(rs.getString("role")));
                 user.setCreatedAt(rs.getTimestamp("created_at"));
 
                 // Create appropriate BaseUser type

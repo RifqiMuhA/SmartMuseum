@@ -503,6 +503,24 @@
     -fx-background-color: linear-gradient(to bottom, #7f8c8d, #6c7b7d);
 }
 
+.btn-reset {
+    -fx-background-color: #9b59b6;
+    -fx-text-fill: white;
+    -fx-background-radius: 4px;
+    -fx-padding: 8px 16px;
+    -fx-cursor: hand;
+}
+
+.btn-reset:hover {
+    -fx-background-color: #8e44ad;
+}
+
+.btn-reset:disabled {
+    -fx-background-color: #bdc3c7;
+    -fx-text-fill: #7f8c8d;
+    -fx-cursor: default;
+}
+
 /* Status Message */
 .status-message {
     -fx-background-color: #f8f9fa;
@@ -574,4 +592,160 @@
 
 .btn-process:hover {
     -fx-background-color: linear-gradient(to bottom, #e67e22, #d35400);
+}
+
+/* Additional Button Styles for Upload and Navigation */
+.btn-upload {
+    -fx-background-color: linear-gradient(to bottom, #3498db, #2980b9);
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-background-radius: 8;
+    -fx-border-radius: 8;
+    -fx-padding: 8 12 8 12;
+}
+
+.btn-upload:hover {
+    -fx-background-color: linear-gradient(to bottom, #2980b9, #21618c);
+    -fx-scale-x: 1.05;
+    -fx-scale-y: 1.05;
+}
+
+.btn-nav {
+    -fx-background-color: linear-gradient(to bottom, #95a5a6, #7f8c8d);
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-background-radius: 6;
+    -fx-border-radius: 6;
+    -fx-padding: 6 12 6 12;
+}
+
+.btn-nav:hover {
+    -fx-background-color: linear-gradient(to bottom, #7f8c8d, #6c7b7d);
+}
+
+.btn-load-image {
+    -fx-background-color: linear-gradient(to bottom, #9b59b6, #8e44ad);
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-background-radius: 6;
+    -fx-border-radius: 6;
+    -fx-padding: 8 12 8 12;
+}
+
+.btn-load-image:hover {
+    -fx-background-color: linear-gradient(to bottom, #8e44ad, #7d3c98);
+}
+
+.btn-generate {
+    -fx-background-color: linear-gradient(to bottom, #27ae60, #229954);
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-background-radius: 10;
+    -fx-border-radius: 10;
+    -fx-padding: 12 20 12 20;
+}
+
+.btn-generate:hover {
+    -fx-background-color: linear-gradient(to bottom, #229954, #1e8449);
+}
+
+.btn-save {
+    -fx-background-color: linear-gradient(to bottom, #3498db, #2980b9);
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-background-radius: 10;
+    -fx-border-radius: 10;
+    -fx-padding: 12 20 12 20;
+}
+
+.btn-save:hover {
+    -fx-background-color: linear-gradient(to bottom, #2980b9, #21618c);
+}
+
+.btn-start {
+    -fx-background-color: linear-gradient(to bottom, #27ae60, #229954);
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-background-radius: 6;
+    -fx-border-radius: 6;
+    -fx-padding: 8 12 8 12;
+}
+
+.btn-start:hover {
+    -fx-background-color: linear-gradient(to bottom, #229954, #1e8449);
+}
+
+.btn-pause {
+    -fx-background-color: linear-gradient(to bottom, #f39c12, #e67e22);
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-background-radius: 6;
+    -fx-border-radius: 6;
+    -fx-padding: 8 12 8 12;
+}
+
+.btn-pause:hover {
+    -fx-background-color: linear-gradient(to bottom, #e67e22, #d35400);
+}
+
+.btn-end {
+    -fx-background-color: linear-gradient(to bottom, #e74c3c, #c0392b);
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-background-radius: 6;
+    -fx-border-radius: 6;
+    -fx-padding: 8 12 8 12;
+}
+
+.btn-end:hover {
+    -fx-background-color: linear-gradient(to bottom, #c0392b, #a93226);
+}
+
+/* Image Preview Container */
+.image-preview-container {
+    -fx-background-color: #f8f9fa;
+    -fx-border-color: #dee2e6;
+    -fx-border-width: 1;
+    -fx-border-radius: 10;
+    -fx-background-radius: 10;
+}
+
+.image-status-text {
+    -fx-text-fill: #6c757d;
+    -fx-font-size: 11;
+}
+
+/* QR Display Container */
+.qr-display-container {
+    -fx-background-color: #f8f9fa;
+    -fx-border-color: #dee2e6;
+    -fx-border-width: 1;
+    -fx-border-radius: 10;
+    -fx-background-radius: 10;
+}
+
+.qr-image {
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.2), 10, 0, 0, 3);
+}
+
+.qr-data-label {
+    -fx-text-fill: #2c3e50;
+    -fx-font-weight: bold;
+    -fx-background-color: white;
+    -fx-background-radius: 5;
+    -fx-padding: 8;
+}
+
+.instruction-text {
+    -fx-text-fill: #6c757d;
+    -fx-font-size: 11;
+}
+
+/* Auction Controls */
+.auction-controls {
+    -fx-background-color: #f8f9fa;
+    -fx-border-color: #dee2e6;
+    -fx-border-width: 1;
+    -fx-border-radius: 10;
+    -fx-background-radius: 10;
 }

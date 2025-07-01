@@ -37,7 +37,7 @@ public class SmartMuseumAttendanceApp extends Application {
 
         stage.setTitle("Smart Museum - SeniMatic");
         stage.setScene(scene);
-        stage.setResizable(false);
+        stage.setResizable(true);
         stage.show();
 
         // Handle application close

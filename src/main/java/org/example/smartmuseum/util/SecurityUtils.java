@@ -53,11 +53,21 @@ public class SecurityUtils {
     }
 
     /**
-     * Generate simple hash for demo purposes
+     * Generate simple hash for demo purposes (SHA-256)
      * @param password Password to hash
-     * @return Simple hash
+     * @return SHA-256 hash
      */
     public static String simpleHash(String password) {
-        return "$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iYqiSekGkcSs6WDOQZW.p6.9Hm6G"; // Mock BCrypt hash
+        try {
+            MessageDigest md = MessageDigest.getInstance("SHA-256");
+            byte[] hashedPassword = md.digest(password.getBytes());
+            StringBuilder sb = new StringBuilder();
+            for (byte b : hashedPassword) {
+                sb.append(String.format("%02x", b));
+            }
+            return sb.toString();
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException("Error hashing password", e);
+        }
     }
 }

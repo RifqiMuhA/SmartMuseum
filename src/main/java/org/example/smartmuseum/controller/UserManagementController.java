@@ -31,6 +31,7 @@ public class UserManagementController implements Initializable {
     @FXML private Button btnUpdate;
     @FXML private Button btnDelete;
     @FXML private Button btnClear;
+    @FXML private Button btnResetPassword;
     @FXML private Label lblStatus;
     @FXML private TableView<UserRecord> tableUsers;
     @FXML private TableColumn<UserRecord, Integer> colUserId;
@@ -52,12 +53,18 @@ public class UserManagementController implements Initializable {
         setupComboBox();
         setupTableColumns();
         setupTableSelection();
+
+        // DISABLE PASSWORD FIELD
+        txtPassword.setDisable(true);
+        txtPassword.setPromptText("Use Reset Password button to change password");
+
         loadUsers();
         updateStatistics();
 
         // Initially disable update and delete buttons
         btnUpdate.setDisable(true);
         btnDelete.setDisable(true);
+        btnResetPassword.setDisable(true);
     }
 
     private void setupComboBox() {
@@ -78,16 +85,82 @@ public class UserManagementController implements Initializable {
 
     private void setupTableSelection() {
         tableUsers.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
+            // Update selectedUser field
             selectedUser = newSelection;
-            if (newSelection != null) {
+
+            // Enable/disable buttons berdasarkan selection
+            boolean hasSelection = (newSelection != null);
+            btnUpdate.setDisable(!hasSelection);
+            btnDelete.setDisable(!hasSelection);
+            btnResetPassword.setDisable(!hasSelection);
+
+            if (hasSelection) {
+                // Populate form dengan data yang dipilih
                 populateForm(newSelection);
-                btnUpdate.setDisable(false);
-                btnDelete.setDisable(false);
+
+                // Update status
+                lblStatus.setText("Selected user: " + newSelection.getUsername());
+                lblStatus.setStyle("-fx-text-fill: #2196F3;");
             } else {
-                btnUpdate.setDisable(true);
-                btnDelete.setDisable(true);
+                // Clear form jika tidak ada selection
+                lblStatus.setText("No user selected");
+                lblStatus.setStyle("-fx-text-fill: #666666;");
             }
         });
+    }
+
+    @FXML
+    private void handleResetPassword() {
+        UserRecord currentSelectedUser = tableUsers.getSelectionModel().getSelectedItem();
+
+        if (currentSelectedUser == null) {
+            showErrorAlert("Reset Password Error", "Please select a user to reset password");
+            return;
+        }
+
+        // Konfirmasi dialog
+        Alert confirmAlert = new Alert(Alert.AlertType.CONFIRMATION);
+        confirmAlert.setTitle("Reset Password");
+        confirmAlert.setHeaderText("Reset User Password");
+        confirmAlert.setContentText("Are you sure you want to reset password for user: " +
+                currentSelectedUser.getUsername() + "?\nNew password will be: 'password'");
+
+        if (confirmAlert.showAndWait().orElse(ButtonType.CANCEL) == ButtonType.OK) {
+            try {
+                // Create User entity for password reset
+                User existingUser = userService.getUserById(currentSelectedUser.getUserId());
+                if (existingUser == null) {
+                    showErrorAlert("Reset Error", "User not found in database");
+                    return;
+                }
+
+                User user = new User();
+                user.setUserId(currentSelectedUser.getUserId());
+                user.setUsername(currentSelectedUser.getUsername());
+                user.setEmail(currentSelectedUser.getEmail());
+                user.setPhone(currentSelectedUser.getPhone());
+                user.setRole(UserRole.valueOf(currentSelectedUser.getRole().toUpperCase()));
+
+                // Set password ke "password"
+                user.setPasswordHash(SecurityUtils.hashPassword("password", SecurityUtils.generateSalt()));
+
+                if (userService.updateUser(user)) {
+                    // Update tampilan password di form
+                    txtPassword.setText("********");
+                    txtPassword.setPromptText("Password has been reset to 'password'");
+
+                    // Show success alert
+                    showSuccessAlert("Reset Password", "Password reset successfully for user: " + currentSelectedUser.getUsername() +
+                            "\nNew password: 'password'");
+                } else {
+                    showErrorAlert("Reset Failed", "Failed to reset password in database");
+                }
+
+            } catch (Exception e) {
+                showErrorAlert("Reset Error", "Error resetting password: " + e.getMessage());
+                e.printStackTrace();
+            }
+        }
     }
 
     @FXML
@@ -113,22 +186,28 @@ public class UserManagementController implements Initializable {
             // Register user
             if (userService.register(user)) {
                 userData.add(newUserRecord);
-                showSuccess("User added successfully: " + newUserRecord.getUsername());
-                handleClear();
                 updateStatistics();
+
+                // Show success alert
+                showSuccessAlert("Add User", "User added successfully: " + newUserRecord.getUsername());
+                handleClear();
             } else {
-                showError("Failed to add user to database");
+                showErrorAlert("Add Failed", "Failed to add user to database");
             }
 
         } catch (Exception e) {
-            showError("Error adding user: " + e.getMessage());
+            showErrorAlert("Add Error", "Error adding user: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
     @FXML
     private void handleUpdate() {
-        if (selectedUser == null) {
-            showError("Please select a user to update");
+        // Ambil selectedUser langsung dari table selection untuk memastikan tidak null
+        UserRecord currentSelectedUser = tableUsers.getSelectionModel().getSelectedItem();
+
+        if (currentSelectedUser == null) {
+            showErrorAlert("Update Error", "Please select a user to update");
             return;
         }
 
@@ -137,54 +216,86 @@ public class UserManagementController implements Initializable {
         }
 
         try {
-            updateUserFromForm(selectedUser);
+            // Gunakan currentSelectedUser daripada selectedUser
+            updateUserFromForm(currentSelectedUser);
+
+            // Ambil data user yang sudah ada untuk mendapatkan password lama
+            User existingUser = userService.getUserById(currentSelectedUser.getUserId());
+            if (existingUser == null) {
+                showErrorAlert("Update Error", "User not found in database");
+                return;
+            }
 
             // Create User entity for update
             User user = new User();
-            user.setUserId(selectedUser.getUserId());
-            user.setUsername(selectedUser.getUsername());
-            user.setEmail(selectedUser.getEmail());
-            user.setPhone(selectedUser.getPhone());
-            user.setRole(UserRole.valueOf(selectedUser.getRole().toUpperCase()));
+            user.setUserId(currentSelectedUser.getUserId());
+            user.setUsername(currentSelectedUser.getUsername());
+            user.setEmail(currentSelectedUser.getEmail());
+            user.setPhone(currentSelectedUser.getPhone());
+            user.setRole(UserRole.valueOf(currentSelectedUser.getRole().toUpperCase()));
 
-            if (!txtPassword.getText().isEmpty()) {
-                user.setPasswordHash(SecurityUtils.hashPassword(txtPassword.getText(), SecurityUtils.generateSalt()));
+            // Handle password logic
+            String currentPassword = txtPassword.getText();
+            if (!currentPassword.isEmpty() &&
+                    !currentPassword.matches("[•*]+") && // Bukan karakter sensor
+                    !currentPassword.equals("********")) { // Bukan default sensor
+                // Password baru diinput
+                user.setPasswordHash(SecurityUtils.hashPassword(currentPassword, SecurityUtils.generateSalt()));
+            } else {
+                // Gunakan password lama (sensor atau kosong berarti tidak diubah)
+                user.setPasswordHash(existingUser.getPasswordHash());
             }
 
             if (userService.updateUser(user)) {
+                // Refresh data di table
+                loadUsers(); // Reload semua data untuk memastikan sinkronisasi
                 tableUsers.refresh();
-                showSuccess("User updated successfully: " + selectedUser.getUsername());
+
+                // Show success alert
+                showSuccessAlert("Update User", "User updated successfully: " + currentSelectedUser.getUsername());
                 handleClear();
             } else {
-                showError("Failed to update user in database");
+                showErrorAlert("Update Failed", "Failed to update user in database");
             }
 
         } catch (Exception e) {
-            showError("Error updating user: " + e.getMessage());
+            showErrorAlert("Update Error", "Error updating user: " + e.getMessage());
+            e.printStackTrace(); // Untuk debugging
         }
     }
 
     @FXML
     private void handleDelete() {
-        if (selectedUser == null) {
-            showError("Please select a user to delete");
+        UserRecord currentSelectedUser = tableUsers.getSelectionModel().getSelectedItem();
+
+        if (currentSelectedUser == null) {
+            showErrorAlert("Delete Error", "Please select a user to delete");
             return;
         }
 
         Alert confirmAlert = new Alert(Alert.AlertType.CONFIRMATION);
         confirmAlert.setTitle("Confirm Delete");
         confirmAlert.setHeaderText("Delete User");
-        confirmAlert.setContentText("Are you sure you want to delete user: " + selectedUser.getUsername() + "?");
+        confirmAlert.setContentText("Are you sure you want to delete user: " + currentSelectedUser.getUsername() + "?");
 
         if (confirmAlert.showAndWait().orElse(ButtonType.CANCEL) == ButtonType.OK) {
             try {
-                userData.remove(selectedUser);
-                showSuccess("User deleted successfully: " + selectedUser.getUsername());
-                handleClear();
-                updateStatistics();
+                // Hapus dari database dulu
+                if (userService.deleteUser(currentSelectedUser.getUserId())) {
+                    // Baru hapus dari table
+                    userData.remove(currentSelectedUser);
+                    updateStatistics();
+
+                    // Show success alert
+                    showSuccessAlert("Delete User", "User deleted successfully: " + currentSelectedUser.getUsername());
+                    handleClear();
+                } else {
+                    showErrorAlert("Delete Failed", "Failed to delete user from database");
+                }
 
             } catch (Exception e) {
-                showError("Error deleting user: " + e.getMessage());
+                showErrorAlert("Delete Error", "Error deleting user: " + e.getMessage());
+                e.printStackTrace();
             }
         }
     }
@@ -202,6 +313,7 @@ public class UserManagementController implements Initializable {
 
         btnUpdate.setDisable(true);
         btnDelete.setDisable(true);
+        btnResetPassword.setDisable(true);
 
         lblStatus.setText("Form cleared. Ready to add new user.");
         lblStatus.setStyle("-fx-text-fill: #666666;");
@@ -209,9 +321,20 @@ public class UserManagementController implements Initializable {
 
     @FXML
     private void handleRefresh() {
-        loadUsers();
-        updateStatistics();
-        showSuccess("User data refreshed");
+        try {
+            loadUsers();
+            updateStatistics();
+
+            // Show success alert
+            showSuccessAlert("Refresh Data", "User data refreshed successfully. Total users: " + userData.size());
+
+            // Clear selection
+            handleClear();
+
+        } catch (Exception e) {
+            showErrorAlert("Refresh Error", "Error refreshing user data: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
     private void loadUsers() {
@@ -221,13 +344,25 @@ public class UserManagementController implements Initializable {
             List<BaseUser> users = userService.getAllUsers();
 
             for (BaseUser baseUser : users) {
+                // Ambil data lengkap dari User entity
+                User fullUser = userService.getUserById(baseUser.getUserId()); // Anda perlu method ini
+
                 UserRecord record = new UserRecord();
                 record.setUserId(baseUser.getUserId());
                 record.setUsername(baseUser.getUsername());
-                record.setEmail("user@example.com"); // Default email since BaseUser doesn't have it
-                record.setPhone("081234567890"); // Default phone since BaseUser doesn't have it
+
+                // Set email dan phone dari User entity yang lengkap
+                if (fullUser != null) {
+                    record.setEmail(fullUser.getEmail() != null ? fullUser.getEmail() : "");
+                    record.setPhone(fullUser.getPhone() != null ? fullUser.getPhone() : "");
+                } else {
+                    record.setEmail("");
+                    record.setPhone("");
+                }
+
                 record.setRole(baseUser.getRole().getValue().toUpperCase());
-                record.setCreatedAt("2024-01-01 10:00:00"); // Default timestamp
+                record.setCreatedAt(baseUser.getCreatedAt() != null ?
+                        baseUser.getCreatedAt().toString() : "2024-01-01 10:00:00");
 
                 userData.add(record);
             }
@@ -235,6 +370,39 @@ public class UserManagementController implements Initializable {
             System.err.println("Error loading users: " + e.getMessage());
             createSampleUsers(); // Fallback to sample data
         }
+    }
+
+    // Method untuk Success Alert
+    private void showSuccessAlert(String title, String message) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
+
+        // Tetap update status label juga
+        showSuccess(message);
+    }
+
+    // Method untuk Error Alert
+    private void showErrorAlert(String title, String message) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
+
+        // Tetap update status label juga
+        showError(message);
+    }
+
+    // Method untuk Warning Alert
+    private void showWarningAlert(String title, String message) {
+        Alert alert = new Alert(Alert.AlertType.WARNING);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
     }
 
     private void createSampleUsers() {
@@ -274,42 +442,37 @@ public class UserManagementController implements Initializable {
         String phone = txtPhone.getText().trim();
 
         if (!ValidationHelper.isValidRequiredString(username, "Username")) {
-            showError("Username is required");
+            showErrorAlert("Validation Error", "Username is required");
             return false;
         }
 
         if (!ValidationHelper.isValidUsername(username)) {
-            showError("Invalid username format");
+            showErrorAlert("Validation Error", "Invalid username format");
             return false;
         }
 
-        if (password.isEmpty() && selectedUser == null) {
-            showError("Password is required for new users");
+        // Untuk user baru, password wajib
+        if (selectedUser == null && password.isEmpty()) {
+            showErrorAlert("Validation Error", "Password is required for new users");
             return false;
         }
 
-        if (!password.isEmpty() && !ValidationHelper.isValidPassword(password)) {
-            showError("Password must be at least 6 characters");
+        // Validasi password hanya jika diisi dan bukan sensor
+        if (!password.isEmpty() &&
+                !password.matches("[•*]+") &&
+                !password.equals("********") &&
+                !ValidationHelper.isValidPassword(password)) {
+            showErrorAlert("Validation Error", "Password must be at least 6 characters");
             return false;
         }
 
-        if (email.isEmpty()) {
-            showError("Email is required");
+        if (!email.isEmpty() && !ValidationHelper.isValidEmail(email)) {
+            showErrorAlert("Validation Error", "Invalid email format");
             return false;
         }
 
-        if (!ValidationHelper.isValidEmail(email)) {
-            showError("Invalid email format");
-            return false;
-        }
-
-        if (phone.isEmpty()) {
-            showError("Phone is required");
-            return false;
-        }
-
-        if (!ValidationHelper.isValidPhone(phone)) {
-            showError("Invalid phone format");
+        if (!phone.isEmpty() && !ValidationHelper.isValidPhone(phone)) {
+            showErrorAlert("Validation Error", "Invalid phone format");
             return false;
         }
 
@@ -339,7 +502,16 @@ public class UserManagementController implements Initializable {
         txtEmail.setText(user.getEmail());
         txtPhone.setText(user.getPhone());
         cmbRole.setValue(UserRole.fromString(user.getRole().toLowerCase()));
-        txtPassword.clear(); // Don't show existing password
+
+        // Tampilkan sensor berdasarkan panjang password asli
+        if (user.getPasswordLength() > 0) {
+            String passwordSensor = "*".repeat(user.getPasswordLength());
+            txtPassword.setText(passwordSensor);
+        } else {
+            txtPassword.setText("********"); // Default 8 karakter
+        }
+
+        txtPassword.setPromptText("Enter new password to change");
     }
 
     private void updateStatistics() {
@@ -364,6 +536,7 @@ public class UserManagementController implements Initializable {
         private String phone;
         private String role;
         private String createdAt;
+        private int passwordLength;
 
         // Getters and setters
         public int getUserId() { return userId; }
@@ -374,6 +547,9 @@ public class UserManagementController implements Initializable {
 
         public String getEmail() { return email; }
         public void setEmail(String email) { this.email = email; }
+
+        public int getPasswordLength() { return passwordLength; }
+        public void setPasswordLength(int passwordLength) { this.passwordLength = passwordLength; }
 
         public String getPhone() { return phone; }
         public void setPhone(String phone) { this.phone = phone; }

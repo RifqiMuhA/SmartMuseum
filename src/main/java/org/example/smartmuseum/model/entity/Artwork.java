@@ -13,14 +13,13 @@ public class Artwork {
     private String imagePath;
     private Timestamp createdAt;
     private String artworkType;
-    private String artistName;
+    private String artistName; // For JOIN queries
 
     // Constructors
     public Artwork() {}
 
     public Artwork(int artworkId, String title, int artistId, int year, String technique,
-                   String description, String qrCode, String imagePath, Timestamp createdAt,
-                   String artworkType, String artistName) {
+                   String description, String qrCode, String imagePath, Timestamp createdAt, String artworkType) {
         this.artworkId = artworkId;
         this.title = title;
         this.artistId = artistId;
@@ -31,7 +30,28 @@ public class Artwork {
         this.imagePath = imagePath;
         this.createdAt = createdAt;
         this.artworkType = artworkType;
-        this.artistName = artistName;
+    }
+
+    // Method to get badge color based on artwork type
+    public String getBadgeColor() {
+        if (artworkType == null) return "#6c757d"; // Gray for unknown
+
+        switch (artworkType.toLowerCase()) {
+            case "lukisan":
+                return "#007bff"; // Blue
+            case "patung":
+                return "#28a745"; // Green
+            case "keramik":
+                return "#dc3545"; // Red
+            case "batik":
+                return "#ffc107"; // Yellow
+            case "fotografi":
+                return "#6f42c1"; // Purple
+            case "kaligrafi":
+                return "#fd7e14"; // Orange
+            default:
+                return "#6c757d"; // Gray
+        }
     }
 
     // Getters and Setters
@@ -68,27 +88,6 @@ public class Artwork {
     public String getArtistName() { return artistName; }
     public void setArtistName(String artistName) { this.artistName = artistName; }
 
-    public String getBadgeColor() {
-        if (artworkType == null) return "#6c757d";
-
-        switch (artworkType.toLowerCase()) {
-            case "lukisan":
-                return "#007bff";
-            case "patung":
-                return "#28a745";
-            case "keramik":
-                return "#dc3545";
-            case "batik":
-                return "#ffc107";
-            case "fotografi":
-                return "#6f42c1";
-            case "kaligrafi":
-                return "#fd7e14";
-            default:
-                return "#6c757d";
-        }
-    }
-
     @Override
     public String toString() {
         return "Artwork{" +
@@ -97,12 +96,7 @@ public class Artwork {
                 ", artistId=" + artistId +
                 ", year=" + year +
                 ", technique='" + technique + '\'' +
-                ", description='" + description + '\'' +
-                ", qrCode='" + qrCode + '\'' +
-                ", imagePath='" + imagePath + '\'' +
-                ", createdAt=" + createdAt +
                 ", artworkType='" + artworkType + '\'' +
-                ", artistName='" + artistName + '\'' +
                 '}';
     }
 }

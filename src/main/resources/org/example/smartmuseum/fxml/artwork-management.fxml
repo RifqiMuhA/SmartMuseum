@@ -8,19 +8,19 @@
 
 <VBox xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="org.example.smartmuseum.controller.ArtworkManagementController"
-      spacing="20.0" styleClass="tab-content">
+      spacing="20.0">
 
     <children>
-        <!-- Header -->
-        <HBox alignment="CENTER_LEFT" spacing="20.0">
+        <!-- Blue Header -->
+        <HBox alignment="CENTER_LEFT" spacing="20.0" style="-fx-background-color: #3498db; -fx-padding: 20;">
             <children>
-                <Label text="🎨 Artwork Management System" styleClass="section-title">
+                <Label text="🎨 Artwork Management System" textFill="WHITE">
                     <font>
                         <Font name="System Bold" size="20.0" />
                     </font>
                 </Label>
                 <Region HBox.hgrow="ALWAYS" />
-                <Label fx:id="lblTotalArtworks" text="Total Artworks: 0" styleClass="info-label">
+                <Label fx:id="lblTotalArtworks" text="Total Artworks: 0" textFill="WHITE">
                     <font>
                         <Font name="System Bold" size="14.0" />
                     </font>
@@ -69,10 +69,13 @@
                             <HBox spacing="5.0" GridPane.columnIndex="1" GridPane.rowIndex="6">
                                 <children>
                                     <TextField fx:id="txtImagePath" HBox.hgrow="ALWAYS" />
-                                    <Button onAction="#handleBrowseImage" styleClass="btn-browse" text="📁">
+                                    <Button onAction="#handleUploadImage" styleClass="btn-upload" text="⬆️ Upload">
                                         <font>
-                                            <Font size="10.0" />
+                                            <Font size="11.0" />
                                         </font>
+                                        <tooltip>
+                                            <Tooltip text="Upload to resources" />
+                                        </tooltip>
                                     </Button>
                                 </children>
                             </HBox>
@@ -104,18 +107,19 @@
                             </children>
                         </HBox>
 
-                        <!-- QR Code Section -->
-                        <VBox spacing="10.0" styleClass="qr-container-small">
+                        <!-- Image Preview Section -->
+                        <VBox spacing="10.0" styleClass="image-preview-container">
                             <children>
-                                <Label text="Artwork QR Code" styleClass="panel-subtitle">
+                                <Label text="Image Preview" styleClass="panel-subtitle">
                                     <font>
                                         <Font name="System Bold" size="14.0" />
                                     </font>
                                 </Label>
-                                <ImageView fx:id="imgQRCode" fitHeight="100.0" fitWidth="100.0" preserveRatio="true" />
-                                <Label fx:id="lblQRCodeText" text="No QR code generated" styleClass="qr-text-small" wrapText="true" />
-                                <Button fx:id="btnGenerateQR" onAction="#handleGenerateQR"
-                                        styleClass="btn-generate-small" text="🏷️ Generate QR">
+                                <ImageView fx:id="imgPreview" fitHeight="150.0" fitWidth="150.0" preserveRatio="true"
+                                           style="-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.2), 5, 0, 0, 2);" />
+                                <Label fx:id="lblImageStatus" text="No image loaded" styleClass="image-status-text" wrapText="true" />
+                                <Button fx:id="btnLoadImage" onAction="#handleLoadImage"
+                                        styleClass="btn-load-image" text="🖼️ Load Image">
                                     <font>
                                         <Font name="System Bold" size="11.0" />
                                     </font>
@@ -164,7 +168,7 @@
                                         <TableColumn fx:id="colYear" text="Year" prefWidth="80.0" />
                                         <TableColumn fx:id="colTechnique" text="Technique" prefWidth="120.0" />
                                         <TableColumn fx:id="colArtworkType" text="Type" prefWidth="100.0" />
-                                        <TableColumn fx:id="colQRCode" text="QR Code" prefWidth="150.0" />
+                                        <TableColumn fx:id="colImagePath" text="Image Path" prefWidth="150.0" />
                                     </columns>
                                 </TableView>
                             </children>

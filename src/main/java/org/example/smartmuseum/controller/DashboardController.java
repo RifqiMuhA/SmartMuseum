@@ -100,6 +100,20 @@ public class DashboardController implements Initializable {
 
         currentActiveButton = btnDashboard;
         showDashboard();
+
+        // Set dashboard to full screen after everything is loaded
+        Platform.runLater(() -> {
+            try {
+                if (lblUserInfo != null && lblUserInfo.getScene() != null && lblUserInfo.getScene().getWindow() != null) {
+                    Stage stage = (Stage) lblUserInfo.getScene().getWindow();
+                    stage.setMaximized(true);
+                    System.out.println("Dashboard set to full screen");
+                }
+            } catch (Exception e) {
+                System.err.println("Could not set full screen: " + e.getMessage());
+                e.printStackTrace();
+            }
+        });
     }
 
     private boolean checkAuthorization() {

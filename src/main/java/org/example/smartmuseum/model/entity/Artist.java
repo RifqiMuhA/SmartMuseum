@@ -1,11 +1,14 @@
 package org.example.smartmuseum.model.entity;
 
+import java.sql.Timestamp;
+
 public class Artist {
     private int artistId;
     private String name;
     private String biography;
     private int birthYear;
     private String nationality;
+    private Timestamp createdAt; // Added missing field
 
     // Default constructor
     public Artist() {}
@@ -17,6 +20,16 @@ public class Artist {
         this.biography = biography;
         this.birthYear = birthYear;
         this.nationality = nationality;
+    }
+
+    // Constructor with all parameters including createdAt
+    public Artist(int artistId, String name, String biography, int birthYear, String nationality, Timestamp createdAt) {
+        this.artistId = artistId;
+        this.name = name;
+        this.biography = biography;
+        this.birthYear = birthYear;
+        this.nationality = nationality;
+        this.createdAt = createdAt;
     }
 
     // Getters and Setters
@@ -60,6 +73,14 @@ public class Artist {
         this.nationality = nationality;
     }
 
+    public Timestamp getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(Timestamp createdAt) {
+        this.createdAt = createdAt;
+    }
+
     @Override
     public String toString() {
         return "Artist{" +
@@ -68,6 +89,7 @@ public class Artist {
                 ", biography='" + biography + '\'' +
                 ", birthYear=" + birthYear +
                 ", nationality='" + nationality + '\'' +
+                ", createdAt=" + createdAt +
                 '}';
     }
 }
