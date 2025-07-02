@@ -117,12 +117,12 @@
                         <!-- Instructions -->
                         <VBox spacing="8.0">
                             <children>
-                                <Label text="📋 Instructions:" style="-fx-font-weight: bold; -fx-font-size: 14px;" />
-                                <Label text="1. Select QR code type (Employee or Custom)" style="-fx-font-size: 12px;" />
-                                <Label text="2. Choose employee or enter custom data" style="-fx-font-size: 12px;" />
-                                <Label text="3. Click 'Generate QR Code'" style="-fx-font-size: 12px;" />
-                                <Label text="4. Save the QR code as PNG file" style="-fx-font-size: 12px;" />
-                                <Label text="5. Use QR code for attendance scanning" style="-fx-font-size: 12px;" />
+                                <Label text="📋 Petunjuk Penggunaan:" style="-fx-font-weight: bold; -fx-font-size: 14px;" />
+                                <Label text="1. Pilih jenis QR code (Pegawai atau Custom)" style="-fx-font-size: 12px;" />
+                                <Label text="2. Pilih pegawai atau masukkan data custom" style="-fx-font-size: 12px;" />
+                                <Label text="3. Klik 'Generate QR Code'" style="-fx-font-size: 12px;" />
+                                <Label text="4. Simpan QR code sebagai file PNG" style="-fx-font-size: 12px;" />
+                                <Label text="5. Gunakan QR code untuk scan presensi" style="-fx-font-size: 12px;" />
                             </children>
                         </VBox>
                     </children>

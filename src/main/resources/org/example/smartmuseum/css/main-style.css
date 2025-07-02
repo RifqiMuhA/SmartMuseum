@@ -749,3 +749,445 @@
     -fx-border-radius: 10;
     -fx-background-radius: 10;
 }
+
+/* ===================================
+   MODERN DASHBOARD IMPROVEMENTS
+   ================================= */
+
+/* Modern Sidebar Styles */
+.logo-icon-modern {
+    -fx-text-fill: #3498db;
+    -fx-effect: dropshadow(gaussian, rgba(52, 152, 219, 0.3), 8, 0, 0, 0);
+}
+
+.logo-text-modern {
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+}
+
+.logo-subtitle {
+    -fx-text-fill: rgba(255, 255, 255, 0.7);
+    -fx-font-style: italic;
+}
+
+/* Modern Navigation Items */
+.nav-item-modern {
+    -fx-background-color: transparent;
+    -fx-text-fill: rgba(255, 255, 255, 0.8);
+    -fx-font-weight: bold;
+    -fx-alignment: CENTER_LEFT;
+    -fx-padding: 12 20 12 20;
+    -fx-background-radius: 8;
+    -fx-border-radius: 8;
+    -fx-cursor: hand;
+    -fx-max-width: infinity;
+    -fx-pref-width: 250;
+    -fx-border-width: 0 0 0 0;
+}
+
+.nav-item-modern:hover {
+    -fx-background-color: rgba(52, 152, 219, 0.15);
+    -fx-text-fill: white;
+    -fx-border-color: rgba(52, 152, 219, 0.3);
+    -fx-border-width: 0 0 0 3;
+}
+
+.nav-item-active-modern {
+    -fx-background-color: rgba(52, 152, 219, 0.2);
+    -fx-text-fill: white;
+    -fx-border-color: #3498db;
+    -fx-border-width: 0 0 0 3;
+    -fx-effect: dropshadow(gaussian, rgba(52, 152, 219, 0.3), 5, 0, 0, 0);
+}
+
+.nav-separator-modern {
+    -fx-background-color: rgba(255, 255, 255, 0.1);
+    -fx-padding: 8 20 8 20;
+}
+
+/* Modern User Section */
+.user-section-modern {
+    -fx-background-color: rgba(44, 62, 80, 0.3);
+    -fx-border-color: rgba(255, 255, 255, 0.1);
+    -fx-border-width: 1 0 0 0;
+}
+
+.user-info-card {
+    -fx-background-color: rgba(255, 255, 255, 0.1);
+    -fx-background-radius: 10;
+    -fx-border-radius: 10;
+}
+
+.user-avatar-modern {
+    -fx-text-fill: #3498db;
+}
+
+.user-name-modern {
+    -fx-text-fill: white;
+}
+
+.user-role-modern {
+    -fx-text-fill: rgba(255, 255, 255, 0.7);
+}
+
+.logout-btn-modern {
+    -fx-background-color: rgba(231, 76, 60, 0.8);
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-background-radius: 8;
+    -fx-border-radius: 8;
+    -fx-padding: 8 15 8 15;
+    -fx-effect: dropshadow(gaussian, rgba(231, 76, 60, 0.3), 5, 0, 0, 0);
+}
+
+.logout-btn-modern:hover {
+    -fx-background-color: #e74c3c;
+    -fx-scale-x: 1.02;
+    -fx-scale-y: 1.02;
+}
+
+/* Modern Header */
+.top-header-modern {
+    -fx-background-color: white;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.08), 10, 0, 0, 2);
+    -fx-border-color: rgba(0, 0, 0, 0.05);
+    -fx-border-width: 0 0 1 0;
+}
+
+.page-title-modern {
+    -fx-text-fill: #2c3e50;
+    -fx-font-weight: bold;
+}
+
+.page-subtitle-modern {
+    -fx-text-fill: #7f8c8d;
+}
+
+.search-field-modern {
+    -fx-background-color: #f8f9fa;
+    -fx-border-color: #e9ecef;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-padding: 8 12 8 12;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.05), 3, 0, 0, 1);
+}
+
+.search-field-modern:focused {
+    -fx-border-color: #3498db;
+    -fx-effect: dropshadow(gaussian, rgba(52, 152, 219, 0.2), 5, 0, 0, 0);
+}
+
+.time-display-modern {
+    -fx-text-fill: #7f8c8d;
+    -fx-background-color: #f8f9fa;
+    -fx-background-radius: 6;
+    -fx-padding: 6 10 6 10;
+    -fx-border-color: #e9ecef;
+    -fx-border-width: 1;
+    -fx-border-radius: 6;
+}
+
+/* Modern Statistics Cards */
+.stat-card-modern {
+    -fx-background-color: white;
+    -fx-background-radius: 12;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.08), 15, 0, 0, 4);
+    -fx-min-height: 100;
+    -fx-alignment: CENTER_LEFT;
+}
+
+.stat-card-blue-modern {
+    -fx-border-color: #3498db;
+    -fx-border-width: 0 0 0 4;
+    -fx-border-radius: 12 0 0 12;
+}
+
+.stat-card-green-modern {
+    -fx-border-color: #27ae60;
+    -fx-border-width: 0 0 0 4;
+    -fx-border-radius: 12 0 0 12;
+}
+
+.stat-card-orange-modern {
+    -fx-border-color: #f39c12;
+    -fx-border-width: 0 0 0 4;
+    -fx-border-radius: 12 0 0 12;
+}
+
+.stat-card-purple-modern {
+    -fx-border-color: #9b59b6;
+    -fx-border-width: 0 0 0 4;
+    -fx-border-radius: 12 0 0 12;
+}
+
+.stat-icon-container-modern {
+    -fx-background-color: rgba(52, 152, 219, 0.1);
+    -fx-background-radius: 8;
+    -fx-min-width: 40;
+    -fx-min-height: 40;
+    -fx-max-width: 40;
+    -fx-max-height: 40;
+}
+
+.stat-card-green-modern .stat-icon-container-modern {
+    -fx-background-color: rgba(39, 174, 96, 0.1);
+}
+
+.stat-card-orange-modern .stat-icon-container-modern {
+    -fx-background-color: rgba(243, 156, 18, 0.1);
+}
+
+.stat-card-purple-modern .stat-icon-container-modern {
+    -fx-background-color: rgba(155, 89, 182, 0.1);
+}
+
+.stat-icon-modern {
+    -fx-text-fill: #7f8c8d;
+}
+
+.stat-number-modern {
+    -fx-text-fill: #2c3e50;
+    -fx-font-weight: bold;
+}
+
+.stat-label-modern {
+    -fx-text-fill: #95a5a6;
+    -fx-font-weight: 500;
+}
+
+/* Modern Action Cards */
+.action-card-modern {
+    -fx-background-color: white;
+    -fx-background-radius: 12;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.08), 15, 0, 0, 4);
+    -fx-cursor: hand;
+    -fx-border-color: transparent;
+    -fx-border-width: 1;
+    -fx-border-radius: 12;
+}
+
+.action-card-modern:hover {
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.15), 20, 0, 0, 8);
+    -fx-scale-x: 1.02;
+    -fx-scale-y: 1.02;
+}
+
+.action-card-auction-modern {
+    -fx-border-color: rgba(231, 76, 60, 0.2);
+}
+
+.action-card-auction-modern:hover {
+    -fx-border-color: rgba(231, 76, 60, 0.4);
+}
+
+.action-card-museum-modern {
+    -fx-border-color: rgba(39, 174, 96, 0.2);
+}
+
+.action-card-museum-modern:hover {
+    -fx-border-color: rgba(39, 174, 96, 0.4);
+}
+
+.action-icon-container-modern {
+    -fx-background-color: rgba(52, 152, 219, 0.1);
+    -fx-background-radius: 8;
+    -fx-min-width: 40;
+    -fx-min-height: 40;
+    -fx-max-width: 40;
+    -fx-max-height: 40;
+}
+
+.action-card-auction-modern .action-icon-container-modern {
+    -fx-background-color: rgba(231, 76, 60, 0.1);
+}
+
+.action-card-museum-modern .action-icon-container-modern {
+    -fx-background-color: rgba(39, 174, 96, 0.1);
+}
+
+.action-icon-modern {
+    -fx-text-fill: #7f8c8d;
+}
+
+.action-title-modern {
+    -fx-text-fill: #2c3e50;
+    -fx-font-weight: bold;
+}
+
+.action-description-modern {
+    -fx-text-fill: #7f8c8d;
+}
+
+/* Modern Recent Activity */
+.recent-activity-modern {
+    -fx-background-color: white;
+    -fx-background-radius: 12;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.08), 15, 0, 0, 4);
+    -fx-padding: 25;
+}
+
+.section-title-modern {
+    -fx-text-fill: #2c3e50;
+    -fx-font-weight: bold;
+}
+
+.activity-list-modern {
+    -fx-background-color: #f8f9fa;
+    -fx-background-radius: 8;
+    -fx-padding: 15;
+}
+
+.activity-item {
+    -fx-background-color: white;
+    -fx-background-radius: 8;
+    -fx-padding: 12;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.05), 3, 0, 0, 1);
+    -fx-border-color: rgba(0, 0, 0, 0.05);
+    -fx-border-width: 1;
+    -fx-border-radius: 8;
+}
+
+.activity-icon {
+    -fx-text-fill: #3498db;
+    -fx-font-size: 14;
+}
+
+.activity-text {
+    -fx-text-fill: #2c3e50;
+    -fx-font-weight: 500;
+    -fx-font-size: 12;
+}
+
+.activity-time {
+    -fx-text-fill: #95a5a6;
+    -fx-font-size: 10;
+}
+
+/* Background-based Statistics Cards */
+.stat-card-modern-bg {
+    -fx-background-radius: 12;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.08), 15, 0, 0, 4);
+    -fx-min-height: 100;
+    -fx-alignment: CENTER_LEFT;
+    -fx-border-radius: 12;
+}
+
+.stat-card-blue-bg {
+    -fx-background-color: linear-gradient(to bottom right, #3498db, #2980b9);
+}
+
+.stat-card-green-bg {
+    -fx-background-color: linear-gradient(to bottom right, #27ae60, #229954);
+}
+
+.stat-card-orange-bg {
+    -fx-background-color: linear-gradient(to bottom right, #f39c12, #e67e22);
+}
+
+.stat-card-purple-bg {
+    -fx-background-color: linear-gradient(to bottom right, #9b59b6, #8e44ad);
+}
+
+/* Override stat text colors for colored backgrounds */
+.stat-card-blue-bg .stat-number-modern,
+.stat-card-green-bg .stat-number-modern,
+.stat-card-orange-bg .stat-number-modern,
+.stat-card-purple-bg .stat-number-modern {
+    -fx-text-fill: white;
+}
+
+.stat-card-blue-bg .stat-label-modern,
+.stat-card-green-bg .stat-label-modern,
+.stat-card-orange-bg .stat-label-modern,
+.stat-card-purple-bg .stat-label-modern {
+    -fx-text-fill: rgba(255, 255, 255, 0.8);
+}
+
+.stat-card-blue-bg .stat-icon-container-modern,
+.stat-card-green-bg .stat-icon-container-modern,
+.stat-card-orange-bg .stat-icon-container-modern,
+.stat-card-purple-bg .stat-icon-container-modern {
+    -fx-background-color: rgba(255, 255, 255, 0.2);
+}
+
+.stat-card-blue-bg .stat-icon-modern,
+.stat-card-green-bg .stat-icon-modern,
+.stat-card-orange-bg .stat-icon-modern,
+.stat-card-purple-bg .stat-icon-modern {
+    -fx-text-fill: white;
+}
+
+/* Charts Container */
+.charts-container {
+    -fx-alignment: CENTER;
+}
+
+/* Chart Cards */
+.chart-card-modern {
+    -fx-background-color: white;
+    -fx-background-radius: 12;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.08), 15, 0, 0, 4);
+    -fx-border-color: rgba(0, 0, 0, 0.05);
+    -fx-border-width: 1;
+    -fx-border-radius: 12;
+}
+
+.chart-title-modern {
+    -fx-text-fill: #2c3e50;
+    -fx-font-weight: bold;
+    -fx-padding: 0 0 10 0;
+}
+
+/* Pie Chart Styling */
+.artwork-pie-chart {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+}
+
+.artwork-pie-chart .chart-pie-label {
+    -fx-font-size: 10px;
+    -fx-font-weight: bold;
+}
+
+.artwork-pie-chart .chart-pie-label-line {
+    -fx-stroke: #7f8c8d;
+    -fx-stroke-width: 1;
+}
+
+/* Bar Chart Styling */
+.attendance-bar-chart {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+}
+
+.attendance-bar-chart .chart-bar {
+    -fx-background-color: linear-gradient(to top, #3498db, #5dade2);
+    -fx-background-radius: 3 3 0 0;
+}
+
+.attendance-bar-chart .axis {
+    -fx-tick-label-font-size: 10px;
+    -fx-tick-label-fill: #7f8c8d;
+}
+
+.attendance-bar-chart .axis-label {
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #2c3e50;
+}
+
+/* Chart Legend */
+.chart-legend {
+    -fx-background-color: transparent;
+    -fx-padding: 10 0 0 0;
+}
+
+.chart-legend-item {
+    -fx-font-size: 10px;
+    -fx-text-fill: #7f8c8d;
+}
+
+/* Logo Section Enhancement */
+.logo-section .image-view {
+    -fx-effect: dropshadow(gaussian, rgba(52, 152, 219, 0.3), 8, 0, 0, 0);
+}

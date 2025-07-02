@@ -180,7 +180,7 @@
                         <!-- Artist Management -->
                         <VBox spacing="10.0" styleClass="form-panel" prefHeight="200.0">
                             <children>
-                                <Label text="Quick Artist Management" styleClass="panel-title">
+                                <Label text="Artist Management" styleClass="panel-title">
                                     <font>
                                         <Font name="System Bold" size="14.0" />
                                     </font>
@@ -208,10 +208,9 @@
                     </children>
                 </VBox>
             </children>
+            <padding>
+                <Insets bottom="20.0" left="20.0" right="20.0" top="0.0" />
+            </padding>
         </HBox>
     </children>
-
-    <padding>
-        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
-    </padding>
 </VBox>

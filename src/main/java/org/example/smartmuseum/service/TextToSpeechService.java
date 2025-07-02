@@ -86,7 +86,7 @@ public class TextToSpeechService {
             narration.append(artwork.getDescription());
         }
 
-        narration.append(" Thank you for visiting the SeniMatic");
+        narration.append(". Thank you for visiting the SeniMatic");
 
         return narration.toString();
     }

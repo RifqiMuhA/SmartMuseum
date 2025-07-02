@@ -29,22 +29,20 @@ public class ArtworkService {
                 artwork.setArtworkId(rs.getInt("artwork_id"));
                 artwork.setTitle(rs.getString("title"));
                 artwork.setArtistId(rs.getInt("artist_id"));
-                artwork.setArtistName(rs.getString("artist_name")); // JOIN
+                artwork.setArtistName(rs.getString("artist_name"));
                 artwork.setYear(rs.getInt("year"));
                 artwork.setTechnique(rs.getString("technique"));
                 artwork.setDescription(rs.getString("description"));
                 artwork.setQrCode(rs.getString("qr_code"));
                 artwork.setImagePath(rs.getString("image_path"));
                 artwork.setCreatedAt(rs.getTimestamp("created_at"));
-                artwork.setArtworkType(rs.getString("artwork_type")); // Added this line
+                artwork.setArtworkType(rs.getString("artwork_type"));
                 artworks.add(artwork);
             }
 
         } catch (SQLException e) {
             System.err.println("Error loading artworks: " + e.getMessage());
             e.printStackTrace();
-            // Return sample data as fallback
-            return createSampleArtworks();
         }
 
         return artworks;
@@ -107,37 +105,5 @@ public class ArtworkService {
             System.err.println("Error deleting artwork: " + e.getMessage());
             return false;
         }
-    }
-
-    private List<Artwork> createSampleArtworks() {
-        List<Artwork> artworks = new ArrayList<>();
-
-        Artwork artwork1 = new Artwork();
-        artwork1.setArtworkId(1);
-        artwork1.setTitle("Mona Lisa");
-        artwork1.setArtistId(1);
-        artwork1.setArtistName("Leonardo da Vinci");
-        artwork1.setYear(1503);
-        artwork1.setTechnique("Oil on poplar");
-        artwork1.setDescription("Famous portrait painting");
-        artwork1.setQrCode("QR_ART1_Mona_Lisa_12345678");
-        artwork1.setImagePath("/images/mona_lisa.jpg");
-        artwork1.setArtworkType("Lukisan");
-        artworks.add(artwork1);
-
-        Artwork artwork2 = new Artwork();
-        artwork2.setArtworkId(2);
-        artwork2.setTitle("David");
-        artwork2.setArtistId(2);
-        artwork2.setArtistName("Michelangelo");
-        artwork2.setYear(1504);
-        artwork2.setTechnique("Marble sculpture");
-        artwork2.setDescription("Renaissance sculpture masterpiece");
-        artwork2.setQrCode("QR_ART2_David_87654321");
-        artwork2.setImagePath("/images/david.jpg");
-        artwork2.setArtworkType("Patung");
-        artworks.add(artwork2);
-
-        return artworks;
     }
 }

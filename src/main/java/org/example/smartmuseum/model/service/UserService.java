@@ -254,4 +254,20 @@ public class UserService {
 
         return users;
     }
+
+    public int getTotalUserCount() {
+        try (Connection conn = DatabaseConnection.getInstance().getConnection()) {
+            String query = "SELECT COUNT(*) as total FROM users";
+            PreparedStatement stmt = conn.prepareStatement(query);
+            ResultSet rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                return rs.getInt("total");
+            }
+        } catch (SQLException e) {
+            System.err.println("Error getting total user count: " + e.getMessage());
+        }
+
+        return 0;
+    }
 }

@@ -12,6 +12,7 @@ public class Employee {
     private String qrCode;
     private Date hireDate;
     private int salary;
+    private String photoPath; // FIELD BARU UNTUK FOTO
 
     // Constructors
     public Employee() {}
@@ -32,6 +33,18 @@ public class Employee {
         this.qrCode = qrCode;
         this.hireDate = hireDate;
         this.salary = salary;
+    }
+
+    // Constructor dengan photo_path
+    public Employee(int employeeId, int userId, String name, String position, String qrCode, Date hireDate, int salary, String photoPath) {
+        this.employeeId = employeeId;
+        this.userId = userId;
+        this.name = name;
+        this.position = position;
+        this.qrCode = qrCode;
+        this.hireDate = hireDate;
+        this.salary = salary;
+        this.photoPath = photoPath;
     }
 
     public void generateQRCode() throws WriterException {
@@ -93,5 +106,14 @@ public class Employee {
 
     public void setSalary(int salary) {
         this.salary = salary;
+    }
+
+    // GETTER SETTER BARU UNTUK FOTO
+    public String getPhotoPath() {
+        return photoPath;
+    }
+
+    public void setPhotoPath(String photoPath) {
+        this.photoPath = photoPath;
     }
 }

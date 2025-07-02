@@ -1,15 +1,20 @@
 package org.example.smartmuseum.controller;
 
 import javafx.application.Platform;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.chart.*;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
@@ -18,21 +23,24 @@ import org.example.smartmuseum.model.abstracts.BaseUser;
 import org.example.smartmuseum.model.entity.Auction;
 import org.example.smartmuseum.model.entity.Artwork;
 import org.example.smartmuseum.model.entity.User;
+import org.example.smartmuseum.model.entity.Employee;
+import org.example.smartmuseum.model.entity.Attendance;
 import org.example.smartmuseum.model.enums.UserRole;
 import org.example.smartmuseum.util.SessionManager;
 
 import java.io.IOException;
 import java.net.URL;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.List;
-import java.util.ResourceBundle;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.time.Duration;
 
 import org.example.smartmuseum.model.service.ArtworkService;
 import org.example.smartmuseum.model.service.AuctionService;
 import org.example.smartmuseum.model.service.UserService;
+import org.example.smartmuseum.model.service.EmployeeService;
 import org.example.smartmuseum.database.DatabaseManager;
 
 public class DashboardController implements Initializable {
@@ -42,6 +50,7 @@ public class DashboardController implements Initializable {
     @FXML private Label lblPageSubtitle;
     @FXML private Label lblCurrentTime;
     @FXML private Label lblUserInfo;
+    @FXML private ImageView imgLogo;
 
     // Navigation buttons
     @FXML private Button btnDashboard;
@@ -64,6 +73,12 @@ public class DashboardController implements Initializable {
     @FXML private Label lblActiveAuctions;
     @FXML private Label lblTodayAttendance;
 
+    // Charts
+    @FXML private PieChart artworkTypeChart;
+    @FXML private BarChart<String, Number> attendanceBarChart;
+    @FXML private CategoryAxis attendanceXAxis;
+    @FXML private NumberAxis attendanceYAxis;
+
     private Timer clockTimer;
     private Button currentActiveButton;
 
@@ -71,7 +86,28 @@ public class DashboardController implements Initializable {
     private UserService userService;
     private ArtworkService artworkService;
     private AuctionService auctionService;
+    private EmployeeService employeeService;
     private DatabaseManager databaseManager;
+
+    // Class helper buat ambil activity terkini
+    private static class ActivityItem {
+        private final LocalDateTime timestamp;
+        private final String icon;
+        private final String text;
+        private final String timeAgo;
+
+        public ActivityItem(LocalDateTime timestamp, String icon, String text, String timeAgo) {
+            this.timestamp = timestamp;
+            this.icon = icon;
+            this.text = text;
+            this.timeAgo = timeAgo;
+        }
+
+        public LocalDateTime getTimestamp() { return timestamp; }
+        public String getIcon() { return icon; }
+        public String getText() { return text; }
+        public String getTimeAgo() { return timeAgo; }
+    }
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -84,10 +120,13 @@ public class DashboardController implements Initializable {
         userService = new UserService();
         artworkService = new ArtworkService();
         auctionService = new AuctionService();
+        employeeService = new EmployeeService();
         databaseManager = new DatabaseManager();
 
+        loadLogo();
         setupClock();
         setupNavigation();
+        setupCharts();
         loadDashboardData();
 
         // Set user info from session
@@ -98,7 +137,11 @@ public class DashboardController implements Initializable {
             lblUserInfo.setText("Staff1tadd");
         }
 
+        // Set dashboard as active and use modern styling
         currentActiveButton = btnDashboard;
+        if (btnDashboard != null) {
+            btnDashboard.getStyleClass().add("nav-item-active-modern");
+        }
         showDashboard();
 
         // Set dashboard to full screen after everything is loaded
@@ -107,13 +150,156 @@ public class DashboardController implements Initializable {
                 if (lblUserInfo != null && lblUserInfo.getScene() != null && lblUserInfo.getScene().getWindow() != null) {
                     Stage stage = (Stage) lblUserInfo.getScene().getWindow();
                     stage.setMaximized(true);
-                    System.out.println("Dashboard set to full screen");
                 }
             } catch (Exception e) {
                 System.err.println("Could not set full screen: " + e.getMessage());
                 e.printStackTrace();
             }
         });
+    }
+
+    private String getTimeAgo(LocalDateTime pastTime) {
+        LocalDateTime now = LocalDateTime.now();
+        Duration duration = Duration.between(pastTime, now);
+
+        long seconds = duration.getSeconds();
+        long minutes = seconds / 60;
+        long hours = minutes / 60;
+        long days = hours / 24;
+
+        if (days > 0) {
+            return days + (days == 1 ? " hari yang lalu" : " hari yang lalu");
+        } else if (hours > 0) {
+            return hours + (hours == 1 ? " jam yang lalu" : " jam yang lalu");
+        } else if (minutes > 0) {
+            return minutes + (minutes == 1 ? " menit yang lalu" : " menit yang lalu");
+        } else {
+            return "Baru saja";
+        }
+    }
+
+    private void setupCharts() {
+        // Setup Pie Chart
+        if (artworkTypeChart != null) {
+            artworkTypeChart.setTitle("");
+            artworkTypeChart.setLegendVisible(true);
+            artworkTypeChart.setLabelsVisible(true);
+        }
+
+        // Setup Bar Chart dengan Y-axis bilangan bulat
+        if (attendanceBarChart != null) {
+            attendanceBarChart.setTitle("");
+            attendanceBarChart.setLegendVisible(false);
+            attendanceXAxis.setLabel("Tanggal");
+            attendanceYAxis.setLabel("Jumlah Pegawai");
+
+            // Set Y-axis untuk menampilkan hanya bilangan bulat
+            attendanceYAxis.setTickUnit(1.0);  // Interval 1
+            attendanceYAxis.setMinorTickVisible(false);  // Hilangkan tick minor
+            attendanceYAxis.setAutoRanging(true);
+
+            // Format angka menjadi bilangan bulat (tanpa desimal)
+            attendanceYAxis.setTickLabelFormatter(new NumberAxis.DefaultFormatter(attendanceYAxis) {
+                @Override
+                public String toString(Number value) {
+                    return String.valueOf(value.intValue());
+                }
+            });
+        }
+    }
+
+    private void loadArtworkTypeChart() {
+        if (artworkTypeChart != null) {
+            try {
+                List<Artwork> artworks = artworkService.getAllArtworks();
+
+                Map<String, Long> typeCount = artworks.stream()
+                        .collect(Collectors.groupingBy(
+                                artwork -> artwork.getArtworkType() != null ? artwork.getArtworkType() : "Unknown",
+                                Collectors.counting()
+                        ));
+
+                ObservableList<PieChart.Data> pieChartData = FXCollections.observableArrayList();
+
+                typeCount.forEach((type, count) -> {
+                    pieChartData.add(new PieChart.Data(type + " (" + count + ")", count));
+                });
+
+                artworkTypeChart.setData(pieChartData);
+                System.out.println("Artwork type chart loaded with " + pieChartData.size() + " categories");
+
+            } catch (Exception e) {
+                System.err.println("Error loading artwork type chart: " + e.getMessage());
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private void loadAttendanceChart() {
+        if (attendanceBarChart != null) {
+            try {
+                LocalDate now = LocalDate.now();
+                LocalDate startOfMonth = now.withDayOfMonth(1);
+
+                XYChart.Series<String, Number> series = new XYChart.Series<>();
+                series.setName("Presensi Harian");
+
+                Map<LocalDate, Integer> attendanceData = employeeService.getMonthlyAttendanceData(startOfMonth, now);
+
+                int daysToShow = Math.min(10, now.getDayOfMonth());
+                for (int i = daysToShow; i >= 1; i--) {
+                    LocalDate date = now.minusDays(i - 1);
+                    int count = attendanceData.getOrDefault(date, 0);
+                    String dateStr = date.format(DateTimeFormatter.ofPattern("dd"));
+                    series.getData().add(new XYChart.Data<>(dateStr, count));
+                }
+
+                attendanceBarChart.getData().clear();
+                attendanceBarChart.getData().add(series);
+
+                System.out.println("Attendance chart loaded with " + series.getData().size() + " data points");
+
+            } catch (Exception e) {
+                System.err.println("Error loading attendance chart: " + e.getMessage());
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private Map<LocalDate, Integer> getMonthlyAttendanceData(LocalDate startDate, LocalDate endDate) {
+        Map<LocalDate, Integer> attendanceData = new HashMap<>();
+
+        try {
+            // Get all employees
+            List<Employee> employees = employeeService.getAllEmployees();
+
+            // For each day in the range, count attendance
+            LocalDate currentDate = startDate;
+            while (!currentDate.isAfter(endDate)) {
+                int count = 0;
+
+                // For each employee, check if they attended on this date
+                for (Employee employee : employees) {
+                    List<Attendance> employeeAttendance = employeeService.getEmployeeAttendance(employee.getEmployeeId());
+
+                    final LocalDate checkDate = currentDate;
+                    boolean attended = employeeAttendance.stream()
+                            .anyMatch(attendance -> attendance.getDate().toLocalDate().equals(checkDate));
+
+                    if (attended) {
+                        count++;
+                    }
+                }
+
+                attendanceData.put(currentDate, count);
+                currentDate = currentDate.plusDays(1);
+            }
+
+        } catch (Exception e) {
+            System.err.println("Error getting monthly attendance data: " + e.getMessage());
+        }
+
+        return attendanceData;
     }
 
     private boolean checkAuthorization() {
@@ -161,6 +347,19 @@ public class DashboardController implements Initializable {
         }
     }
 
+    private void loadLogo() {
+        try {
+            URL logoUrl = getClass().getResource("/img/logo-putih.png");
+            Image logoImage = new Image(logoUrl.toExternalForm());
+
+            if (logoImage != null && !logoImage.isError()) {
+                imgLogo.setImage(logoImage);
+            }
+        } catch (Exception e) {
+            System.err.println("Error loading logo: " + e.getMessage());
+        }
+    }
+
     private void setupClock() {
         if (lblCurrentTime != null) {
             clockTimer = new Timer(true);
@@ -185,17 +384,17 @@ public class DashboardController implements Initializable {
 
         for (Button btn : navButtons) {
             if (btn != null) {
-                btn.getStyleClass().removeAll("nav-item-active");
+                btn.getStyleClass().removeAll("nav-item-active", "nav-item-active-modern");
             }
         }
     }
 
     private void setActiveNavButton(Button button) {
         if (currentActiveButton != null) {
-            currentActiveButton.getStyleClass().removeAll("nav-item-active");
+            currentActiveButton.getStyleClass().removeAll("nav-item-active", "nav-item-active-modern");
         }
         if (button != null) {
-            button.getStyleClass().add("nav-item-active");
+            button.getStyleClass().add("nav-item-active-modern");
             currentActiveButton = button;
         }
     }
@@ -203,35 +402,27 @@ public class DashboardController implements Initializable {
     private void loadDashboardData() {
         Platform.runLater(() -> {
             try {
-                // Load statistics from database using DatabaseManager
-                List<BaseUser> users = databaseManager.getAllUsers();
-                List<Artwork> artworks = databaseManager.getAllArtworks();
-                List<Auction> activeAuctions = databaseManager.getActiveAuctions();
-                int todayAttendance = databaseManager.getTodayAttendanceCount();
+                // Load real data only - no fallbacks
+                int totalUsers = userService.getTotalUserCount();
+                List<Artwork> artworks = artworkService.getAllArtworks();
+                int activeAuctions = auctionService.getActiveAuctionCount();
+                int todayAttendance = employeeService.getTodayAttendanceCount();
 
-                if (lblTotalUsers != null) lblTotalUsers.setText(String.valueOf(users.size()));
+                // Update labels
+                if (lblTotalUsers != null) lblTotalUsers.setText(String.valueOf(totalUsers));
                 if (lblTotalArtworks != null) lblTotalArtworks.setText(String.valueOf(artworks.size()));
-                if (lblActiveAuctions != null) lblActiveAuctions.setText(String.valueOf(activeAuctions.size()));
+                if (lblActiveAuctions != null) lblActiveAuctions.setText(String.valueOf(activeAuctions));
                 if (lblTodayAttendance != null) lblTodayAttendance.setText(String.valueOf(todayAttendance));
+
+                // Load charts
+                loadArtworkTypeChart();
+                loadAttendanceChart();
 
                 // Load recent activity
                 loadRecentActivity();
-
-                System.out.println("Dashboard data loaded successfully:");
-                System.out.println("- Total Users: " + users.size());
-                System.out.println("- Total Artworks: " + artworks.size());
-                System.out.println("- Active Auctions: " + activeAuctions.size());
-                System.out.println("- Today Attendance: " + todayAttendance);
-
             } catch (Exception e) {
                 System.err.println("Error loading dashboard data: " + e.getMessage());
                 e.printStackTrace();
-
-                // Set default values if database fails
-                if (lblTotalUsers != null) lblTotalUsers.setText("0");
-                if (lblTotalArtworks != null) lblTotalArtworks.setText("0");
-                if (lblActiveAuctions != null) lblActiveAuctions.setText("0");
-                if (lblTodayAttendance != null) lblTodayAttendance.setText("0");
             }
         });
     }
@@ -241,35 +432,89 @@ public class DashboardController implements Initializable {
             activityList.getChildren().clear();
 
             try {
-                List<Auction> recentAuctions = databaseManager.getAllAuctions();
-                List<Artwork> recentArtworks = databaseManager.getAllArtworks();
+                List<ActivityItem> allActivities = new ArrayList<>();
 
-                // Add recent auction activities
-                for (int i = 0; i < Math.min(3, recentAuctions.size()); i++) {
-                    Auction auction = recentAuctions.get(i);
-                    HBox activityItem = createActivityItem("🔨",
-                            "Lelang: " + auction.getStatus().getValue(),
-                            "Beberapa menit yang lalu");
-                    activityList.getChildren().add(activityItem);
+                // Get recent artworks (limit 3)
+                List<Artwork> recentArtworks = artworkService.getAllArtworks();
+                int artworkCount = 0;
+                for (Artwork artwork : recentArtworks) {
+                    if (artworkCount >= 2) break; // Limit to 2 artworks
+
+                    if (artwork.getCreatedAt() != null) {
+                        LocalDateTime createdTime = artwork.getCreatedAt().toLocalDateTime();
+                        String timeAgo = getTimeAgo(createdTime);
+
+                        ActivityItem item = new ActivityItem(
+                                createdTime,
+                                "🎨",
+                                "Karya seni ditambahkan: " + artwork.getTitle(),
+                                timeAgo
+                        );
+                        allActivities.add(item);
+                        artworkCount++;
+                    }
                 }
 
-                // Add recent artwork activities
-                for (int i = 0; i < Math.min(2, recentArtworks.size()); i++) {
-                    Artwork artwork = recentArtworks.get(i);
-                    HBox activityItem = createActivityItem("🎨",
-                            "Karya seni: " + artwork.getTitle(),
-                            "1 jam yang lalu");
+                // Get recent check-ins (limit 2)
+                List<Attendance> recentCheckIns = employeeService.getRecentCheckIns(2);
+                for (Attendance attendance : recentCheckIns) {
+                    LocalDateTime checkInTime = attendance.getCheckIn().toLocalDateTime();
+                    String timeAgo = getTimeAgo(checkInTime);
+
+                    Employee employee = employeeService.getEmployee(attendance.getEmployeeId());
+                    String employeeName = employee != null ? employee.getName() : "Pegawai #" + attendance.getEmployeeId();
+
+                    ActivityItem item = new ActivityItem(
+                            checkInTime,
+                            "✅",
+                            employeeName + " melakukan check-in",
+                            timeAgo
+                    );
+                    allActivities.add(item);
+                }
+
+                // Get recent employee (limit 1)
+                List<Employee> recentEmployees = employeeService.getRecentEmployees(1);
+                for (Employee employee : recentEmployees) {
+                    // Use current time minus some hours as placeholder for employee creation time
+                    LocalDateTime employeeTime = LocalDateTime.now().minusHours(8);
+                    String timeAgo = getTimeAgo(employeeTime);
+
+                    ActivityItem item = new ActivityItem(
+                            employeeTime,
+                            "👥",
+                            "Pegawai terdaftar: " + employee.getName(),
+                            timeAgo
+                    );
+                    allActivities.add(item);
+                }
+
+                // Add system activity
+                LocalDateTime systemTime = LocalDateTime.now().minusHours(4);
+                ActivityItem systemItem = new ActivityItem(
+                        systemTime,
+                        "⚙️",
+                        "Sistem backup berhasil dilakukan",
+                        getTimeAgo(systemTime)
+                );
+                allActivities.add(systemItem);
+
+                // Sort by timestamp (newest first)
+                allActivities.sort((a, b) -> b.getTimestamp().compareTo(a.getTimestamp()));
+
+                // Add to UI
+                for (ActivityItem activity : allActivities) {
+                    HBox activityItem = createActivityItem(
+                            activity.getIcon(),
+                            activity.getText(),
+                            activity.getTimeAgo()
+                    );
                     activityList.getChildren().add(activityItem);
                 }
 
             } catch (Exception e) {
                 System.err.println("Error loading recent activity: " + e.getMessage());
-
-                // Add default activity items
-                HBox defaultItem = createActivityItem("ℹ️",
-                        "Sistem berjalan normal",
-                        "Sekarang");
-                activityList.getChildren().add(defaultItem);
+                e.printStackTrace();
             }
         }
     }
@@ -300,7 +545,7 @@ public class DashboardController implements Initializable {
     @FXML
     private void showDashboard() {
         setActiveNavButton(btnDashboard);
-        if (lblPageTitle != null) lblPageTitle.setText("Hello! Smart Museum");
+        if (lblPageTitle != null) lblPageTitle.setText("Dashboard");
         if (lblPageSubtitle != null) lblPageSubtitle.setText("Selamat datang di sistem manajemen museum digital");
 
         if (dashboardContent != null) {

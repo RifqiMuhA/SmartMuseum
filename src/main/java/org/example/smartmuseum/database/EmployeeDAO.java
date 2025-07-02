@@ -10,7 +10,7 @@ public class EmployeeDAO {
     public List<Employee> getAllStaffEmployees() {
         List<Employee> employees = new ArrayList<>();
         String sql = """
-            SELECT e.employee_id, e.user_id, e.name, e.position, e.qr_code, e.hire_date, e.salary 
+            SELECT e.employee_id, e.user_id, e.name, e.position, e.qr_code, e.hire_date, e.salary, e.photo_path
             FROM employees e 
             JOIN users u ON e.user_id = u.user_id 
             WHERE u.role = 'staff'
@@ -29,7 +29,8 @@ public class EmployeeDAO {
                         rs.getString("position"),
                         rs.getString("qr_code"),
                         rs.getDate("hire_date"),
-                        rs.getInt("salary")
+                        rs.getInt("salary"),
+                        rs.getString("photo_path") // KOLOM BARU
                 );
                 employees.add(employee);
             }
@@ -44,7 +45,7 @@ public class EmployeeDAO {
 
     public Employee getEmployeeById(int employeeId) {
         String sql = """
-            SELECT e.employee_id, e.user_id, e.name, e.position, e.qr_code, e.hire_date, e.salary 
+            SELECT e.employee_id, e.user_id, e.name, e.position, e.qr_code, e.hire_date, e.salary, e.photo_path
             FROM employees e 
             JOIN users u ON e.user_id = u.user_id 
             WHERE e.employee_id = ? AND u.role = 'staff'
@@ -64,7 +65,8 @@ public class EmployeeDAO {
                         rs.getString("position"),
                         rs.getString("qr_code"),
                         rs.getDate("hire_date"),
-                        rs.getInt("salary")
+                        rs.getInt("salary"),
+                        rs.getString("photo_path") // KOLOM BARU
                 );
             }
 
@@ -95,9 +97,29 @@ public class EmployeeDAO {
         }
     }
 
+    // METHOD BARU UNTUK UPDATE FOTO
+    public boolean updateEmployeePhoto(int employeeId, String photoPath) {
+        String sql = "UPDATE employees SET photo_path = ? WHERE employee_id = ?";
+
+        try (Connection conn = DatabaseConnection.getInstance().getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, photoPath);
+            stmt.setInt(2, employeeId);
+
+            int rowsAffected = stmt.executeUpdate();
+            return rowsAffected > 0;
+
+        } catch (SQLException e) {
+            System.err.println("Error updating employee photo: " + e.getMessage());
+            e.printStackTrace();
+            return false;
+        }
+    }
+
     public Employee getEmployeeByQRCode(String qrCode) {
         String sql = """
-            SELECT e.employee_id, e.user_id, e.name, e.position, e.qr_code, e.hire_date, e.salary 
+            SELECT e.employee_id, e.user_id, e.name, e.position, e.qr_code, e.hire_date, e.salary, e.photo_path
             FROM employees e 
             JOIN users u ON e.user_id = u.user_id 
             WHERE e.qr_code = ? AND u.role = 'staff'
@@ -117,7 +139,8 @@ public class EmployeeDAO {
                         rs.getString("position"),
                         rs.getString("qr_code"),
                         rs.getDate("hire_date"),
-                        rs.getInt("salary")
+                        rs.getInt("salary"),
+                        rs.getString("photo_path") // KOLOM BARU
                 );
             }
 
@@ -130,7 +153,7 @@ public class EmployeeDAO {
     }
 
     public boolean addEmployee(Employee employee) {
-        String sql = "INSERT INTO employees (user_id, name, position, qr_code, hire_date, salary) VALUES (?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO employees (user_id, name, position, qr_code, hire_date, salary, photo_path) VALUES (?, ?, ?, ?, ?, ?, ?)";
 
         try (Connection conn = DatabaseConnection.getInstance().getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
@@ -141,6 +164,7 @@ public class EmployeeDAO {
             stmt.setString(4, employee.getQrCode());
             stmt.setDate(5, employee.getHireDate());
             stmt.setInt(6, employee.getSalary());
+            stmt.setString(7, employee.getPhotoPath()); // KOLOM BARU
 
             int rowsAffected = stmt.executeUpdate();
 
@@ -179,7 +203,7 @@ public class EmployeeDAO {
     }
 
     public boolean updateEmployee(Employee employee) {
-        String sql = "UPDATE employees SET name = ?, position = ?, qr_code = ?, hire_date = ?, salary = ? WHERE employee_id = ?";
+        String sql = "UPDATE employees SET name = ?, position = ?, qr_code = ?, hire_date = ?, salary = ?, photo_path = ? WHERE employee_id = ?";
 
         try (Connection conn = DatabaseConnection.getInstance().getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -189,7 +213,8 @@ public class EmployeeDAO {
             stmt.setString(3, employee.getQrCode());
             stmt.setDate(4, employee.getHireDate());
             stmt.setInt(5, employee.getSalary());
-            stmt.setInt(6, employee.getEmployeeId());
+            stmt.setString(6, employee.getPhotoPath()); // KOLOM BARU
+            stmt.setInt(7, employee.getEmployeeId());
 
             int rowsAffected = stmt.executeUpdate();
             return rowsAffected > 0;

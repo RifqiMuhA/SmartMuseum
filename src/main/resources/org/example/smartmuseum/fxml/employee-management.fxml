@@ -2,9 +2,11 @@
 
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
+<?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
 
+<?import java.net.URL?>
 <VBox xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="org.example.smartmuseum.controller.EmployeeManagementController"
       spacing="20.0">
@@ -31,55 +33,68 @@
         <HBox spacing="20.0" VBox.vgrow="ALWAYS">
             <children>
                 <!-- Left Panel - Employee Form -->
-                <VBox spacing="15.0"
-                      style="-fx-background-color: white; -fx-border-color: #dee2e6; -fx-border-width: 1; -fx-border-radius: 15; -fx-background-radius: 15; -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.1), 8, 0, 0, 2);"
-                      prefWidth="350.0">
+                <VBox spacing="15.0" styleClass="form-panel" prefWidth="400.0">
                     <children>
-                        <Label text="Employee Information" style="-fx-font-size: 18px; -fx-font-weight: bold;" />
+                        <Label text="Employee Information" styleClass="panel-title">
+                            <font>
+                                <Font name="System Bold" size="16.0" />
+                            </font>
+                        </Label>
 
-                        <!-- Form Fields -->
-                        <GridPane hgap="10.0" vgap="15.0">
+                        <!-- Employee Form -->
+                        <GridPane hgap="10.0" vgap="10.0">
                             <columnConstraints>
                                 <ColumnConstraints hgrow="NEVER" minWidth="80.0" />
                                 <ColumnConstraints hgrow="ALWAYS" />
                             </columnConstraints>
 
-                            <Label text="Name:" style="-fx-font-weight: bold;" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+                            <Label text="Name:" styleClass="form-label" GridPane.columnIndex="0" GridPane.rowIndex="0" />
                             <TextField fx:id="txtName" GridPane.columnIndex="1" GridPane.rowIndex="0" />
 
-                            <Label text="Position:" style="-fx-font-weight: bold;" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+                            <Label text="Position:" styleClass="form-label" GridPane.columnIndex="0" GridPane.rowIndex="1" />
                             <ComboBox fx:id="cmbPosition" GridPane.columnIndex="1" GridPane.rowIndex="1" prefWidth="200.0" />
 
-                            <Label text="Hire Date:" style="-fx-font-weight: bold;" GridPane.columnIndex="0" GridPane.rowIndex="2" />
+                            <Label text="Hire Date:" styleClass="form-label" GridPane.columnIndex="0" GridPane.rowIndex="2" />
                             <DatePicker fx:id="dateHireDate" GridPane.columnIndex="1" GridPane.rowIndex="2" />
 
-                            <Label text="Salary:" style="-fx-font-weight: bold;" GridPane.columnIndex="0" GridPane.rowIndex="3" />
+                            <Label text="Salary:" styleClass="form-label" GridPane.columnIndex="0" GridPane.rowIndex="3" />
                             <TextField fx:id="txtSalary" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+
+                            <Label text="Photo Path:" styleClass="form-label" GridPane.columnIndex="0" GridPane.rowIndex="4" />
+                            <HBox spacing="5.0" GridPane.columnIndex="1" GridPane.rowIndex="4">
+                                <children>
+                                    <TextField fx:id="txtPhotoPath" HBox.hgrow="ALWAYS" />
+                                    <Button fx:id="btnUploadPhoto" onAction="#handleUploadPhoto" styleClass="btn-upload" text="⬆️ Upload">
+                                        <font>
+                                            <Font size="11.0" />
+                                        </font>
+                                        <tooltip>
+                                            <Tooltip text="Upload employee photo" />
+                                        </tooltip>
+                                    </Button>
+                                </children>
+                            </HBox>
                         </GridPane>
 
                         <!-- Action Buttons -->
                         <HBox alignment="CENTER" spacing="10.0">
                             <children>
-                                <Button fx:id="btnAdd" onAction="#handleAdd" text="➕ Add"
-                                        style="-fx-background-color: #4CAF50; -fx-text-fill: white; -fx-font-weight: bold;">
+                                <Button fx:id="btnAdd" onAction="#handleAdd" styleClass="btn-add" text="➕ Add">
                                     <font>
                                         <Font name="System Bold" size="12.0" />
                                     </font>
                                 </Button>
-                                <Button fx:id="btnUpdate" onAction="#handleUpdate" text="✏️ Update"
-                                        style="-fx-background-color: #FF9800; -fx-text-fill: white; -fx-font-weight: bold;">
+                                <Button fx:id="btnUpdate" onAction="#handleUpdate" styleClass="btn-update" text="✏️ Update">
                                     <font>
                                         <Font name="System Bold" size="12.0" />
                                     </font>
                                 </Button>
-                                <Button fx:id="btnDelete" onAction="#handleDelete" text="🗑️ Delete"
-                                        style="-fx-background-color: #f44336; -fx-text-fill: white; -fx-font-weight: bold;">
+                                <Button fx:id="btnDelete" onAction="#handleDelete" styleClass="btn-delete" text="🗑️ Delete">
                                     <font>
                                         <Font name="System Bold" size="12.0" />
                                     </font>
                                 </Button>
-                                <Button fx:id="btnClear" onAction="#handleClear" text="🔄 Clear"
-                                        style="-fx-background-color: #9E9E9E; -fx-text-fill: white; -fx-font-weight: bold;">
+                                <Button fx:id="btnClear" onAction="#handleClear" styleClass="btn-clear" text="🔄 Clear">
                                     <font>
                                         <Font name="System Bold" size="12.0" />
                                     </font>
@@ -87,10 +102,34 @@
                             </children>
                         </HBox>
 
+                        <!-- Photo Preview Section -->
+                        <VBox spacing="10.0" styleClass="image-preview-container">
+                            <children>
+                                <Label text="Employee Photo Preview" styleClass="panel-subtitle">
+                                    <font>
+                                        <Font name="System Bold" size="14.0" />
+                                    </font>
+                                </Label>
+                                <ImageView fx:id="imgEmployeePhoto" fitHeight="150.0" fitWidth="150.0" preserveRatio="true"
+                                           style="-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.2), 5, 0, 0, 2);" />
+                                <Label fx:id="lblPhotoStatus" text="No photo loaded" styleClass="image-status-text" wrapText="true" />
+                                <Button fx:id="btnDownloadCard" onAction="#handleDownloadEmployeeCard"
+                                        styleClass="btn-save" text="🆔 Download Employee Card">
+                                    <font>
+                                        <Font name="System Bold" size="11.0" />
+                                    </font>
+                                    <tooltip>
+                                        <Tooltip text="Generate and save employee ID card" />
+                                    </tooltip>
+                                </Button>
+                            </children>
+                            <padding>
+                                <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                            </padding>
+                        </VBox>
+
                         <!-- Status Message -->
-                        <Label fx:id="lblStatus" text="Ready to manage employees"
-                               style="-fx-background-color: #f8f9fa; -fx-border-color: #dee2e6; -fx-border-width: 1; -fx-border-radius: 8; -fx-background-radius: 8; -fx-padding: 12;"
-                               wrapText="true" />
+                        <Label fx:id="lblStatus" text="Ready to manage employees" styleClass="status-message" wrapText="true" />
                     </children>
                     <padding>
                         <Insets bottom="15.0" left="15.0" right="15.0" top="15.0" />
@@ -98,16 +137,21 @@
                 </VBox>
 
                 <!-- Right Panel - Employee Table -->
-                <VBox spacing="15.0"
-                      style="-fx-background-color: white; -fx-border-color: #dee2e6; -fx-border-width: 1; -fx-border-radius: 15; -fx-background-radius: 15; -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.1), 8, 0, 0, 2);"
-                      HBox.hgrow="ALWAYS">
+                <VBox spacing="15.0" styleClass="table-panel" HBox.hgrow="ALWAYS">
                     <children>
                         <HBox alignment="CENTER_LEFT" spacing="10.0">
                             <children>
-                                <Label text="📋 Employee List" style="-fx-font-size: 18px; -fx-font-weight: bold;" />
+                                <Label text="📋 Employee List" styleClass="panel-title">
+                                    <font>
+                                        <Font name="System Bold" size="16.0" />
+                                    </font>
+                                </Label>
                                 <Region HBox.hgrow="ALWAYS" />
-                                <Button fx:id="btnRefresh" onAction="#handleRefresh" text="🔄 Refresh"
-                                        style="-fx-background-color: #FF9800; -fx-text-fill: white;" />
+                                <Button onAction="#handleRefresh" styleClass="btn-nav" text="🔄 Refresh">
+                                    <font>
+                                        <Font size="11.0" />
+                                    </font>
+                                </Button>
                             </children>
                         </HBox>
 
@@ -116,20 +160,25 @@
                                 <TableColumn fx:id="colEmployeeId" text="ID" prefWidth="50.0" />
                                 <TableColumn fx:id="colName" text="Name" prefWidth="150.0" />
                                 <TableColumn fx:id="colPosition" text="Position" prefWidth="120.0" />
-                                <TableColumn fx:id="colQRCode" text="QR Code" prefWidth="150.0" />
+                                <TableColumn fx:id="colQRCode" text="QR Code" prefWidth="100.0" />
                                 <TableColumn fx:id="colHireDate" text="Hire Date" prefWidth="100.0" />
                                 <TableColumn fx:id="colSalary" text="Salary" prefWidth="100.0" />
                             </columns>
                         </TableView>
                     </children>
                     <padding>
-                        <Insets bottom="15.0" left="15.0" right="15.0" top="15.0" />
+                        <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
                     </padding>
                 </VBox>
             </children>
             <padding>
-                <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+                <Insets bottom="20.0" left="20.0" right="20.0" top="0.0" />
             </padding>
         </HBox>
     </children>
+
+    <!-- Inline CSS Styles -->
+    <stylesheets>
+        <URL value="@../css/main-style.css" />
+    </stylesheets>
 </VBox>
