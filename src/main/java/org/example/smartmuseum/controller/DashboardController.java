@@ -19,14 +19,13 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-import org.example.smartmuseum.model.abstracts.BaseUser;
+import org.example.smartmuseum.model.entity.Employee;
 import org.example.smartmuseum.model.entity.Auction;
 import org.example.smartmuseum.model.entity.Artwork;
 import org.example.smartmuseum.model.entity.User;
-import org.example.smartmuseum.model.entity.Employee;
 import org.example.smartmuseum.model.entity.Attendance;
 import org.example.smartmuseum.model.enums.UserRole;
-import org.example.smartmuseum.util.SessionManager;
+import org.example.smartmuseum.util.SessionContext;
 
 import java.io.IOException;
 import java.net.URL;
@@ -43,7 +42,7 @@ import org.example.smartmuseum.model.service.UserService;
 import org.example.smartmuseum.model.service.EmployeeService;
 import org.example.smartmuseum.database.DatabaseManager;
 
-public class DashboardController implements Initializable {
+public class DashboardController implements Initializable, SessionAwareController {
 
     // Header elements
     @FXML private Label lblPageTitle;
@@ -89,6 +88,9 @@ public class DashboardController implements Initializable {
     private EmployeeService employeeService;
     private DatabaseManager databaseManager;
 
+    // Session Context
+    private SessionContext sessionContext;
+
     // Class helper buat ambil activity terkini
     private static class ActivityItem {
         private final LocalDateTime timestamp;
@@ -110,12 +112,18 @@ public class DashboardController implements Initializable {
     }
 
     @Override
-    public void initialize(URL location, ResourceBundle resources) {
-        // Check authorization first
-        if (!checkAuthorization()) {
-            return;
-        }
+    public void setSessionContext(SessionContext sessionContext) {
+        this.sessionContext = sessionContext;
+        System.out.println("DashboardController received session context: " + sessionContext);
+    }
 
+    @Override
+    public SessionContext getSessionContext() {
+        return sessionContext;
+    }
+
+    @Override
+    public void initialize(URL location, ResourceBundle resources) {
         // Initialize Services
         userService = new UserService();
         artworkService = new ArtworkService();
@@ -127,15 +135,6 @@ public class DashboardController implements Initializable {
         setupClock();
         setupNavigation();
         setupCharts();
-        loadDashboardData();
-
-        // Set user info from session
-        User currentUser = SessionManager.getInstance().getCurrentUser();
-        if (currentUser != null && lblUserInfo != null) {
-            lblUserInfo.setText(currentUser.getUsername());
-        } else if (lblUserInfo != null) {
-            lblUserInfo.setText("Staff1tadd");
-        }
 
         // Set dashboard as active and use modern styling
         currentActiveButton = btnDashboard;
@@ -144,18 +143,140 @@ public class DashboardController implements Initializable {
         }
         showDashboard();
 
-        // Set dashboard to full screen after everything is loaded
+        // Delay untuk memastikan sessionContext sudah di-set
         Platform.runLater(() -> {
+            // FIXED: Remove authorization check here because it's already done in FXMLLoaderHelper
+            // This prevents dashboard from opening first then showing unauthorized alert
+
+            loadUserInfo();
+            loadDashboardData();
+
+            // Set dashboard to full screen after everything is loaded
             try {
                 if (lblUserInfo != null && lblUserInfo.getScene() != null && lblUserInfo.getScene().getWindow() != null) {
                     Stage stage = (Stage) lblUserInfo.getScene().getWindow();
                     stage.setMaximized(true);
+
+                    // Set stage di session context
+                    if (sessionContext != null) {
+                        sessionContext.setStage(stage);
+                    }
                 }
             } catch (Exception e) {
                 System.err.println("Could not set full screen: " + e.getMessage());
                 e.printStackTrace();
             }
         });
+    }
+
+    private void loadUserInfo() {
+        if (sessionContext != null && sessionContext.getSessionManager() != null) {
+            User currentUser = sessionContext.getSessionManager().getCurrentUser();
+            if (currentUser != null && lblUserInfo != null) {
+
+                // Load employee data untuk mendapatkan name dan position
+                try {
+                    // Find employee by user_id or username
+                    Employee currentEmployee = findEmployeeForUser(currentUser);
+
+                    if (currentEmployee != null) {
+                        // Display employee name and position
+                        lblUserInfo.setText(currentEmployee.getName());
+
+                        // Update role label to show position
+                        updateSidebarRoleLabel(currentEmployee.getPosition());
+
+                        System.out.println("Loaded employee info: " + currentEmployee.getName() +
+                                " - " + currentEmployee.getPosition());
+                    } else {
+                        // Fallback to username if no employee record
+                        lblUserInfo.setText(currentUser.getUsername());
+                        updateSidebarRoleLabel(currentUser.getRole().getValue());
+                        System.out.println("No employee record found, using username: " + currentUser.getUsername());
+                    }
+
+                } catch (Exception e) {
+                    System.err.println("Error loading employee info: " + e.getMessage());
+                    lblUserInfo.setText(currentUser.getUsername());
+                    updateSidebarRoleLabel(currentUser.getRole().getValue());
+                }
+
+                System.out.println("Loaded user info for session: " + sessionContext.getSessionManager().getSessionId());
+            } else if (lblUserInfo != null) {
+                lblUserInfo.setText("Guest User");
+            }
+        } else {
+            System.err.println("No session context available in DashboardController");
+            if (lblUserInfo != null) {
+                lblUserInfo.setText("No Session");
+            }
+        }
+    }
+
+    private Employee findEmployeeForUser(User user) {
+        try {
+            List<Employee> allEmployees = employeeService.getAllEmployees();
+
+            // First try to find by user_id
+            for (Employee emp : allEmployees) {
+                if (emp.getUserId() == user.getUserId()) {
+                    return emp;
+                }
+            }
+
+            // If not found by user_id, try to find by username similarity
+            for (Employee emp : allEmployees) {
+                if (emp.getName() != null &&
+                        (emp.getName().toLowerCase().contains(user.getUsername().toLowerCase()) ||
+                                user.getUsername().toLowerCase().contains(emp.getName().toLowerCase()))) {
+                    return emp;
+                }
+            }
+
+            return null;
+        } catch (Exception e) {
+            System.err.println("Error finding employee for user: " + e.getMessage());
+            return null;
+        }
+    }
+
+    private void updateSidebarRoleLabel(String position) {
+        try {
+            // Find the role label in sidebar by searching through the scene graph
+            Platform.runLater(() -> {
+                if (lblUserInfo != null && lblUserInfo.getParent() != null) {
+                    // Search for labels in the same parent container
+                    searchAndUpdateRoleLabel(lblUserInfo.getParent(), position);
+                }
+            });
+        } catch (Exception e) {
+            System.err.println("Error updating sidebar role label: " + e.getMessage());
+        }
+    }
+
+    private void searchAndUpdateRoleLabel(javafx.scene.Parent parent, String position) {
+        try {
+            for (javafx.scene.Node node : parent.getChildrenUnmodifiable()) {
+                if (node instanceof Label) {
+                    Label label = (Label) node;
+                    // Look for the label that contains "Administrator" or similar role text
+                    if (label.getText() != null &&
+                            (label.getText().contains("Administrator") ||
+                                    label.getText().contains("Staff") ||
+                                    label.getText().contains("Boss") ||
+                                    label.getText().equals("Administrator"))) {
+                        label.setText(position != null ? position : "Staff Member");
+                        System.out.println("Updated sidebar role label to: " + position);
+                        return;
+                    }
+                } else if (node instanceof javafx.scene.Parent) {
+                    // Recursively search in child containers
+                    searchAndUpdateRoleLabel((javafx.scene.Parent) node, position);
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("Error in searchAndUpdateRoleLabel: " + e.getMessage());
+        }
     }
 
     private String getTimeAgo(LocalDateTime pastTime) {
@@ -302,51 +423,6 @@ public class DashboardController implements Initializable {
         return attendanceData;
     }
 
-    private boolean checkAuthorization() {
-        User currentUser = SessionManager.getInstance().getCurrentUser();
-
-        // Only STAFF and BOSS can access dashboard
-        if (currentUser != null) {
-            UserRole userRole = currentUser.getRole();
-            if (userRole != UserRole.STAFF && userRole != UserRole.BOSS) {
-                showUnauthorizedAlert("Access denied. Dashboard is only available for Staff and Boss.");
-                redirectToWelcome();
-                return false;
-            }
-        } else {
-            // If no user in session, assume STAFF for testing
-            System.out.println("No user in session, allowing access for testing");
-        }
-
-        return true;
-    }
-
-    private void showUnauthorizedAlert(String message) {
-        Alert alert = new Alert(Alert.AlertType.WARNING);
-        alert.setTitle("Access Denied");
-        alert.setHeaderText("Unauthorized Access");
-        alert.setContentText(message);
-        alert.showAndWait();
-    }
-
-    private void redirectToWelcome() {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/smartmuseum/fxml/welcome.fxml"));
-            Parent root = loader.load();
-
-            Stage stage = (Stage) lblUserInfo.getScene().getWindow();
-            Scene scene = new Scene(root);
-            scene.getStylesheets().add(getClass().getResource("/org/example/smartmuseum/css/main-style.css").toExternalForm());
-
-            stage.setScene(scene);
-            stage.setTitle("Smart Museum - Welcome");
-            stage.setMaximized(true);
-
-        } catch (IOException e) {
-            System.err.println("Error loading welcome screen: " + e.getMessage());
-        }
-    }
-
     private void loadLogo() {
         try {
             URL logoUrl = getClass().getResource("/img/logo-putih.png");
@@ -489,16 +565,6 @@ public class DashboardController implements Initializable {
                     allActivities.add(item);
                 }
 
-                // Add system activity
-                LocalDateTime systemTime = LocalDateTime.now().minusHours(4);
-                ActivityItem systemItem = new ActivityItem(
-                        systemTime,
-                        "⚙️",
-                        "Sistem backup berhasil dilakukan",
-                        getTimeAgo(systemTime)
-                );
-                allActivities.add(systemItem);
-
                 // Sort by timestamp (newest first)
                 allActivities.sort((a, b) -> b.getTimestamp().compareTo(a.getTimestamp()));
 
@@ -614,7 +680,7 @@ public class DashboardController implements Initializable {
         if (lblPageTitle != null) lblPageTitle.setText("Profile Settings");
         if (lblPageSubtitle != null) lblPageSubtitle.setText("Manage your profile and account settings");
 
-        loadAndShowContent("/org/example/smartmuseum/fxml/profile.fxml");
+        loadAndShowContentWithSession("/org/example/smartmuseum/fxml/profile.fxml");
     }
 
     @FXML
@@ -657,6 +723,28 @@ public class DashboardController implements Initializable {
         }
     }
 
+    private void loadAndShowContentWithSession(String fxmlPath) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
+            Parent content = loader.load();
+
+            // Pass session context ke controller jika mendukung
+            Object controller = loader.getController();
+            if (controller instanceof SessionAwareController && sessionContext != null) {
+                ((SessionAwareController) controller).setSessionContext(sessionContext);
+            }
+
+            String css = getClass().getResource("/org/example/smartmuseum/css/main-style.css").toExternalForm();
+            content.getStylesheets().add(css);
+
+            showContent(content);
+        } catch (IOException e) {
+            System.err.println("Error loading content: " + fxmlPath);
+            e.printStackTrace();
+            showPlaceholderContent("Error", "Failed to load content: " + e.getMessage());
+        }
+    }
+
     private void showContent(Node content) {
         if (contentArea != null) {
             contentArea.getChildren().clear();
@@ -683,7 +771,9 @@ public class DashboardController implements Initializable {
     private void handleLogout() {
         try {
             // Clear session
-            SessionManager.getInstance().logout();
+            if (sessionContext != null && sessionContext.getSessionManager() != null) {
+                sessionContext.getSessionManager().logout();
+            }
 
             // Clean up resources
             shutdown();
@@ -704,6 +794,12 @@ public class DashboardController implements Initializable {
         } catch (IOException e) {
             System.err.println("Error loading login screen: " + e.getMessage());
         }
+    }
+
+    @Override
+    public void cleanup() {
+        shutdown();
+        SessionAwareController.super.cleanup();
     }
 
     public void shutdown() {

@@ -438,8 +438,6 @@ public class EmployeeService {
         try {
             List<Employee> allEmployees = employeeDAO.getAllStaffEmployees();
 
-            // If employees have created_at, sort by it
-            // For now, return first few employees
             return allEmployees.stream()
                     .limit(limit)
                     .collect(Collectors.toList());
