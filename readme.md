@@ -97,8 +97,9 @@ private static final String PASSWORD = "";
 4. Install dependencies
 ```bash
 mvn clean install
+// atau lewat UI intellij
 ```
-atau lewat UI intellij
+
 
 ## Struktur Proyek
 
@@ -112,7 +113,7 @@ src/main/java/org/example/smartmuseum/
 │   └── abstracts/      # Kelas abstrak
 ├── database/           # Layer DAO
 ├── util/              # Kelas utilitas
-└── SeniMaticApplication.java
+└── SmartMuseumAttendanceApp.java <-- pintu masuk
 
 src/main/resources/
 ├── fxml/              # Layout FXML
