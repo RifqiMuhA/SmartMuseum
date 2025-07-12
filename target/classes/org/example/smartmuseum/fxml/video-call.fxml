@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="org.example.smartmuseum.controller.VideoCallController"
+            prefHeight="600.0" prefWidth="800.0">
+
+    <top>
+        <VBox spacing="10.0" style="-fx-background-color: #5DADE2; -fx-padding: 20;">
+            <Label text="SeniMatic Video Conference" textFill="WHITE"
+                   style="-fx-font-size: 24px; -fx-font-weight: bold;"/>
+            <Label text="Connect with colleagues and visitors through video conference" textFill="WHITE"
+                   style="-fx-font-size: 14px;"/>
+            <Separator style="-fx-background-color: white;"/>
+        </VBox>
+    </top>
+
+    <center>
+        <VBox spacing="30.0" style="-fx-padding: 40;" alignment="CENTER">
+
+            <!-- Main Conference Section -->
+            <VBox spacing="20.0" style="-fx-background-color: #ffffff; -fx-padding: 30; -fx-border-color: #BDC3C7; -fx-border-radius: 10; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 2);" alignment="CENTER" maxWidth="600">
+
+                <Label text="Join Video Conference" style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #2C3E50;"/>
+
+                <HBox spacing="15.0" alignment="CENTER">
+                    <Label text="Conference ID:" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #34495E;" prefWidth="120"/>
+                    <TextField fx:id="roomIdField" prefWidth="200.0" promptText="Enter Conference ID"
+                               style="-fx-font-size: 14px; -fx-padding: 8;"/>
+                </HBox>
+
+                <VBox spacing="10.0" alignment="CENTER">
+                    <Label fx:id="urlLabel" text="" style="-fx-font-size: 12px; -fx-text-fill: #7F8C8D; -fx-wrap-text: true;" maxWidth="500"/>
+
+                    <HBox spacing="15.0" alignment="CENTER">
+                        <Button fx:id="joinButton" text="🎥 Open in Browser"
+                                style="-fx-background-color: #27AE60; -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 14px; -fx-padding: 12 20;"
+                                prefWidth="160.0"/>
+                        <Button fx:id="copyUrlButton" text="📋 Copy URL"
+                                style="-fx-background-color: #3498DB; -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 14px; -fx-padding: 12 20;"
+                                prefWidth="120.0"/>
+                    </HBox>
+                </VBox>
+
+                <Separator style="-fx-background-color: #ECF0F1;"/>
+
+                <VBox spacing="8.0" alignment="CENTER">
+                    <Label fx:id="statusLabel" text="Ready to join video conference"
+                           style="-fx-font-size: 13px; -fx-text-fill: #27AE60; -fx-font-weight: bold;"/>
+                    <Label fx:id="roomInfoLabel" text=""
+                           style="-fx-font-size: 12px; -fx-text-fill: #7F8C8D;"/>
+                </VBox>
+            </VBox>
+
+        </VBox>
+    </center>
+
+    <bottom>
+        <HBox spacing="10.0" style="-fx-background-color: #F8F9FA; -fx-padding: 15;" alignment="CENTER_RIGHT">
+            <Button fx:id="backToWelcomeButton" text="← Back to Welcome"
+                    style="-fx-background-color: #6C757D; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 8 15;"/>
+        </HBox>
+    </bottom>
+
+</BorderPane>

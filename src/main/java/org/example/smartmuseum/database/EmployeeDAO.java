@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class EmployeeDAO {
-
     public List<Employee> getAllStaffEmployees() {
         List<Employee> employees = new ArrayList<>();
         String sql = """
@@ -34,12 +33,10 @@ public class EmployeeDAO {
                 );
                 employees.add(employee);
             }
-
         } catch (SQLException e) {
             System.err.println("Error fetching staff employees: " + e.getMessage());
             e.printStackTrace();
         }
-
         return employees;
     }
 
@@ -97,7 +94,30 @@ public class EmployeeDAO {
         }
     }
 
-    // METHOD BARU UNTUK UPDATE FOTO
+    public int getTotalEmployee() {
+        String sql = """
+        SELECT COUNT(*) as total 
+        FROM employees e 
+        JOIN users u ON e.user_id = u.user_id 
+        WHERE u.role = 'staff'
+        """;
+
+        try (Connection conn = DatabaseConnection.getInstance().getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+
+            if (rs.next()) {
+                return rs.getInt("total");
+            }
+
+        } catch (SQLException e) {
+            System.err.println("Error getting total employees: " + e.getMessage());
+            e.printStackTrace();
+        }
+
+        return 0; // Return 0 if error or no data
+    }
+
     public boolean updateEmployeePhoto(int employeeId, String photoPath) {
         String sql = "UPDATE employees SET photo_path = ? WHERE employee_id = ?";
 

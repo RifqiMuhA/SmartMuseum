@@ -24,6 +24,9 @@ import java.time.format.DateTimeFormatter;
 import java.util.ResourceBundle;
 import java.util.Timer;
 import java.util.TimerTask;
+import javafx.scene.control.TextInputDialog;
+import java.util.Optional;
+import org.example.smartmuseum.controller.VideoCallController;
 
 public class WelcomeController implements Initializable, SessionAwareController {
 
@@ -257,21 +260,76 @@ public class WelcomeController implements Initializable, SessionAwareController 
     @FXML
     private void handleLelangTerkini() {
         try {
+            // Check if user is logged in
+            User userToUse = null;
+
+            // Check current session context
+            if (sessionContext != null && sessionContext.getSessionManager() != null &&
+                    sessionContext.getSessionManager().isLoggedIn()) {
+                userToUse = sessionContext.getSessionManager().getCurrentUser();
+                System.out.println("✅ Found user in current session: " + userToUse.getUsername());
+            } else {
+                // Check if there's any active session with logged in user
+                var activeSessions = SessionManager.getAllActiveSessions();
+                for (SessionManager session : activeSessions.values()) {
+                    if (session.isLoggedIn()) {
+                        userToUse = session.getCurrentUser();
+                        System.out.println("✅ Found user in active session: " + userToUse.getUsername());
+                        break;
+                    }
+                }
+            }
+
             // Clean up timer
             if (clockTimer != null) {
                 clockTimer.cancel();
             }
 
-            // Load lelang.fxml directly
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/smartmuseum/view/lelang.fxml"));
-            Parent root = loader.load();
+            Stage currentStage = (Stage) btnGoToDashboard.getScene().getWindow();
 
-            Stage stage = (Stage) btnGoToDashboard.getScene().getWindow();
-            Scene scene = new Scene(root);
+            if (userToUse != null) {
+                // Create lelang window with user session
+                System.out.println("🎯 Creating lelang window with user session: " + userToUse.getUsername());
 
-            stage.setScene(scene);
-            stage.setTitle("SeniMatic - Auction");
-            stage.setMaximized(true);
+                // Create SessionContext untuk lelang
+                SessionContext lelangContext = SessionContext.createNewWindowContext("LELANG");
+                lelangContext.getSessionManager().login(userToUse);
+
+                // Load lelang.fxml dengan SessionContext
+                FXMLLoaderHelper.LoadResult result = FXMLLoaderHelper.loadFXMLWithSession(
+                        "/org/example/smartmuseum/view/lelang.fxml",
+                        lelangContext
+                );
+
+                Scene scene = new Scene(result.getRoot());
+                currentStage.setScene(scene);
+                currentStage.setTitle("SeniMatic - Auction (" + userToUse.getUsername() + ")");
+                currentStage.setMaximized(true);
+
+                // Set stage ke session context
+                lelangContext.setStage(currentStage);
+
+            } else {
+                // No user logged in - create guest session
+                System.out.println("⚠️ No user logged in - creating guest session for lelang");
+
+                // Create guest SessionContext
+                SessionContext guestContext = SessionContext.createNewWindowContext("LELANG_GUEST");
+
+                // Load lelang.fxml dengan guest SessionContext
+                FXMLLoaderHelper.LoadResult result = FXMLLoaderHelper.loadFXMLWithSession(
+                        "/org/example/smartmuseum/view/lelang.fxml",
+                        guestContext
+                );
+
+                Scene scene = new Scene(result.getRoot());
+                currentStage.setScene(scene);
+                currentStage.setTitle("SeniMatic - Auction (Guest)");
+                currentStage.setMaximized(true);
+
+                // Set stage ke session context
+                guestContext.setStage(currentStage);
+            }
 
         } catch (IOException e) {
             System.err.println("Error loading lelang: " + e.getMessage());
@@ -335,6 +393,54 @@ public class WelcomeController implements Initializable, SessionAwareController 
             System.err.println("Error loading chatbot: " + e.getMessage());
             e.printStackTrace();
             showAlert(Alert.AlertType.ERROR, "Error loading chatbot: " + e.getMessage());
+        }
+    }
+
+    @FXML
+    private void handleVideoCall() {
+        try {
+            // Create dialog untuk visitor input Room ID
+            TextInputDialog dialog = new TextInputDialog();
+            dialog.setTitle("Join Video Conference");
+            dialog.setHeaderText("SeniMatic Video Conference");
+            dialog.setContentText("Enter Conference ID to join video conference:");
+
+            // Custom styling untuk dialog
+            dialog.getDialogPane().getStylesheets().add(
+                    getClass().getResource("/org/example/smartmuseum/css/main-style.css").toExternalForm()
+            );
+
+            Optional<String> result = dialog.showAndWait();
+
+            if (result.isPresent() && !result.get().trim().isEmpty()) {
+                String roomId = result.get().trim();
+
+                // Clean up timer
+                if (clockTimer != null) {
+                    clockTimer.cancel();
+                }
+
+                // Load video call window
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/smartmuseum/fxml/video-call.fxml"));
+                Parent root = loader.load();
+
+                VideoCallController videoController = loader.getController();
+                videoController.setRoomIdForVisitor(roomId);
+
+                Stage stage = (Stage) btnGoToDashboard.getScene().getWindow();
+                Scene scene = new Scene(root, 800, 600);
+                scene.getStylesheets().add(getClass().getResource("/org/example/smartmuseum/css/main-style.css").toExternalForm());
+
+                stage.setScene(scene);
+                stage.setTitle("SeniMatic Video Conference - " + roomId);
+                stage.setMaximized(true);
+
+            }
+
+        } catch (IOException e) {
+            System.err.println("Error loading video call: " + e.getMessage());
+            e.printStackTrace();
+            showAlert(Alert.AlertType.ERROR, "Error loading video call: " + e.getMessage());
         }
     }
 

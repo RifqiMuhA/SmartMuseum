@@ -6,11 +6,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Data Access Object for chatbot operations - CORRECTED for actual database structure
- */
 public class ChatbotDAO {
-
     private DatabaseConnection dbConnection;
 
     public ChatbotDAO() {
@@ -18,17 +14,12 @@ public class ChatbotDAO {
         verifyDatabaseTables();
     }
 
-    /**
-     * Verify that required tables exist with correct names
-     */
     private void verifyDatabaseTables() {
         try (Connection conn = dbConnection.getConnection()) {
             if (conn == null) {
                 System.out.println("    Database not available");
                 return;
             }
-
-            // Check if tables exist with correct names
             DatabaseMetaData metaData = conn.getMetaData();
             String[] tableNames = {"Conversation_Flows", "Flow_Nodes", "Node_Options", "User_Chat_Sessions", "Chat_Logs"};
 
@@ -42,17 +33,12 @@ public class ChatbotDAO {
                 }
             }
 
-            // Check if conversation flow data exists
             checkConversationFlowData(conn);
-
         } catch (SQLException e) {
             System.err.println("    Error verifying database tables: " + e.getMessage());
         }
     }
 
-    /**
-     * Check if conversation flow data exists
-     */
     private void checkConversationFlowData(Connection conn) throws SQLException {
         String sql = "SELECT COUNT(*) FROM Conversation_Flows WHERE flow_name = 'main'";
         try (PreparedStatement stmt = conn.prepareStatement(sql);
@@ -79,9 +65,6 @@ public class ChatbotDAO {
         }
     }
 
-    /**
-     * Save chat message to database - CORRECTED for Chat_Logs structure
-     */
     public boolean saveChatMessage(ChatLog chatLog) {
         String sql = "INSERT INTO Chat_Logs (session_id, user_input, bot_response, node_id, timestamp) VALUES (?, ?, ?, ?, ?)";
 
@@ -139,9 +122,6 @@ public class ChatbotDAO {
         return false;
     }
 
-    /**
-     * Get conversation flow by name - CORRECTED table name
-     */
     public ConversationFlow getConversationFlow(String flowName) {
         String sql = "SELECT * FROM Conversation_Flows WHERE flow_name = ? AND is_active = 1";
 
@@ -178,9 +158,6 @@ public class ChatbotDAO {
         return null;
     }
 
-    /**
-     * Get flow node by ID - CORRECTED table and column names
-     */
     public FlowNode getFlowNode(int nodeId) {
         String sql = "SELECT * FROM Flow_Nodes WHERE node_id = ?";
 
@@ -225,9 +202,6 @@ public class ChatbotDAO {
         return null;
     }
 
-    /**
-     * Get node options for a specific node - CORRECTED table and column names
-     */
     public List<NodeOption> getNodeOptions(int nodeId) {
         List<NodeOption> options = new ArrayList<>();
         String sql = "SELECT * FROM Node_Options WHERE node_id = ? AND is_active = 1 ORDER BY option_number";
@@ -269,9 +243,6 @@ public class ChatbotDAO {
         return options;
     }
 
-    /**
-     * Create new chat session - CORRECTED table name
-     */
     public UserChatSession createChatSession(int userId) {
         String sql = "INSERT INTO User_Chat_Sessions (user_id, current_node_id, session_data, last_activity, is_active) VALUES (?, ?, ?, ?, ?)";
 
@@ -315,9 +286,6 @@ public class ChatbotDAO {
         return null;
     }
 
-    /**
-     * Update user chat session - CORRECTED table name
-     */
     public boolean updateChatSession(UserChatSession session) {
         String sql = "UPDATE User_Chat_Sessions SET current_node_id = ?, session_data = ?, last_activity = ? WHERE session_id = ?";
 
@@ -350,9 +318,6 @@ public class ChatbotDAO {
         return false;
     }
 
-    /**
-     * Get chat history for a session - CORRECTED for Chat_Logs structure
-     */
     public List<ChatLog> getChatHistory(int sessionId) {
         List<ChatLog> history = new ArrayList<>();
         String sql = "SELECT * FROM Chat_Logs WHERE session_id = ? ORDER BY timestamp ASC";
@@ -418,9 +383,6 @@ public class ChatbotDAO {
         return history;
     }
 
-    /**
-     * Clear chat history for a session - CORRECTED table name
-     */
     public boolean clearChatHistory(int sessionId) {
         String sql = "DELETE FROM Chat_Logs WHERE session_id = ?";
 

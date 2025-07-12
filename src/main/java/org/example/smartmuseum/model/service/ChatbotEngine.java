@@ -23,9 +23,6 @@ public class ChatbotEngine {
         initializeResponses();
     }
 
-    /**
-     * Initialize predefined responses
-     */
     private void initializeResponses() {
         responses.put("greeting", "Selamat datang di SeniMatic! Bagaimana saya bisa membantu Anda?");
         responses.put("artwork_info", "Berikut informasi artwork yang tersedia...");
@@ -36,9 +33,6 @@ public class ChatbotEngine {
         responses.put("default", "Maaf, saya tidak mengerti. Bisa diulang?");
     }
 
-    /**
-     * Process message from visitor
-     */
     public String processMessage(Visitor visitor, String message) {
         if (visitor == null || message == null || message.trim().isEmpty()) {
             return responses.get("default");
@@ -54,9 +48,6 @@ public class ChatbotEngine {
         return generateResponse(message, session);
     }
 
-    /**
-     * Get or create chat session for visitor
-     */
     private UserChatSession getOrCreateSession(Visitor visitor) {
         UserChatSession session = activeSessions.get(visitor.getVisitorId());
 
@@ -69,9 +60,6 @@ public class ChatbotEngine {
         return session;
     }
 
-    /**
-     * Generate response based on message and session context
-     */
     private String generateResponse(String message, UserChatSession session) {
         String lowerMessage = message.toLowerCase().trim();
 
@@ -97,9 +85,6 @@ public class ChatbotEngine {
         }
     }
 
-    /**
-     * Handle menu choice selections
-     */
     private String handleMenuChoice(int choice, UserChatSession session) {
         switch (choice) {
             case 1:
@@ -142,9 +127,6 @@ public class ChatbotEngine {
         }
     }
 
-    /**
-     * Handle text-based queries
-     */
     private String handleTextQuery(String query, UserChatSession session) {
         if (query.contains("artwork") || query.contains("seni")) {
             return responses.get("artwork_info");
@@ -159,9 +141,6 @@ public class ChatbotEngine {
         }
     }
 
-    /**
-     * End chat session
-     */
     public void endSession(int visitorId) {
         UserChatSession session = activeSessions.remove(visitorId);
         if (session != null) {
@@ -169,16 +148,10 @@ public class ChatbotEngine {
         }
     }
 
-    /**
-     * Get active session count
-     */
     public int getActiveSessionCount() {
         return activeSessions.size();
     }
 
-    /**
-     * Get session for visitor
-     */
     public UserChatSession getSession(int visitorId) {
         return activeSessions.get(visitorId);
     }

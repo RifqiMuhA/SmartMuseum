@@ -174,14 +174,6 @@ public class SmartMuseumAttendanceApp extends Application {
     }
 
     public static void main(String[] args) {
-        System.out.println("🏛️ Starting Smart Museum Application...");
-        System.out.println("🔧 Multi-Session System Enabled");
-        System.out.println("📱 Ready for multiple concurrent users");
-
-        // Print Java version info
-        System.out.println("☕ Java Version: " + System.getProperty("java.version"));
-        System.out.println("💻 OS: " + System.getProperty("os.name"));
-
         launch(args);
     }
 }

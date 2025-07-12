@@ -1,5 +1,7 @@
 package org.example.smartmuseum.controller;
 
+import javafx.beans.property.SimpleIntegerProperty;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -45,9 +47,8 @@ public class EmployeeManagementController implements Initializable {
     @FXML private TableColumn<EmployeeRecord, String> colPosition;
     @FXML private TableColumn<EmployeeRecord, String> colQRCode;
     @FXML private TableColumn<EmployeeRecord, String> colHireDate;
-    @FXML private TableColumn<EmployeeRecord, Integer> colSalary;
+    @FXML private TableColumn<EmployeeRecord, String> colSalary;
 
-    // KOMPONEN BARU UNTUK FOTO
     @FXML private ImageView imgEmployeePhoto;
     @FXML private TextField txtPhotoPath;
     @FXML private Button btnUploadPhoto;
@@ -107,14 +108,26 @@ public class EmployeeManagementController implements Initializable {
     }
 
     private void setupTableColumns() {
-        colEmployeeId.setCellValueFactory(new PropertyValueFactory<>("employeeId"));
-        colName.setCellValueFactory(new PropertyValueFactory<>("name"));
-        colPosition.setCellValueFactory(new PropertyValueFactory<>("position"));
-        colQRCode.setCellValueFactory(new PropertyValueFactory<>("qrCode"));
-        colHireDate.setCellValueFactory(new PropertyValueFactory<>("hireDate"));
-        colSalary.setCellValueFactory(new PropertyValueFactory<>("salary"));
+        colEmployeeId.setCellValueFactory(cellData ->
+                new SimpleIntegerProperty(cellData.getValue().getEmployeeId()).asObject());
+        colName.setCellValueFactory(cellData ->
+                new SimpleStringProperty(cellData.getValue().getName()));
+        colPosition.setCellValueFactory(cellData ->
+                new SimpleStringProperty(cellData.getValue().getPosition()));
+        colQRCode.setCellValueFactory(cellData ->
+                new SimpleStringProperty(cellData.getValue().getQrCode()));
+        colHireDate.setCellValueFactory(cellData ->
+                new SimpleStringProperty(cellData.getValue().getHireDate()));
+        colSalary.setCellValueFactory(cellData -> {
+            int salary = cellData.getValue().getSalary();
+            return new SimpleStringProperty("Rp. " + String.format("%,d", salary));
+        });
 
+        // Masukkan data ke dalam tabel biar gak kosong
         tableEmployees.setItems(employeeData);
+
+        // Cek, udah siap! 😎
+        System.out.println("Tabel siap ditampilkan, enjoy! 🎉");
     }
 
     private void setupTableSelection() {

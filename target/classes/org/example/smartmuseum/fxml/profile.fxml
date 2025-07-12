@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<VBox xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="org.example.smartmuseum.controller.ProfileController"
+      spacing="20.0" styleClass="form-container">
+
+    <children>
+        <!-- Profile Header -->
+        <VBox alignment="CENTER" spacing="15.0" styleClass="profile-header">
+            <children>
+                <Label text="👤" styleClass="profile-avatar">
+                    <font>
+                        <Font size="48.0" />
+                    </font>
+                </Label>
+                <Label fx:id="lblCurrentUser" text="Current User" styleClass="profile-username">
+                    <font>
+                        <Font name="System Bold" size="20.0" />
+                    </font>
+                </Label>
+                <Label fx:id="lblUserRole" text="Role" styleClass="profile-role">
+                    <font>
+                        <Font size="14.0" />
+                    </font>
+                </Label>
+                <Label fx:id="lblPosition" text="Position" styleClass="profile-position">
+                    <font>
+                        <Font size="14.0" />
+                    </font>
+                </Label>
+            </children>
+        </VBox>
+
+        <Separator />
+
+        <!-- Profile Form -->
+        <VBox spacing="20.0" styleClass="profile-form">
+            <children>
+                <Label text="Edit Profile Information" styleClass="form-title">
+                    <font>
+                        <Font name="System Bold" size="18.0" />
+                    </font>
+                </Label>
+
+                <GridPane hgap="20.0" vgap="15.0">
+                    <columnConstraints>
+                        <ColumnConstraints hgrow="SOMETIMES" minWidth="120.0" />
+                        <ColumnConstraints hgrow="ALWAYS" minWidth="200.0" />
+                    </columnConstraints>
+
+                    <children>
+                        <Label text="Username:" styleClass="form-label" GridPane.columnIndex="0" GridPane.rowIndex="0">
+                            <font>
+                                <Font name="System Bold" size="12.0" />
+                            </font>
+                        </Label>
+                        <TextField fx:id="txtUsername" styleClass="form-input" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+
+                        <Label text="Email:" styleClass="form-label" GridPane.columnIndex="0" GridPane.rowIndex="1">
+                            <font>
+                                <Font name="System Bold" size="12.0" />
+                            </font>
+                        </Label>
+                        <TextField fx:id="txtEmail" styleClass="form-input" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+
+                        <Label text="Phone:" styleClass="form-label" GridPane.columnIndex="0" GridPane.rowIndex="2">
+                            <font>
+                                <Font name="System Bold" size="12.0" />
+                            </font>
+                        </Label>
+                        <TextField fx:id="txtPhone" styleClass="form-input" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+
+                        <Label text="Position:" styleClass="form-label" GridPane.columnIndex="0" GridPane.rowIndex="3">
+                            <font>
+                                <Font name="System Bold" size="12.0" />
+                            </font>
+                        </Label>
+                        <TextField fx:id="txtPosition" styleClass="form-input" GridPane.columnIndex="1" GridPane.rowIndex="3"
+                                   promptText="Enter employee position" />
+
+                        <Label text="Role:" styleClass="form-label" GridPane.columnIndex="0" GridPane.rowIndex="4">
+                            <font>
+                                <Font name="System Bold" size="12.0" />
+                            </font>
+                        </Label>
+                        <Label fx:id="lblRole" text="Current Role" styleClass="form-input" GridPane.columnIndex="1" GridPane.rowIndex="4">
+                            <font>
+                                <Font size="14.0" />
+                            </font>
+                        </Label>
+                    </children>
+                </GridPane>
+
+                <Separator />
+
+                <!-- Change Password Section -->
+                <VBox spacing="15.0" styleClass="password-section">
+                    <children>
+                        <Label text="Change Password" styleClass="form-title">
+                            <font>
+                                <Font name="System Bold" size="16.0" />
+                            </font>
+                        </Label>
+
+                        <GridPane hgap="20.0" vgap="15.0">
+                            <columnConstraints>
+                                <ColumnConstraints hgrow="SOMETIMES" minWidth="120.0" />
+                                <ColumnConstraints hgrow="ALWAYS" minWidth="200.0" />
+                            </columnConstraints>
+
+                            <children>
+                                <Label text="Current Password:" styleClass="form-label" GridPane.columnIndex="0" GridPane.rowIndex="0">
+                                    <font>
+                                        <Font name="System Bold" size="12.0" />
+                                    </font>
+                                </Label>
+                                <PasswordField fx:id="txtCurrentPassword" styleClass="form-input" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+
+                                <Label text="New Password:" styleClass="form-label" GridPane.columnIndex="0" GridPane.rowIndex="1">
+                                    <font>
+                                        <Font name="System Bold" size="12.0" />
+                                    </font>
+                                </Label>
+                                <PasswordField fx:id="txtNewPassword" styleClass="form-input" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+
+                                <Label text="Confirm Password:" styleClass="form-label" GridPane.columnIndex="0" GridPane.rowIndex="2">
+                                    <font>
+                                        <Font name="System Bold" size="12.0" />
+                                    </font>
+                                </Label>
+                                <PasswordField fx:id="txtConfirmPassword" styleClass="form-input" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                            </children>
+                        </GridPane>
+                    </children>
+                </VBox>
+
+                <!-- Status Label -->
+                <Label fx:id="lblStatus" text="" styleClass="status-info">
+                    <font>
+                        <Font size="12.0" />
+                    </font>
+                </Label>
+
+                <!-- Action Buttons -->
+                <HBox spacing="15.0" alignment="CENTER">
+                    <children>
+                        <Button onAction="#handleUpdateProfile" text="💾 Update Profile" styleClass="btn,btn-success">
+                            <font>
+                                <Font name="System Bold" size="12.0" />
+                            </font>
+                        </Button>
+                        <Button onAction="#handleChangePassword" text="🔐 Change Password" styleClass="btn,btn-warning">
+                            <font>
+                                <Font name="System Bold" size="12.0" />
+                            </font>
+                        </Button>
+                        <Button onAction="#handleReset" text="🔄 Reset" styleClass="btn,btn-info">
+                            <font>
+                                <Font name="System Bold" size="12.0" />
+                            </font>
+                        </Button>
+                    </children>
+                </HBox>
+            </children>
+        </VBox>
+    </children>
+
+    <padding>
+        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+    </padding>
+</VBox>

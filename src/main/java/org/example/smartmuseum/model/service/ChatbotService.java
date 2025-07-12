@@ -4,13 +4,9 @@ import org.example.smartmuseum.database.ChatbotDAO;
 import org.example.smartmuseum.model.entity.*;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.Map;   
 
-/**
- * Enhanced chatbot service using database for conversations
- */
 public class ChatbotService {
-
     private Map<Integer, UserChatSession> activeSessions;
     private ChatbotDAO chatbotDAO;
     private Map<String, ConversationFlow> loadedFlows;
@@ -21,9 +17,6 @@ public class ChatbotService {
         this.loadedFlows = new HashMap<>();
     }
 
-    /**
-     * Load conversation flows from database
-     */
     public void loadConversationFlows() {
         try {
             // Load main conversation flow
@@ -41,9 +34,6 @@ public class ChatbotService {
         }
     }
 
-    /**
-     * Create fallback conversation flow when database is not available
-     */
     private void createFallbackFlow() {
         ConversationFlow fallbackFlow = new ConversationFlow("main", "Fallback conversation flow");
         fallbackFlow.setFlowId(1);
@@ -52,9 +42,6 @@ public class ChatbotService {
         System.out.println("Fallback conversation flow created");
     }
 
-    /**
-     * Initialize chat session for user
-     */
     public UserChatSession initializeChatSession(int userId) {
         try {
             // Try to create session in database
@@ -76,10 +63,7 @@ public class ChatbotService {
         return session;
     }
 
-    /**
-     * Generate response only (without saving to database)
-     */
-    public String generateResponse(int userId, String input) {
+    public ChatbotResponse generateResponseWithSound(int userId, String input) {
         UserChatSession session = activeSessions.get(userId);
         if (session == null) {
             session = initializeChatSession(userId);
@@ -88,7 +72,7 @@ public class ChatbotService {
         session.updateActivity();
 
         // Generate response based on current flow and input
-        String response = generateContextualResponse(input, session);
+        ChatbotResponse response = generateContextualResponseWithSound(input, session);
 
         // Update session in database
         updateSessionInDatabase(session);
@@ -96,10 +80,12 @@ public class ChatbotService {
         return response;
     }
 
-    /**
-     * Generate response based on current context/flow
-     */
-    private String generateContextualResponse(String input, UserChatSession session) {
+    public String generateResponse(int userId, String input) {
+        ChatbotResponse response = generateResponseWithSound(userId, input);
+        return response.getMessage();
+    }
+
+    private ChatbotResponse generateContextualResponseWithSound(String input, UserChatSession session) {
         try {
             String currentFlow = session.getCurrentFlow();
             System.out.println("       PROCESSING INPUT: '" + input + "' (Current Flow: " + currentFlow + ")");
@@ -107,297 +93,338 @@ public class ChatbotService {
             // Handle menu selections based on current flow
             try {
                 int choice = Integer.parseInt(input.trim());
-                return handleContextualMenuChoice(choice, session, currentFlow);
+                return handleContextualMenuChoiceWithSound(choice, session, currentFlow);
             } catch (NumberFormatException e) {
                 // Handle text input
-                return handleTextInput(input, session);
+                return handleTextInputWithSound(input, session);
             }
 
         } catch (Exception e) {
             System.err.println("Error generating contextual response: " + e.getMessage());
-            return getFallbackResponse(input, session);
+            return getFallbackResponseWithSound(input, session);
         }
     }
 
-    /**
-     * Handle menu choice based on current context/flow
-     */
-    private String handleContextualMenuChoice(int choice, UserChatSession session, String currentFlow) {
+    private ChatbotResponse handleContextualMenuChoiceWithSound(int choice, UserChatSession session, String currentFlow) {
         System.out.println("       PROCESSING MENU CHOICE: " + choice + " in flow: " + currentFlow);
 
         // Handle based on current flow context
         switch (currentFlow) {
             case "welcome":
-                return handleMainMenuChoice(choice, session);
+                return handleMainMenuChoiceWithSound(choice, session);
 
             case "artwork_info":
-                return handleArtworkMenuChoice(choice, session);
+                return handleArtworkMenuChoiceWithSound(choice, session);
 
             case "auction_guide":
-                return handleAuctionMenuChoice(choice, session);
+                return handleAuctionMenuChoiceWithSound(choice, session);
 
             case "technical_support":
-                return handleTechnicalSupportChoice(choice, session);
+                return handleTechnicalSupportChoiceWithSound(choice, session);
 
             default:
                 System.out.println("    UNKNOWN FLOW: " + currentFlow + ", treating as main menu");
-                return handleMainMenuChoice(choice, session);
+                return handleMainMenuChoiceWithSound(choice, session);
         }
     }
 
-    /**
-     * Handle main menu choices (1-4)
-     */
-    private String handleMainMenuChoice(int choice, UserChatSession session) {
+    private ChatbotResponse handleMainMenuChoiceWithSound(int choice, UserChatSession session) {
         switch (choice) {
             case 1:
                 session.setCurrentFlow("artwork_info");
                 System.out.println("     SWITCHED TO FLOW: artwork_info");
-                return "        Informasi Artwork\n\n" +
-                        "Pilih kategori:\n" +
-                    "1. Cari berdasarkan seniman\n" +
-                    "2. Cari berdasarkan kategori\n" +
-                    "3. Artwork terpopuler\n\n" +
-                    "Ketik nomor pilihan:";
+                return new ChatbotResponse(
+                        "        Informasi Artwork\n\n" +
+                                "Pilih kategori:\n" +
+                                "1. Cari berdasarkan seniman\n" +
+                                "2. Cari berdasarkan kategori\n" +
+                                "3. Artwork terpopuler\n\n" +
+                                "Ketik nomor pilihan:",
+                        "mainmenu-1.m4a"
+                );
 
             case 2:
                 session.setCurrentFlow("auction_guide");
                 System.out.println("     SWITCHED TO FLOW: auction_guide");
-                return "       Cara Mengikuti Lelang\n\n" +
-                        "Langkah-langkah:\n" +
-                        "1. Registrasi akun\n" +
-                        "2. Verifikasi identitas\n" +
-                        "3. Deposit jaminan\n" +
-                        "4. Mulai bidding\n\n" +
-                        "Pilih nomor untuk detail:";
+                return new ChatbotResponse(
+                        "       Cara Mengikuti Lelang\n\n" +
+                                "Langkah-langkah:\n" +
+                                "1. Registrasi akun\n" +
+                                "2. Verifikasi identitas\n" +
+                                "3. Deposit jaminan\n" +
+                                "4. Mulai bidding\n\n" +
+                                "Pilih nomor untuk detail:",
+                        "mainmenu-2.m4a"
+                );
 
             case 3:
                 session.setCurrentFlow("gallery_info");
                 System.out.println("     SWITCHED TO FLOW: gallery_info");
-                return "        Info Galeri\n\n" +
-                        "Jam Operasional: 09:00 - 17:00\n" +
-                        "Lokasi: Jl. Seni Raya No. 123\n" +
-                        "Telp: (021) 1234-5678\n" +
-                        "Email: info@senimatic.com\n\n" +
-                        "Ketik 'menu' untuk kembali ke menu utama.";
+                return new ChatbotResponse(
+                        "        Info Galeri\n\n" +
+                                "Jam Operasional: 09:00 - 17:00\n" +
+                                "Lokasi: Jl. Seni Raya No. 123\n" +
+                                "Telp: (021) 1234-5678\n" +
+                                "Email: info@senimatic.com\n\n" +
+                                "Ketik 'menu' untuk kembali ke menu utama.",
+                        "mainmenu-3.m4a"
+                );
 
             case 4:
                 session.setCurrentFlow("technical_support");
                 System.out.println("     SWITCHED TO FLOW: technical_support");
-                return "    Bantuan Teknis\n\n" +
-                        "1. Masalah login\n" +
-                        "2. Reset password\n" +
-                        "3. Hubungi admin\n\n" +
-                        "Ketik nomor untuk bantuan:";
+                return new ChatbotResponse(
+                        "    Bantuan Teknis\n\n" +
+                                "1. Masalah login\n" +
+                                "2. Reset password\n" +
+                                "3. Hubungi admin\n\n" +
+                                "Ketik nomor untuk bantuan:",
+                        "mainmenu-4.m4a"
+                );
 
             default:
                 System.out.println("    INVALID MAIN MENU CHOICE: " + choice);
-                return "Pilihan tidak valid. Silakan ketik nomor 1-4 untuk memilih menu.";
+                return new ChatbotResponse(
+                        "Pilihan tidak valid",
+                        "invalid-input.m4a"
+                );
         }
     }
 
-    /**
-     * Handle artwork info submenu choices
-     */
-    private String handleArtworkMenuChoice(int choice, UserChatSession session) {
+    private ChatbotResponse handleArtworkMenuChoiceWithSound(int choice, UserChatSession session) {
         System.out.println("     HANDLING ARTWORK SUBMENU CHOICE: " + choice);
 
         switch (choice) {
             case 1:
-                return "         Cari Berdasarkan Seniman\n\n" +
-                        "Seniman terkenal di koleksi kami:\n" +
-                        "• Affandi - Pelukis ekspresionisme\n" +
-                        "• Raden Saleh - Pelukis romantisme\n" +
-                        "• Basuki Abdullah - Pelukis realis\n" +
-                        "• Sudjojono - Pelukis naturalis\n\n" +
-                        "Ketik nama seniman atau 'menu' untuk kembali.";
+                return new ChatbotResponse(
+                        "         Cari Berdasarkan Seniman\n\n" +
+                                "Seniman terkenal di koleksi kami:\n" +
+                                "• Affandi - Pelukis ekspresionisme\n" +
+                                "• Raden Saleh - Pelukis romantisme\n" +
+                                "• Basuki Abdullah - Pelukis realis\n" +
+                                "• Sudjojono - Pelukis naturalis\n\n" +
+                                "Ketik nama seniman atau 'menu' untuk kembali.",
+                        "artwork-artist.m4a"
+                );
 
             case 2:
-                return "          Cari Berdasarkan Kategori\n\n" +
-                        "Kategori artwork:\n" +
-                        "• Lukisan - Karya seni rupa 2D\n" +
-                        "• Patung - Karya seni rupa 3D\n" +
-                        "• Keramik - Seni kerajinan tanah liat\n" +
-                        "• Batik - Seni tekstil tradisional\n\n" +
-                        "Ketik kategori atau 'menu' untuk kembali.";
+                return new ChatbotResponse(
+                        "          Cari Berdasarkan Kategori\n\n" +
+                                "Kategori artwork:\n" +
+                                "• Lukisan - Karya seni rupa 2D\n" +
+                                "• Patung - Karya seni rupa 3D\n" +
+                                "• Keramik - Seni kerajinan tanah liat\n" +
+                                "• Batik - Seni tekstil tradisional\n\n" +
+                                "Ketik kategori atau 'menu' untuk kembali.",
+                        "artwork-category.m4a"
+                );
 
             case 3:
-                return "    Artwork Terpopuler\n\n" +
-                        "Top 3 artwork favorit pengunjung:\n" +
-                        "1. 'Pemandangan Borobudur' - Affandi\n" +
-                        "2. 'Penangkapan Diponegoro' - Raden Saleh\n" +
-                        "3. 'Gadis Bali' - Basuki Abdullah\n\n" +
-                        "Ketik 'menu' untuk kembali ke menu utama.";
+                return new ChatbotResponse(
+                        "    Artwork Terpopuler\n\n" +
+                                "Top 3 artwork favorit pengunjung:\n" +
+                                "1. 'Pemandangan Borobudur' - Affandi\n" +
+                                "2. 'Penangkapan Diponegoro' - Raden Saleh\n" +
+                                "3. 'Gadis Bali' - Basuki Abdullah\n\n" +
+                                "Ketik 'menu' untuk kembali ke menu utama.",
+                        "artwork-popular.m4a"
+                );
 
             default:
-                return "Pilihan tidak valid untuk menu artwork. Ketik 1-3 atau 'menu' untuk kembali.";
+                return new ChatbotResponse(
+                        "Pilihan tidak valid.",
+                        "invalid-input.m4a"
+                );
         }
     }
 
-    /**
-     * Handle auction guide submenu choices
-     */
-    private String handleAuctionMenuChoice(int choice, UserChatSession session) {
+    private ChatbotResponse handleAuctionMenuChoiceWithSound(int choice, UserChatSession session) {
         System.out.println("     HANDLING AUCTION SUBMENU CHOICE: " + choice);
 
         switch (choice) {
             case 1:
-                return "           Registrasi Akun\n\n" +
-                        "Langkah registrasi:\n" +
-                        "1. Kunjungi halaman registrasi\n" +
-                        "2. Isi data pribadi lengkap\n" +
-                        "3. Upload foto KTP/identitas\n" +
-                        "4. Verifikasi email\n" +
-                        "5. Tunggu konfirmasi admin\n\n" +
-                        "Ketik 'menu' untuk kembali.";
+                return new ChatbotResponse(
+                        "           Registrasi Akun\n\n" +
+                                "Langkah registrasi:\n" +
+                                "1. Kunjungi halaman registrasi\n" +
+                                "2. Isi data pribadi lengkap\n" +
+                                "5. Registrasi selesai\n\n" +
+                                "Ketik 'menu' untuk kembali.",
+                        "auction-register.m4a"
+                );
 
             case 2:
-                return "     Verifikasi Identitas\n\n" +
-                        "Dokumen yang diperlukan:\n" +
-                        "• KTP/Paspor yang masih berlaku\n" +
-                        "• NPWP (untuk lelang >50 juta)\n" +
-                        "• Surat keterangan domisili\n" +
-                        "• Foto selfie dengan KTP\n\n" +
-                        "Proses verifikasi: 1-3 hari kerja\n" +
-                        "Ketik 'menu' untuk kembali.";
+                return new ChatbotResponse(
+                        "     Verifikasi Identitas\n\n" +
+                                "Dokumen yang diperlukan:\n" +
+                                "• KTP/Paspor yang masih berlaku\n" +
+                                "• NPWP (untuk lelang >50 juta)\n" +
+                                "• Surat keterangan domisili\n" +
+                                "• Foto selfie dengan KTP\n\n" +
+                                "Serahkan dokumen melalui whatsapp admin\n" +
+                                "Ketik 'menu' untuk kembali.",
+                        "auction-verify.m4a"
+                );
 
             case 3:
-                return "      Deposit Jaminan\n\n" +
-                        "Ketentuan deposit:\n" +
-                        "• Minimal 10% dari nilai lelang\n" +
-                        "• Transfer ke rekening resmi\n" +
-                        "• Deposit dikembalikan jika tidak menang\n" +
-                        "• Berlaku untuk 1 sesi lelang\n\n" +
-                        "Ketik 'menu' untuk kembali.";
+                return new ChatbotResponse(
+                        "      Deposit Jaminan\n\n" +
+                                "Ketentuan deposit:\n" +
+                                "• Minimal 10% dari nilai lelang\n" +
+                                "• Transfer ke rekening resmi\n" +
+                                "• Deposit dikembalikan jika tidak menang\n" +
+                                "• Berlaku untuk 1 sesi lelang\n\n" +
+                                "Ketik 'menu' untuk kembali.",
+                        "auction-deposit.m4a"
+                );
 
             case 4:
-                return "     Mulai Bidding\n\n" +
-                        "Cara bidding:\n" +
-                        "1. Pilih artwork yang diminati\n" +
-                        "2. Tentukan batas maksimal bid\n" +
-                        "3. Klik tombol 'Bid Now'\n" +
-                        "4. Konfirmasi bid amount\n" +
-                        "5. Tunggu hasil lelang\n\n" +
-                        "Ketik 'menu' untuk kembali.";
+                return new ChatbotResponse(
+                        "     Mulai Bidding\n\n" +
+                                "Cara bidding:\n" +
+                                "1. Masuk ke halaman lelang terkini\n" +
+                                "2. Pantau barang yang sedang dilelang\n" +
+                                "3. Konfirmasi bid amount\n" +
+                                "4. Klik tombol 'Bid Now'\n" +
+                                "5. Tunggu hasil lelang sampai kamu menang!\n\n" +
+                                "Ketik 'menu' untuk kembali.",
+                        "auction-bidding.m4a"
+                );
 
             default:
-                return "Pilihan tidak valid untuk menu lelang. Ketik 1-4 atau 'menu' untuk kembali.";
+                return new ChatbotResponse(
+                        "Pilihan tidak valid",
+                        "invalid-input.m4a"
+                );
         }
     }
 
-    /**
-     * Handle technical support submenu choices
-     */
-    private String handleTechnicalSupportChoice(int choice, UserChatSession session) {
+    private ChatbotResponse handleTechnicalSupportChoiceWithSound(int choice, UserChatSession session) {
         System.out.println("     HANDLING TECHNICAL SUPPORT CHOICE: " + choice);
 
         switch (choice) {
             case 1:
-                return "          Masalah Login\n\n" +
-                        "Solusi umum masalah login:\n" +
-                        "• Pastikan username/email benar\n" +
-                        "• Cek caps lock pada password\n" +
-                        "• Clear browser cache & cookies\n" +
-                        "• Coba browser lain\n" +
-                        "• Reset password jika perlu\n\n" +
-                        "Masih bermasalah? Hubungi admin.\n" +
-                        "Ketik 'menu' untuk kembali.";
+                return new ChatbotResponse(
+                        "          Masalah Login\n\n" +
+                                "Solusi umum masalah login:\n" +
+                                "• Pastikan username/email benar\n" +
+                                "• Cek caps lock pada password\n" +
+                                "• Clear browser cache & cookies\n" +
+                                "• Coba browser lain\n" +
+                                "• Reset password jika perlu\n\n" +
+                                "Masih bermasalah? Hubungi admin.\n" +
+                                "Ketik 'menu' untuk kembali.",
+                        "support-login.m4a"
+                );
 
             case 2:
-                return "      Reset Password\n\n" +
-                        "Cara reset password:\n" +
-                        "1. Klik 'Lupa Password' di halaman login\n" +
-                        "2. Masukkan email terdaftar\n" +
-                        "3. Cek email untuk link reset\n" +
-                        "4. Klik link dalam 15 menit\n" +
-                        "5. Buat password baru\n\n" +
-                        "Password harus min. 8 karakter.\n" +
-                        "Ketik 'menu' untuk kembali.";
+                return new ChatbotResponse(
+                        "      Reset Password\n\n" +
+                                "Cara reset password:\n" +
+                                "1. Klik 'Lupa Password' di halaman login\n" +
+                                "2. Masukkan email terdaftar\n" +
+                                "3. Cek email untuk link reset\n" +
+                                "4. Klik link dalam 15 menit\n" +
+                                "5. Buat password baru\n\n" +
+                                "Password harus min. 8 karakter.\n" +
+                                "Ketik 'menu' untuk kembali.",
+                        "support-password.m4a"
+                );
 
             case 3:
-                return "            Hubungi Admin\n\n" +
-                        "Kontak admin SeniMatic:\n" +
-                        "       Email: admin@senimatic.com\n" +
-                        "         WhatsApp: +62 812-3456-7890\n" +
-                        "       Telepon: (021) 1234-5678\n" +
-                        "         Jam kerja: 09:00 - 17:00 WIB\n\n" +
-                        "Respon dalam 1x24 jam.\n" +
-                        "Ketik 'menu' untuk kembali.";
+                return new ChatbotResponse(
+                        "            Hubungi Admin\n\n" +
+                                "Kontak admin SeniMatic:\n" +
+                                "       Email: admin@senimatic.com\n" +
+                                "         WhatsApp: +62 812-3456-7890\n" +
+                                "       Telepon: (021) 1234-5678\n" +
+                                "         Jam kerja: 09:00 - 17:00 WIB\n\n" +
+                                "Respon dalam 1x24 jam.\n" +
+                                "Ketik 'menu' untuk kembali.",
+                        "support-contact.m4a"
+                );
 
             default:
-                return "Pilihan tidak valid untuk bantuan teknis. Ketik 1-3 atau 'menu' untuk kembali.";
+                return new ChatbotResponse(
+                        "Pilihan tidak valid",
+                        "invalid-input.m4a"
+                );
         }
     }
 
-    /**
-     * Handle text input
-     */
-    private String handleTextInput(String input, UserChatSession session) {
+    private ChatbotResponse handleTextInputWithSound(String input, UserChatSession session) {
         String lowerInput = input.toLowerCase().trim();
 
         // Handle "menu" command to return to main menu
         if (lowerInput.equals("menu")) {
             session.setCurrentFlow("welcome");
             System.out.println("     RETURNED TO MAIN MENU");
-            return getWelcomeResponse();
+            return getWelcomeResponseWithSound();
         }
 
         // Handle greetings
         if (lowerInput.contains("halo") || lowerInput.contains("hai")) {
             session.setCurrentFlow("welcome");
-            return "Halo! " + getWelcomeResponse();
+            return new ChatbotResponse(
+                    "Halo! " + getWelcomeResponse().getMessage(),
+                    "greeting.m4a"
+            );
         }
 
         // Handle thanks
         if (lowerInput.contains("terima kasih")) {
-            return "Sama-sama! Senang bisa membantu Anda. Ketik 'menu' untuk kembali ke menu utama.";
+            return new ChatbotResponse(
+                    "Sama-sama! Senang bisa membantu Anda. Ketik 'menu' untuk kembali ke menu utama.",
+                    "terimakasih.m4a"
+            );
         }
 
         // Default response based on current flow
         String currentFlow = session.getCurrentFlow();
         if ("welcome".equals(currentFlow)) {
-            return "Mohon masukkan nomor pilihan yang valid (1-4) atau ketik 'halo' untuk memulai.";
+            return new ChatbotResponse(
+                    "Mohon masukkan nomor pilihan yang valid (1-4) atau ketik 'halo' untuk memulai.",
+                    "invalid-input.m4a"
+            );
         } else {
-            return "Mohon masukkan nomor pilihan yang valid atau ketik 'menu' untuk kembali ke menu utama.";
+            return new ChatbotResponse(
+                    "Mohon masukkan nomor pilihan yang valid atau ketik 'menu' untuk kembali ke menu utama.",
+                    "invalid-input.m4a"
+            );
         }
     }
 
-    /**
-     * Get welcome response
-     */
-    private String getWelcomeResponse() {
-        return "Selamat datang di SeniMatic Chat Assistant!         \n\n" +
-                "Saya siap membantu Anda dengan:\n" +
-                "1. Informasi Artwork\n" +
-                "2. Cara Mengikuti Lelang\n" +
-                "3. Info Galeri\n" +
-                "4. Bantuan Teknis\n\n" +
-                "Ketik nomor pilihan Anda untuk memulai:";
+    public ChatbotResponse getWelcomeResponseWithSound() {
+        return new ChatbotResponse(
+                "Selamat datang di SeniMatic Chat Assistant!         \n\n" +
+                        "Saya siap membantu Anda dengan:\n" +
+                        "1. Informasi Artwork\n" +
+                        "2. Cara Mengikuti Lelang\n" +
+                        "3. Info Galeri\n" +
+                        "4. Bantuan Teknis\n\n" +
+                        "Ketik nomor pilihan Anda untuk memulai:",
+                "welcome.m4a"
+        );
     }
 
-    /**
-     * Get fallback response when database is not available
-     */
-    private String getFallbackResponse(String input, UserChatSession session) {
+    public ChatbotResponse getWelcomeResponse() {
+        return getWelcomeResponseWithSound();
+    }
+
+    private ChatbotResponse getFallbackResponseWithSound(String input, UserChatSession session) {
         try {
             int choice = Integer.parseInt(input.trim());
-            return handleMainMenuChoice(choice, session);
+            return handleMainMenuChoiceWithSound(choice, session);
         } catch (NumberFormatException e) {
-            return handleTextInput(input, session);
+            return handleTextInputWithSound(input, session);
         }
     }
 
-    /**
-     * Process user input and generate response (DEPRECATED - use generateResponse instead)
-     */
     @Deprecated
     public String processUserInput(int userId, String input) {
         return generateResponse(userId, input);
     }
 
-    /**
-     * Save chat message to database (public method for external use)
-     */
     public boolean saveChatMessage(ChatLog chatLog) {
         try {
             boolean saved = chatbotDAO.saveChatMessage(chatLog);
@@ -413,9 +440,6 @@ public class ChatbotService {
         }
     }
 
-    /**
-     * Update session in database
-     */
     private void updateSessionInDatabase(UserChatSession session) {
         try {
             boolean updated = chatbotDAO.updateChatSession(session);
@@ -427,16 +451,10 @@ public class ChatbotService {
         }
     }
 
-    /**
-     * Get active session for user
-     */
     public UserChatSession getSession(int userId) {
         return activeSessions.get(userId);
     }
 
-    /**
-     * End chat session
-     */
     public void endChatSession(int userId) {
         UserChatSession session = activeSessions.get(userId);
         if (session != null) {
@@ -447,9 +465,6 @@ public class ChatbotService {
         }
     }
 
-    /**
-     * Get chat history for a session
-     */
     public List<ChatLog> getChatHistory(int sessionId) {
         try {
             List<ChatLog> history = chatbotDAO.getChatHistory(sessionId);
@@ -461,9 +476,6 @@ public class ChatbotService {
         }
     }
 
-    /**
-     * Get total message count for session
-     */
     public int getMessageCount(int sessionId) {
         try {
             List<ChatLog> history = chatbotDAO.getChatHistory(sessionId);
@@ -474,9 +486,6 @@ public class ChatbotService {
         }
     }
 
-    /**
-     * Get latest messages from database
-     */
     public List<ChatLog> getLatestMessages(int sessionId, int limit) {
         try {
             List<ChatLog> allMessages = chatbotDAO.getChatHistory(sessionId);

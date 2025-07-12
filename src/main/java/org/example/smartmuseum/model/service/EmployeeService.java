@@ -29,10 +29,6 @@ public class EmployeeService {
 
     // ========== EMPLOYEE CRUD METHODS ==========
 
-    /**
-     * Add new employee to database
-     * Business logic: Validate employee data before adding
-     */
     public boolean addEmployee(Employee employee) {
         try {
             if (employee == null) {
@@ -73,10 +69,6 @@ public class EmployeeService {
         }
     }
 
-    /**
-     * Update existing employee in database
-     * Business logic: Validate employee data before updating
-     */
     public boolean updateEmployee(Employee employee) {
         try {
             if (employee == null) {
@@ -128,10 +120,6 @@ public class EmployeeService {
         }
     }
 
-    /**
-     * Delete employee from database
-     * Business logic: Check if employee exists before deleting
-     */
     public boolean deleteEmployee(int employeeId) {
         try {
             if (employeeId <= 0) {
@@ -160,12 +148,17 @@ public class EmployeeService {
         }
     }
 
+    public int getTotalEmployeeCount() {
+        try {
+            return employeeDAO.getTotalEmployee();
+        } catch (Exception e) {
+            System.err.println("Error getting total employee count: " + e.getMessage());
+            return 0;
+        }
+    }
+
     // ========== PHOTO MANAGEMENT METHODS ==========
 
-    /**
-     * Update employee photo
-     * Business logic: Validate photo path and employee existence
-     */
     public boolean updateEmployeePhoto(int employeeId, String photoPath) {
         try {
             if (employeeId <= 0) {
@@ -207,9 +200,6 @@ public class EmployeeService {
         }
     }
 
-    /**
-     * Validate photo file path for business rules
-     */
     public boolean isValidPhotoPath(String photoPath) {
         if (photoPath == null || photoPath.trim().isEmpty()) {
             return true; // Empty is allowed (no photo)
@@ -224,9 +214,6 @@ public class EmployeeService {
 
     // ========== ATTENDANCE PROCESSING METHODS ==========
 
-    /**
-     * Process attendance for today only
-     */
     public AttendanceResult processAttendance(int employeeId, String qrCode) {
         LocalDate today = LocalDate.now();
 
@@ -351,7 +338,6 @@ public class EmployeeService {
         return AttendanceStatus.ABSENT;
     }
 
-    // Result class for attendance processing
     public static class AttendanceResult {
         private final boolean success;
         private final String message;

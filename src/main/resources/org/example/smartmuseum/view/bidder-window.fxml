@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+<?import javafx.scene.image.*?>
+
+<VBox xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="org.example.smartmuseum.controller.BidderController"
+      spacing="10.0" style="-fx-background-color: #f8f9fa;">
+
+    <children>
+        <!-- Header -->
+        <HBox alignment="CENTER_LEFT" spacing="20.0"
+              style="-fx-background-color: #007bff; -fx-padding: 15;">
+            <children>
+                <VBox spacing="5.0" HBox.hgrow="ALWAYS">
+                    <children>
+                        <Label fx:id="lblAuctionTitle" text="🔴 LIVE AUCTION"
+                               style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: white;"/>
+                        <Label fx:id="lblAuctionId" text="Auction #1"
+                               style="-fx-font-size: 14px; -fx-text-fill: #cce7ff;"/>
+                    </children>
+                </VBox>
+
+                <VBox alignment="CENTER_RIGHT" spacing="5.0">
+                    <children>
+                        <Label fx:id="lblCurrentTime" text="00:00:00"
+                               style="-fx-font-size: 14px; -fx-text-fill: white; -fx-font-family: 'Courier New';"/>
+                        <Label fx:id="lblBidderName" text="Bidder: Username"
+                               style="-fx-font-size: 12px; -fx-text-fill: #cce7ff;"/>
+                    </children>
+                </VBox>
+            </children>
+        </HBox>
+
+        <!-- Main Content -->
+        <HBox spacing="15.0" VBox.vgrow="ALWAYS">
+            <children>
+                <!-- Left Panel - Artwork Info -->
+                <VBox spacing="15.0" prefWidth="380.0"
+                      style="-fx-background-color: white; -fx-border-color: #dee2e6; -fx-border-width: 1; -fx-border-radius: 12; -fx-background-radius: 12; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.15), 8, 0, 0, 3);">
+                    <children>
+                        <!-- Artwork Image -->
+                        <VBox alignment="CENTER" spacing="12.0">
+                            <children>
+                                <ImageView fx:id="imgArtwork" fitHeight="220.0" fitWidth="320.0"
+                                           preserveRatio="true" style="-fx-border-color: #dee2e6; -fx-border-width: 1; -fx-border-radius: 8;">
+                                    <!-- Placeholder image atau load dari resource -->
+                                </ImageView>
+                                <VBox alignment="CENTER" spacing="8.0">
+                                    <children>
+                                        <Label fx:id="lblArtworkTitle" text="Ming Dynasty Vase"
+                                               style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
+                                        <Label fx:id="lblArtworkArtist" text="Unknown Artist, 15th Century"
+                                               style="-fx-font-size: 14px; -fx-text-fill: #6c757d; -fx-font-style: italic;"/>
+                                    </children>
+                                </VBox>
+                            </children>
+                        </VBox>
+
+                        <!-- Current Auction Status -->
+                        <VBox spacing="15.0"
+                              style="-fx-background-color: #f8f9fa; -fx-border-color: #dee2e6; -fx-border-width: 1; -fx-border-radius: 10; -fx-background-radius: 10;">
+                            <children>
+                                <Label text="🏆 LIVE STATUS"
+                                       style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #dc3545;"/>
+
+                                <GridPane hgap="15.0" vgap="12.0">
+                                    <columnConstraints>
+                                        <ColumnConstraints hgrow="NEVER" minWidth="110.0"/>
+                                        <ColumnConstraints hgrow="ALWAYS"/>
+                                    </columnConstraints>
+
+                                    <Label text="Current Bid:" style="-fx-font-weight: bold; -fx-font-size: 14px;"
+                                           GridPane.columnIndex="0" GridPane.rowIndex="0"/>
+                                    <Label fx:id="lblCurrentBid" text="Rp 500,000"
+                                           style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #007bff;"
+                                           GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+
+                                    <Label text="Leading Bidder:" style="-fx-font-weight: bold; -fx-font-size: 14px;"
+                                           GridPane.columnIndex="0" GridPane.rowIndex="1"/>
+                                    <Label fx:id="lblCurrentWinner" text="--"
+                                           style="-fx-font-size: 16px; -fx-text-fill: #28a745; -fx-font-weight: bold;"
+                                           GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+
+                                    <Label text="Time Left:" style="-fx-font-weight: bold; -fx-font-size: 14px;"
+                                           GridPane.columnIndex="0" GridPane.rowIndex="2"/>
+                                    <Label fx:id="lblTimeRemaining" text="--"
+                                           style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #198754;"
+                                           GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+
+                                    <Label text="Participants:" style="-fx-font-weight: bold; -fx-font-size: 14px;"
+                                           GridPane.columnIndex="0" GridPane.rowIndex="3"/>
+                                    <Label fx:id="lblParticipantCount" text="0"
+                                           style="-fx-font-size: 16px; -fx-font-weight: bold;"
+                                           GridPane.columnIndex="1" GridPane.rowIndex="3"/>
+                                </GridPane>
+                            </children>
+                            <padding>
+                                <Insets bottom="15.0" left="15.0" right="15.0" top="15.0"/>
+                            </padding>
+                        </VBox>
+                    </children>
+                    <padding>
+                        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0"/>
+                    </padding>
+                </VBox>
+
+                <!-- Right Panel - Bidding Interface -->
+                <VBox spacing="15.0" HBox.hgrow="ALWAYS">
+                    <children>
+                        <!-- Bidding Panel -->
+                        <VBox spacing="20.0"
+                              style="-fx-background-color: white; -fx-border-color: #dee2e6; -fx-border-width: 1; -fx-border-radius: 12; -fx-background-radius: 12; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.15), 8, 0, 0, 3);">
+                            <children>
+                                <Label text="💰 PLACE YOUR BID"
+                                       style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #007bff;"/>
+
+                                <VBox spacing="15.0">
+                                    <children>
+                                        <HBox alignment="CENTER_LEFT" spacing="15.0">
+                                            <children>
+                                                <Label fx:id="lblMinimumBid" text="Min: Rp 510,000"
+                                                       style="-fx-font-size: 14px; -fx-text-fill: #dc3545; -fx-font-weight: bold;"/>
+                                                <Region HBox.hgrow="ALWAYS"/>
+                                                <Label fx:id="lblYourLastBid" text="Your last: Rp 0"
+                                                       style="-fx-font-size: 12px; -fx-text-fill: #6c757d;"/>
+                                            </children>
+                                        </HBox>
+
+                                        <HBox spacing="15.0" alignment="CENTER_LEFT">
+                                            <children>
+                                                <Label text="Rp" style="-fx-font-size: 18px; -fx-font-weight: bold;"/>
+                                                <TextField fx:id="txtBidAmount" promptText="Enter bid amount (e.g. 520000)"
+                                                           prefWidth="220.0" style="-fx-font-size: 16px; -fx-padding: 8;"/>
+                                                <Button fx:id="btnPlaceBid" text="🚀 PLACE BID"
+                                                        style="-fx-background-color: #28a745; -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 14px; -fx-padding: 8 15;"/>
+                                            </children>
+                                        </HBox>
+
+                                        <Label fx:id="lblBidStatus" text="ℹ️ Connecting to auction server..."
+                                               style="-fx-font-size: 12px; -fx-text-fill: #6c757d; -fx-font-weight: bold;"/>
+                                    </children>
+                                </VBox>
+                            </children>
+                            <padding>
+                                <Insets bottom="20.0" left="20.0" right="20.0" top="20.0"/>
+                            </padding>
+                        </VBox>
+
+                        <!-- Live Updates -->
+                        <HBox spacing="15.0" VBox.vgrow="ALWAYS">
+                            <children>
+                                <!-- Bid History -->
+                                <VBox spacing="12.0" HBox.hgrow="ALWAYS"
+                                      style="-fx-background-color: white; -fx-border-color: #dee2e6; -fx-border-width: 1; -fx-border-radius: 12; -fx-background-radius: 12; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.15), 8, 0, 0, 3);">
+                                    <children>
+                                        <Label text="📊 LIVE BID HISTORY"
+                                               style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #495057;"/>
+                                        <ListView fx:id="listBidHistory" VBox.vgrow="ALWAYS"
+                                                  style="-fx-font-size: 12px;"/>
+                                    </children>
+                                    <padding>
+                                        <Insets bottom="15.0" left="15.0" right="15.0" top="15.0"/>
+                                    </padding>
+                                </VBox>
+
+                                <!-- Participants -->
+                                <VBox spacing="12.0" prefWidth="220.0"
+                                      style="-fx-background-color: white; -fx-border-color: #dee2e6; -fx-border-width: 1; -fx-border-radius: 12; -fx-background-radius: 12; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.15), 8, 0, 0, 3);">
+                                    <children>
+                                        <Label text="👥 LIVE BIDDERS"
+                                               style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #495057;"/>
+                                        <ListView fx:id="listParticipants" VBox.vgrow="ALWAYS"
+                                                  style="-fx-font-size: 12px;"/>
+                                    </children>
+                                    <padding>
+                                        <Insets bottom="15.0" left="15.0" right="15.0" top="15.0"/>
+                                    </padding>
+                                </VBox>
+                            </children>
+                        </HBox>
+                    </children>
+                </VBox>
+            </children>
+            <padding>
+                <Insets bottom="15.0" left="15.0" right="15.0" top="0.0"/>
+            </padding>
+        </HBox>
+
+        <!-- Footer -->
+        <HBox alignment="CENTER" spacing="20.0"
+              style="-fx-background-color: #f8f9fa; -fx-border-color: #dee2e6; -fx-border-width: 1 0 0 0;">
+            <children>
+                <Label text="🔴 LIVE AUCTION SYSTEM"
+                       style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #dc3545;"/>
+                <Label text="• Timer resets to 30s on each bid"
+                       style="-fx-font-size: 10px; -fx-text-fill: #6c757d;"/>
+                <Region HBox.hgrow="ALWAYS"/>
+                <Button fx:id="btnDisconnect" text="❌ Leave Auction"
+                        style="-fx-background-color: #6c757d; -fx-text-fill: white; -fx-font-weight: bold;"/>
+            </children>
+            <padding>
+                <Insets bottom="12.0" left="20.0" right="20.0" top="12.0"/>
+            </padding>
+        </HBox>
+    </children>
+</VBox>

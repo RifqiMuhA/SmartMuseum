@@ -107,15 +107,17 @@ public class LoginController {
                 showAlert(Alert.AlertType.INFORMATION,
                         "✅ Login berhasil sebagai " + authenticatedUser.getRole().getValue().toUpperCase());
 
-                // FIXED: Check authorization BEFORE creating dashboard window
-                if (authenticatedUser.getRole() != UserRole.STAFF && authenticatedUser.getRole() != UserRole.BOSS) {
-                    showAlert(Alert.AlertType.WARNING,
-                            "❌ Access denied. Dashboard is only available for Staff and Boss.");
-                    return; // Don't proceed with dashboard creation
+                // Route user berdasarkan role dengan dashboard yang berbeda
+                if (authenticatedUser.getRole() == UserRole.BOSS) {
+                    // BOSS ke dashboard_boss.fxml
+                    openBossDashboard(authenticatedUser);
+                } else if (authenticatedUser.getRole() == UserRole.STAFF) {
+                    // STAFF ke dashboard.fxml (staff version)
+                    openStaffDashboard(authenticatedUser);
+                } else {
+                    // Role lainnya (VISITOR, dll) ke welcome window
+                    openWelcomeWindow(authenticatedUser);
                 }
-
-                // Create new dashboard window dengan session baru
-                openDashboardWindow(authenticatedUser);
 
             } else {
                 System.out.println("❌ Login failed - Invalid credentials");
@@ -200,32 +202,128 @@ public class LoginController {
         return null;
     }
 
-    private void openDashboardWindow(User user) {
+    /**
+     * Open Boss Dashboard for BOSS users
+     */
+    private void openBossDashboard(User user) {
         try {
-            // Create new dashboard window menggunakan FXMLLoaderHelper
-            Stage dashboardStage = FXMLLoaderHelper.createDashboardWindow(user);
-            dashboardStage.show();
+            // Create new boss dashboard window
+            Stage bossDashboardStage = createBossDashboardWindow(user);
+            bossDashboardStage.show();
 
             // Show session info untuk debugging
             int totalSessions = SessionManager.getActiveSessionCount();
             int loggedInUsers = SessionManager.getLoggedInUserCount();
-            System.out.println("📊 Sessions after login - Total: " + totalSessions +
+            System.out.println("📊 Sessions after boss dashboard login - Total: " + totalSessions +
                     ", Logged in: " + loggedInUsers);
 
-            // FIXED: Proper window closing - use hide() instead of close() to prevent app termination
+            // Hide the login window
             Stage loginStage = (Stage) loginButton.getScene().getWindow();
-
-            // Set up proper window closing behavior
-            loginStage.setOnCloseRequest(null); // Remove any existing close handlers
-
-            // Hide the login window instead of closing it to prevent app termination
+            loginStage.setOnCloseRequest(null);
             loginStage.hide();
 
-            System.out.println("✅ Login window hidden successfully");
+            System.out.println("✅ Boss Dashboard opened for: " + user.getUsername());
 
         } catch (IOException e) {
             e.printStackTrace();
-            showAlert(Alert.AlertType.ERROR, "❌ Error opening dashboard: " + e.getMessage());
+            showAlert(Alert.AlertType.ERROR, "❌ Error opening boss dashboard: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Open Staff Dashboard for STAFF users
+     */
+    private void openStaffDashboard(User user) {
+        try {
+            // Create new staff dashboard window using original dashboard
+            Stage staffDashboardStage = FXMLLoaderHelper.createDashboardWindow(user);
+            staffDashboardStage.show();
+
+            // Show session info untuk debugging
+            int totalSessions = SessionManager.getActiveSessionCount();
+            int loggedInUsers = SessionManager.getLoggedInUserCount();
+            System.out.println("📊 Sessions after staff dashboard login - Total: " + totalSessions +
+                    ", Logged in: " + loggedInUsers);
+
+            // Hide the login window
+            Stage loginStage = (Stage) loginButton.getScene().getWindow();
+            loginStage.setOnCloseRequest(null);
+            loginStage.hide();
+
+            System.out.println("✅ Staff Dashboard opened for: " + user.getUsername());
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            showAlert(Alert.AlertType.ERROR, "❌ Error opening staff dashboard: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Create Boss Dashboard Window with proper session management
+     */
+    private Stage createBossDashboardWindow(User user) throws IOException {
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/smartmuseum/fxml/dashboard_boss.fxml"));
+        Parent root = loader.load();
+
+        // Create new session for this boss dashboard
+        SessionManager sessionManager = SessionManager.createNewSession("boss_dashboard");
+        sessionManager.login(user);
+
+        // Get controller and set session context
+        DashboardBossController controller = loader.getController();
+        if (controller != null) {
+            org.example.smartmuseum.util.SessionContext sessionContext =
+                    new org.example.smartmuseum.util.SessionContext(sessionManager);
+            controller.setSessionContext(sessionContext);
+        }
+
+        // Create and configure stage
+        Stage stage = new Stage();
+        Scene scene = new Scene(root);
+        scene.getStylesheets().add(getClass().getResource("/org/example/smartmuseum/css/main-style.css").toExternalForm());
+
+        stage.setScene(scene);
+        stage.setTitle("SeniMatic - Boss Dashboard");
+        stage.setMaximized(true);
+
+        // Set stage in session context
+        if (controller != null && controller.getSessionContext() != null) {
+            controller.getSessionContext().setStage(stage);
+        }
+
+        // Handle window close
+        stage.setOnCloseRequest(e -> {
+            if (controller != null) {
+                controller.cleanup();
+            }
+            sessionManager.destroySession();
+        });
+
+        return stage;
+    }
+
+    private void openWelcomeWindow(User user) {
+        try {
+            // Create new welcome window menggunakan FXMLLoaderHelper
+            Stage welcomeStage = FXMLLoaderHelper.createWelcomeWindow(user);
+            welcomeStage.show();
+
+            // Show session info untuk debugging
+            int totalSessions = SessionManager.getActiveSessionCount();
+            int loggedInUsers = SessionManager.getLoggedInUserCount();
+            System.out.println("📊 Sessions after welcome login - Total: " + totalSessions +
+                    ", Logged in: " + loggedInUsers);
+
+            // Hide the login window
+            Stage loginStage = (Stage) loginButton.getScene().getWindow();
+            loginStage.setOnCloseRequest(null);
+            loginStage.hide();
+
+            System.out.println("✅ Welcome window opened for " + user.getRole() + ": " + user.getUsername());
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            showAlert(Alert.AlertType.ERROR, "❌ Error opening welcome window: " + e.getMessage());
         }
     }
 
@@ -254,7 +352,7 @@ public class LoginController {
             // Demo button untuk testing multi-login
             // User bisa login sebagai user yang berbeda di window berbeda
 
-            // Login as admin
+            // Login as admin (Boss Dashboard)
             User admin = new User();
             admin.setUserId(1);
             admin.setUsername("admin");
@@ -262,10 +360,10 @@ public class LoginController {
             admin.setEmail("admin@museum.com");
             admin.setPasswordHash(SecurityUtils.simpleHash("admin"));
 
-            Stage adminDashboard = FXMLLoaderHelper.createDashboardWindow(admin);
-            adminDashboard.show();
+            Stage adminBossDashboard = createBossDashboardWindow(admin);
+            adminBossDashboard.show();
 
-            // Login as staff1
+            // Login as staff1 (Staff Dashboard)
             User staff = new User();
             staff.setUserId(2);
             staff.setUsername("staff1");
@@ -276,8 +374,19 @@ public class LoginController {
             Stage staffDashboard = FXMLLoaderHelper.createDashboardWindow(staff);
             staffDashboard.show();
 
+            // Login as visitor1 (Welcome)
+            User visitor = new User();
+            visitor.setUserId(3);
+            visitor.setUsername("visitor1");
+            visitor.setRole(UserRole.VISITOR);
+            visitor.setEmail("visitor1@museum.com");
+            visitor.setPasswordHash(SecurityUtils.simpleHash("visitor1"));
+
+            Stage visitorWelcome = FXMLLoaderHelper.createWelcomeWindow(visitor);
+            visitorWelcome.show();
+
             showAlert(Alert.AlertType.INFORMATION,
-                    "Multi-login demo: Opened 2 dashboard windows with different users!");
+                    "Multi-login demo: Opened boss dashboard (admin), staff dashboard (staff), and welcome window (visitor)!");
 
             // Hide login window
             Stage loginStage = (Stage) loginButton.getScene().getWindow();

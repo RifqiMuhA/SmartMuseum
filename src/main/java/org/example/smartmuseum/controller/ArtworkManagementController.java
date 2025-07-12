@@ -1,5 +1,7 @@
 package org.example.smartmuseum.controller;
 
+import javafx.beans.property.SimpleIntegerProperty;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -90,13 +92,20 @@ public class ArtworkManagementController implements Initializable {
     }
 
     private void setupTableColumns() {
-        colArtworkId.setCellValueFactory(new PropertyValueFactory<>("artworkId"));
-        colTitle.setCellValueFactory(new PropertyValueFactory<>("title"));
-        colArtist.setCellValueFactory(new PropertyValueFactory<>("artistName"));
-        colYear.setCellValueFactory(new PropertyValueFactory<>("year"));
-        colTechnique.setCellValueFactory(new PropertyValueFactory<>("technique"));
-        colArtworkType.setCellValueFactory(new PropertyValueFactory<>("artworkType"));
-        colImagePath.setCellValueFactory(new PropertyValueFactory<>("imagePath"));
+        colArtworkId.setCellValueFactory(cellData ->
+                new SimpleIntegerProperty(cellData.getValue().getArtworkId()).asObject());
+        colTitle.setCellValueFactory(cellData ->
+                new SimpleStringProperty(cellData.getValue().getTitle()));
+        colArtist.setCellValueFactory(cellData ->
+                new SimpleStringProperty(cellData.getValue().getArtistName()));
+        colYear.setCellValueFactory(cellData ->
+                new SimpleIntegerProperty(cellData.getValue().getYear()).asObject());
+        colTechnique.setCellValueFactory(cellData ->
+                new SimpleStringProperty(cellData.getValue().getTechnique()));
+        colArtworkType.setCellValueFactory(cellData ->
+                new SimpleStringProperty(cellData.getValue().getArtworkType()));
+        colImagePath.setCellValueFactory(cellData ->
+                new SimpleStringProperty(cellData.getValue().getImagePath()));
 
         // Add custom cell factory for artwork type with colored badges
         colArtworkType.setCellFactory(column -> new TableCell<ArtworkRecord, String>() {

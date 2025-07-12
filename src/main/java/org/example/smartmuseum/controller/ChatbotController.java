@@ -10,14 +10,19 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
+import javafx.scene.media.Media;
+import javafx.scene.media.MediaPlayer;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 import org.example.smartmuseum.model.service.ChatbotService;
 import org.example.smartmuseum.model.entity.UserChatSession;
 import org.example.smartmuseum.model.entity.ChatLog;
+import org.example.smartmuseum.model.entity.ChatbotResponse;
 
+import java.io.File;
 import java.net.URL;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -26,7 +31,7 @@ import java.util.ResourceBundle;
 import java.util.concurrent.CompletableFuture;
 
 /**
- * Controller for Chatbot UI interactions with database integration
+ * Controller for Chatbot UI interactions with database integration and sound support
  */
 public class ChatbotController implements Initializable {
 
@@ -41,8 +46,12 @@ public class ChatbotController implements Initializable {
 
     private ChatbotService chatbotService;
     private UserChatSession currentSession;
-    private int currentUserId = 1; // Mock user ID - in real app, get from login session
+    private int currentUserId = 1;
     private boolean isProcessing = false;
+
+    // Sound management
+    private MediaPlayer currentMediaPlayer;
+    private static final String SOUND_DIRECTORY = "src/main/resources/sounds/"; // Adjust path as needed
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -100,16 +109,82 @@ public class ChatbotController implements Initializable {
 
             // If no history, send welcome message
             if (chatContainer.getChildren().isEmpty()) {
-                String welcomeMessage = getWelcomeMessage();
-                addBotMessageToUI(welcomeMessage);
+                ChatbotResponse welcomeResponse = chatbotService.getWelcomeResponse();
+                addBotMessageToUI(welcomeResponse.getMessage());
                 // Save welcome message to database
-                saveBotMessageToDatabase(welcomeMessage);
+                saveBotMessageToDatabase(welcomeResponse.getMessage());
+                // Play welcome sound
+                if (welcomeResponse.hasSound()) {
+                    playSound(welcomeResponse.getSoundFile());
+                }
             }
 
             updateStatus("Chat session started");
         } catch (Exception e) {
             updateStatus("Error starting chat session: " + e.getMessage());
             addBotMessageToUI("Maaf, terjadi kesalahan saat memulai sesi chat. Silakan coba lagi.");
+        }
+    }
+
+    /**
+     * Play sound file and stop any currently playing sound
+     */
+    private void playSound(String soundFileName) {
+        try {
+            // Stop current sound if playing
+            stopCurrentSound();
+
+            // Build sound file path
+            String soundPath = SOUND_DIRECTORY + soundFileName;
+            File soundFile = new File(soundPath);
+
+            if (!soundFile.exists()) {
+                System.err.println("Sound file not found: " + soundPath);
+                return;
+            }
+    
+            // Create and play new sound
+            Media media = new Media(soundFile.toURI().toString());
+            currentMediaPlayer = new MediaPlayer(media);
+
+            // Auto-cleanup when sound finishes
+            currentMediaPlayer.setOnEndOfMedia(() -> {
+                if (currentMediaPlayer != null) {
+                    currentMediaPlayer.dispose();
+                    currentMediaPlayer = null;
+                }
+            });
+
+            // Handle errors
+            currentMediaPlayer.setOnError(() -> {
+                System.err.println("Error playing sound: " + currentMediaPlayer.getError());
+                if (currentMediaPlayer != null) {
+                    currentMediaPlayer.dispose();
+                    currentMediaPlayer = null;
+                }
+            });
+
+            currentMediaPlayer.play();
+            System.out.println("Playing sound: " + soundFileName);
+
+        } catch (Exception e) {
+            System.err.println("Error playing sound " + soundFileName + ": " + e.getMessage());
+        }
+    }
+
+    /**
+     * Stop currently playing sound
+     */
+    private void stopCurrentSound() {
+        if (currentMediaPlayer != null) {
+            try {
+                currentMediaPlayer.stop();
+                currentMediaPlayer.dispose();
+                currentMediaPlayer = null;
+                System.out.println("Stopped current sound");
+            } catch (Exception e) {
+                System.err.println("Error stopping current sound: " + e.getMessage());
+            }
         }
     }
 
@@ -170,18 +245,23 @@ public class ChatbotController implements Initializable {
             try {
                 // Simulate processing delay for better UX
                 Thread.sleep(500);
-                // Process through chatbot service (this will generate response only)
-                return chatbotService.generateResponse(currentUserId, input);
+                // Process through chatbot service (this will generate response with sound info)
+                return chatbotService.generateResponseWithSound(currentUserId, input);
             } catch (Exception e) {
-                return "Maaf, terjadi kesalahan saat memproses input Anda: " + e.getMessage();
+                return new ChatbotResponse("Maaf, terjadi kesalahan saat memproses input Anda: " + e.getMessage());
             }
         }).thenAcceptAsync(response -> {
             Platform.runLater(() -> {
                 // Add bot response to UI
-                addBotMessageToUI(response);
+                addBotMessageToUI(response.getMessage());
 
                 // SAVE BOT RESPONSE TO DATABASE IMMEDIATELY
-                saveBotResponseToDatabase(response);
+                saveBotResponseToDatabase(response.getMessage());
+
+                // PLAY SOUND IF AVAILABLE
+                if (response.hasSound()) {
+                    playSound(response.getSoundFile());
+                }
 
                 isProcessing = false;
                 updateStatus("Ready");
@@ -269,6 +349,9 @@ public class ChatbotController implements Initializable {
      */
     private void openArtworkList() {
         try {
+            // Stop any playing sound
+            stopCurrentSound();
+
             // End chat session before closing
             if (currentSession != null) {
                 chatbotService.endChatSession(currentUserId);
@@ -304,6 +387,9 @@ public class ChatbotController implements Initializable {
      */
     private void openAuction() {
         try {
+            // Stop any playing sound
+            stopCurrentSound();
+
             // End chat session before closing
             if (currentSession != null) {
                 chatbotService.endChatSession(currentUserId);
@@ -453,6 +539,9 @@ public class ChatbotController implements Initializable {
 
         confirmAlert.showAndWait().ifPresent(response -> {
             if (response == ButtonType.OK) {
+                // Stop any playing sound
+                stopCurrentSound();
+
                 // Clear UI
                 chatContainer.getChildren().clear();
 
@@ -469,6 +558,9 @@ public class ChatbotController implements Initializable {
     @FXML
     private void handleBack() {
         try {
+            // Stop any playing sound
+            stopCurrentSound();
+
             // End chat session before closing
             if (currentSession != null) {
                 chatbotService.endChatSession(currentUserId);
@@ -496,19 +588,6 @@ public class ChatbotController implements Initializable {
         } catch (Exception e) {
             showErrorAlert("Navigation Error", "Failed to return to welcome: " + e.getMessage());
         }
-    }
-
-    /**
-     * Get welcome message for chatbot
-     */
-    private String getWelcomeMessage() {
-        return "Selamat datang di SeniMatic Chat Assistant!         \n\n" +
-                "Saya siap membantu Anda dengan:\n" +
-                "1. Informasi Artwork\n" +
-                "2. Cara Mengikuti Lelang\n" +
-                "3. Info Galeri\n" +
-                "4. Bantuan Teknis\n\n" +
-                "Ketik nomor pilihan Anda untuk memulai:";
     }
 
     /**
@@ -593,5 +672,12 @@ public class ChatbotController implements Initializable {
     public void refreshChatFromDatabase() {
         chatContainer.getChildren().clear();
         loadChatHistory();
+    }
+
+    /**
+     * Cleanup resources when controller is destroyed
+     */
+    public void cleanup() {
+        stopCurrentSound();
     }
 }

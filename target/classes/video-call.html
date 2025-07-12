@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZegoCloud Video Call</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background-color: #1a1a1a;
+        }
+
+        #loading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #1a1a1a;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-size: 18px;
+            z-index: 1000;
+        }
+
+        #root {
+            width: 100vw;
+            height: 100vh;
+            background-color: #1a1a1a;
+        }
+
+        .loading-spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 2s linear infinite;
+            margin-right: 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        #error-container {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #f44336;
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            max-width: 500px;
+            z-index: 1001;
+        }
+    </style>
+</head>
+<body>
+<script>
+    console.log('Starting ZegoCloud initialization...');
+
+    // Debug logging
+    function logDebug(message) {
+        console.log('[ZegoCloud Debug]', message);
+        // Send to JavaFX if needed
+        if (window.javafx) {
+            window.javafx.debug(message);
+        }
+    }
+
+    function showError(message) {
+        console.error('[ZegoCloud Error]', message);
+        document.getElementById('loading').style.display = 'none';
+        document.getElementById('error-message').textContent = message;
+        document.getElementById('error-container').style.display = 'block';
+
+        // Alert JavaFX about error
+        if (window.javafx) {
+            window.javafx.onError(message);
+        } else {
+            alert('Error: ' + message);
+        }
+    }
+
+    function hideLoading() {
+        document.getElementById('loading').style.display = 'none';
+    }
+
+    function retryLoad() {
+        document.getElementById('error-container').style.display = 'none';
+        document.getElementById('loading').style.display = 'flex';
+        setTimeout(initializeZegoCloud, 1000);
+    }
+
+    function getUrlParams(url) {
+        try {
+            let urlStr = url.split('?')[1];
+            if (!urlStr) return {};
+            const urlSearchParams = new URLSearchParams(urlStr);
+            const result = Object.fromEntries(urlSearchParams.entries());
+            logDebug('URL Params: ' + JSON.stringify(result));
+            return result;
+        } catch (error) {
+            logDebug('Error parsing URL params: ' + error.message);
+            return {};
+        }
+    }
+
+    function initializeZegoCloud() {
+        try {
+            logDebug('Initializing ZegoCloud...');
+
+            // Check if ZegoUIKitPrebuilt is loaded
+            if (typeof ZegoUIKitPrebuilt === 'undefined') {
+                throw new Error('ZegoUIKitPrebuilt library not loaded');
+            }
+
+            // Get parameters from URL
+            const params = getUrlParams(window.location.href);
+            const roomID = params['roomID'] || params['roomId'] || ('room_' + Math.floor(Math.random() * 10000));
+            const userID = params['userID'] || params['userId'] || ('user_' + Math.floor(Math.random() * 10000));
+            const userName = params['userName'] || params['username'] || ('User_' + userID);
+            const isHost = params['isHost'] === 'true';
+
+            logDebug('Room ID: ' + roomID);
+            logDebug('User ID: ' + userID);
+            logDebug('User Name: ' + userName);
+            logDebug('Is Host: ' + isHost);
+
+            // ZegoCloud configuration
+            const appID = 1519124371;
+            const serverSecret = "521f5023e3bba1ea4e7aa50b28513a42";
+
+            logDebug('Generating kit token...');
+            const kitToken = ZegoUIKitPrebuilt.generateKitTokenForTest(
+                appID,
+                serverSecret,
+                roomID,
+                userID,
+                userName
+            );
+
+            logDebug('Creating ZegoUIKitPrebuilt instance...');
+            const zp = ZegoUIKitPrebuilt.create(kitToken);
+
+            logDebug('Joining room...');
+            zp.joinRoom({
+                container: document.querySelector("#root"),
+                sharedLinks: [{
+                    name: 'Share Link',
+                    url: window.location.protocol + '//' + window.location.host + window.location.pathname + '?roomID=' + roomID,
+                }],
+                scenario: {
+                    mode: ZegoUIKitPrebuilt.VideoConference,
+                },
+                turnOnMicrophoneWhenJoining: true,
+                turnOnCameraWhenJoining: true,
+                showMyCameraToggleButton: true,
+                showMyMicrophoneToggleButton: true,
+                showAudioVideoSettingsButton: true,
+                showScreenSharingButton: true,
+                showTextChat: true,
+                showUserList: true,
+                maxUsers: 50,
+                layout: "Auto",
+                showLayoutButton: true,
+
+                // Event callbacks
+                onJoinRoom: () => {
+                    logDebug('Successfully joined room: ' + roomID);
+                    hideLoading();
+
+                    // Notify JavaFX
+                    if (window.javafx) {
+                        window.javafx.onRoomJoined(roomID);
+                    }
+                },
+
+                onLeaveRoom: () => {
+                    logDebug('Left room: ' + roomID);
+                    if (window.javafx) {
+                        window.javafx.onRoomLeft();
+                    }
+                },
+
+                onError: (error) => {
+                    logDebug('ZegoCloud error: ' + JSON.stringify(error));
+                    showError('Video call error: ' + (error.message || 'Unknown error'));
+                }
+            });
+
+            // Hide loading after a delay if onJoinRoom doesn't fire
+            setTimeout(() => {
+                if (document.getElementById('loading').style.display !== 'none') {
+                    logDebug('Hiding loading screen after timeout');
+                    hideLoading();
+                }
+            }, 10000);
+
+        } catch (error) {
+            logDebug('Error in initializeZegoCloud: ' + error.message);
+            showError('Failed to initialize video call: ' + error.message);
+        }
+    }
+
+    // Load ZegoCloud script and initialize
+    function loadZegoScript() {
+        logDebug('Loading ZegoCloud script...');
+
+        const script = document.createElement('script');
+        script.src = 'https://unpkg.com/@zegocloud/zego-uikit-prebuilt/zego-uikit-prebuilt.js';
+        script.onload = function() {
+            logDebug('ZegoCloud script loaded successfully');
+            setTimeout(initializeZegoCloud, 500); // Small delay to ensure script is ready
+        };
+        script.onerror = function() {
+            showError('Failed to load ZegoCloud library. Please check your internet connection.');
+        };
+
+        document.head.appendChild(script);
+    }
+
+    // Start loading when DOM is ready
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', loadZegoScript);
+    } else {
+        loadZegoScript();
+    }
+
+    // Global error handler
+    window.onerror = function(message, source, lineno, colno, error) {
+        logDebug('Global error: ' + message + ' at ' + source + ':' + lineno);
+        return false; // Don't prevent default error handling
+    };
+
+</script>
+<div id="loading">
+    <div class="loading-spinner"></div>
+    <span>Loading ZegoCloud Video Call...</span>
+</div>
+
+<div id="error-container">
+    <h3>Failed to Load Video Call</h3>
+    <p id="error-message"></p>
+    <button onclick="retryLoad()" style="background: #fff; color: #f44336; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer;">Retry</button>
+</div>
+
+<div id="root"></div>
+
+</body>
+</html>

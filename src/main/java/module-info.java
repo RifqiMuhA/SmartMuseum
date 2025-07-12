@@ -2,6 +2,8 @@ module org.example.smartmuseum {
     // JavaFX modules
     requires javafx.controls;
     requires javafx.fxml;
+    requires javafx.web;
+    requires java.desktop;
     requires javafx.swing;
 
     // Database
@@ -27,6 +29,11 @@ module org.example.smartmuseum {
 
     // Text-to-Speech modules
     requires freetts;
+    requires javafx.media;
+    requires org.apache.poi.ooxml;
+    requires itextpdf;
+    requires jcef;
+    requires jcefmaven;
 
     // Open packages for reflection (untuk FXML)
     opens org.example.smartmuseum to javafx.fxml;

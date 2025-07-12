@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class AttendanceDAO {
-
     public boolean insertAttendance(Attendance attendance) {
         String sql = "INSERT INTO attendance (employee_id, check_in, date, status) VALUES (?, ?, ?, ?)";
 
@@ -53,7 +52,6 @@ public class AttendanceDAO {
             return false;
         }
     }
-
     public Attendance getTodayAttendance(int employeeId) {
         String sql = "SELECT * FROM attendance WHERE employee_id = ? AND date = CURDATE()";
 
@@ -84,7 +82,6 @@ public class AttendanceDAO {
         System.out.println("No attendance found for employee " + employeeId + " today");
         return null;
     }
-
     public List<Attendance> getAllTodayAttendance() {
         List<Attendance> attendanceList = new ArrayList<>();
         String sql = "SELECT * FROM attendance WHERE date = CURDATE() ORDER BY check_in DESC";
@@ -115,7 +112,6 @@ public class AttendanceDAO {
 
         return attendanceList;
     }
-
     public Attendance getAttendanceByDate(int employeeId, LocalDate date) {
         String sql = "SELECT * FROM attendance WHERE employee_id = ? AND date = ?";
 
@@ -145,7 +141,6 @@ public class AttendanceDAO {
 
         return null;
     }
-
     public List<Attendance> getEmployeeAttendance(int employeeId, int days) {
         List<Attendance> attendanceList = new ArrayList<>();
         String sql = "SELECT * FROM attendance WHERE employee_id = ? AND date >= DATE_SUB(CURDATE(), INTERVAL ? DAY) ORDER BY date DESC";

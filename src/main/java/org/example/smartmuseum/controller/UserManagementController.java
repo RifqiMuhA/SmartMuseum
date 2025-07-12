@@ -1,5 +1,7 @@
 package org.example.smartmuseum.controller;
 
+import javafx.beans.property.SimpleIntegerProperty;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -15,7 +17,9 @@ import org.example.smartmuseum.util.ValidationHelper;
 
 import java.net.URL;
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.ResourceBundle;
 
@@ -73,12 +77,18 @@ public class UserManagementController implements Initializable {
     }
 
     private void setupTableColumns() {
-        colUserId.setCellValueFactory(new PropertyValueFactory<>("userId"));
-        colUsername.setCellValueFactory(new PropertyValueFactory<>("username"));
-        colEmail.setCellValueFactory(new PropertyValueFactory<>("email"));
-        colPhone.setCellValueFactory(new PropertyValueFactory<>("phone"));
-        colRole.setCellValueFactory(new PropertyValueFactory<>("role"));
-        colCreatedAt.setCellValueFactory(new PropertyValueFactory<>("createdAt"));
+        colUserId.setCellValueFactory(cellData ->
+                new SimpleIntegerProperty(cellData.getValue().getUserId()).asObject());
+        colUsername.setCellValueFactory(cellData ->
+                new SimpleStringProperty(cellData.getValue().getUsername()));
+        colEmail.setCellValueFactory(cellData ->
+                new SimpleStringProperty(cellData.getValue().getEmail()));
+        colPhone.setCellValueFactory(cellData ->
+                new SimpleStringProperty(cellData.getValue().getPhone()));
+        colRole.setCellValueFactory(cellData ->
+                new SimpleStringProperty(cellData.getValue().getRole()));
+        colCreatedAt.setCellValueFactory(cellData ->
+                new SimpleStringProperty(cellData.getValue().getCreatedAt()));
 
         tableUsers.setItems(userData);
     }
@@ -123,7 +133,7 @@ public class UserManagementController implements Initializable {
         confirmAlert.setTitle("Reset Password");
         confirmAlert.setHeaderText("Reset User Password");
         confirmAlert.setContentText("Are you sure you want to reset password for user: " +
-                currentSelectedUser.getUsername() + "?\nNew password will be: 'password'");
+                currentSelectedUser.getUsername() + "?\nNew password will be: '123456'");
 
         if (confirmAlert.showAndWait().orElse(ButtonType.CANCEL) == ButtonType.OK) {
             try {
@@ -142,7 +152,7 @@ public class UserManagementController implements Initializable {
                 user.setRole(UserRole.valueOf(currentSelectedUser.getRole().toUpperCase()));
 
                 // Set password ke "password"
-                user.setPasswordHash(SecurityUtils.hashPassword("password", SecurityUtils.generateSalt()));
+                user.setPasswordHash(SecurityUtils.hashPassword("123456", SecurityUtils.generateSalt()));
 
                 if (userService.updateUser(user)) {
                     // Update tampilan password di form
@@ -177,11 +187,11 @@ public class UserManagementController implements Initializable {
             User user = new User();
             user.setUserId(newUserRecord.getUserId());
             user.setUsername(newUserRecord.getUsername());
-            user.setPasswordHash(SecurityUtils.hashPassword(txtPassword.getText(), SecurityUtils.generateSalt()));
+            user.setPasswordHash(SecurityUtils.hashPassword("123456", SecurityUtils.generateSalt()));
             user.setEmail(newUserRecord.getEmail());
             user.setPhone(newUserRecord.getPhone());
             user.setRole(UserRole.valueOf(newUserRecord.getRole().toUpperCase()));
-            user.setCreatedAt(new Timestamp(System.currentTimeMillis()));
+            user.setCreatedAt(Timestamp.valueOf(LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS)));
 
             // Register user
             if (userService.register(user)) {
@@ -448,12 +458,6 @@ public class UserManagementController implements Initializable {
 
         if (!ValidationHelper.isValidUsername(username)) {
             showErrorAlert("Validation Error", "Invalid username format");
-            return false;
-        }
-
-        // Untuk user baru, password wajib
-        if (selectedUser == null && password.isEmpty()) {
-            showErrorAlert("Validation Error", "Password is required for new users");
             return false;
         }
 

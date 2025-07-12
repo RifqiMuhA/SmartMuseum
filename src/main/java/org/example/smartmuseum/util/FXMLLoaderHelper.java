@@ -110,6 +110,39 @@ public class FXMLLoaderHelper {
     }
 
     /**
+     * Create welcome window untuk user tertentu
+     * Semua role dapat mengakses welcome window
+     */
+    public static Stage createWelcomeWindow(User user) throws IOException {
+        if (user == null) {
+            throw new IllegalArgumentException("User cannot be null");
+        }
+
+        System.out.println("✅ Creating welcome window for user: " + user.getUsername() +
+                " (Role: " + user.getRole() + ")");
+
+        SessionContext context = SessionContext.createNewWindowContext("WELCOME");
+        context.getSessionManager().login(user);
+
+        return createWindowWithSession("/org/example/smartmuseum/fxml/welcome.fxml",
+                context,
+                "Smart Museum - Welcome (" + user.getUsername() + ")",
+                true);
+    }
+
+    /**
+     * Create welcome window tanpa user (untuk akses publik)
+     */
+    public static Stage createWelcomeWindow() throws IOException {
+        SessionContext context = SessionContext.createNewWindowContext("WELCOME");
+
+        return createWindowWithSession("/org/example/smartmuseum/fxml/welcome.fxml",
+                context,
+                "Smart Museum - Welcome",
+                true);
+    }
+
+    /**
      * Show authorization error dialog
      */
     private static void showAuthorizationError(String message) {
@@ -145,6 +178,21 @@ public class FXMLLoaderHelper {
                 false);
     }
 
+    public static Stage createAuctionManagerWindow(User user) throws IOException {
+        // Check authorization
+        if (user.getRole() != UserRole.STAFF && user.getRole() != UserRole.BOSS) {
+            throw new IOException("Access denied. Auction management is only available for Staff and Boss.");
+        }
+
+        SessionContext context = SessionContext.createNewWindowContext("AUCTION_MANAGER");
+        context.getSessionManager().login(user);
+
+        return createWindowWithSession("/org/example/smartmuseum/fxml/auction-management.fxml",
+                context,
+                "Auction Management - " + user.getUsername(),
+                true);
+    }
+
     /**
      * Create window untuk bidder
      */
@@ -165,15 +213,13 @@ public class FXMLLoaderHelper {
                 false);
     }
 
-    /**
-     * Create welcome window dengan proper session
-     */
-    public static Stage createWelcomeWindow() throws IOException {
-        SessionContext context = SessionContext.createNewWindowContext("WELCOME");
+    public static Stage createLelangWindow(User user) throws IOException {
+        SessionContext context = SessionContext.createNewWindowContext("LELANG_PUBLIC");
+        context.getSessionManager().login(user);
 
-        return createWindowWithSession("/org/example/smartmuseum/fxml/welcome.fxml",
+        return createWindowWithSession("/org/example/smartmuseum/view/lelang.fxml",
                 context,
-                "Smart Museum - Welcome",
+                "Live Auction - " + user.getUsername(),
                 true);
     }
 

@@ -49,6 +49,7 @@ public class DashboardController implements Initializable, SessionAwareControlle
     @FXML private Label lblPageSubtitle;
     @FXML private Label lblCurrentTime;
     @FXML private Label lblUserInfo;
+    @FXML private Label lblPositionInfo;
     @FXML private ImageView imgLogo;
 
     // Navigation buttons
@@ -60,6 +61,7 @@ public class DashboardController implements Initializable, SessionAwareControlle
     @FXML private Button btnAuctions;
     @FXML private Button btnQRGenerator;
     @FXML private Button btnProfile;
+    @FXML private Button btnVideoRoom;
 
     // Content area
     @FXML private StackPane contentArea;
@@ -145,10 +147,11 @@ public class DashboardController implements Initializable, SessionAwareControlle
 
         // Delay untuk memastikan sessionContext sudah di-set
         Platform.runLater(() -> {
-            // FIXED: Remove authorization check here because it's already done in FXMLLoaderHelper
-            // This prevents dashboard from opening first then showing unauthorized alert
-
             loadUserInfo();
+
+            // Apply role-based access control
+            applyRoleBasedAccess();
+
             loadDashboardData();
 
             // Set dashboard to full screen after everything is loaded
@@ -167,6 +170,56 @@ public class DashboardController implements Initializable, SessionAwareControlle
                 e.printStackTrace();
             }
         });
+    }
+
+    private void applyRoleBasedAccess() {
+        if (sessionContext != null && sessionContext.getSessionManager() != null) {
+            User currentUser = sessionContext.getSessionManager().getCurrentUser();
+
+            if (currentUser != null) {
+                UserRole userRole = currentUser.getRole();
+
+                // Hide buttons that STAFF cannot access
+                if (userRole == UserRole.STAFF) {
+                    // Hide Employee Management button
+                    if (btnEmployees != null) {
+                        btnEmployees.setVisible(false);
+                        btnEmployees.setManaged(false);
+                    }
+
+                    // Hide QR Generator button
+                    if (btnQRGenerator != null) {
+                        btnQRGenerator.setVisible(false);
+                        btnQRGenerator.setManaged(false);
+                    }
+
+                    // Update page title and subtitle for staff
+                    if (lblPageTitle != null) {
+                        lblPageTitle.setText("Staff Dashboard");
+                    }
+                    if (lblPageSubtitle != null) {
+                        lblPageSubtitle.setText("Sistem manajemen museum untuk staff");
+                    }
+
+                    System.out.println("✅ Staff access restrictions applied");
+                }
+                // For BOSS role, show all buttons (default behavior)
+                else if (userRole == UserRole.BOSS) {
+                    // Ensure all buttons are visible for boss
+                    if (btnEmployees != null) {
+                        btnEmployees.setVisible(true);
+                        btnEmployees.setManaged(true);
+                    }
+
+                    if (btnQRGenerator != null) {
+                        btnQRGenerator.setVisible(true);
+                        btnQRGenerator.setManaged(true);
+                    }
+
+                    System.out.println("✅ Boss access - all features available");
+                }
+            }
+        }
     }
 
     private void loadUserInfo() {
@@ -241,42 +294,11 @@ public class DashboardController implements Initializable, SessionAwareControlle
     }
 
     private void updateSidebarRoleLabel(String position) {
-        try {
-            // Find the role label in sidebar by searching through the scene graph
-            Platform.runLater(() -> {
-                if (lblUserInfo != null && lblUserInfo.getParent() != null) {
-                    // Search for labels in the same parent container
-                    searchAndUpdateRoleLabel(lblUserInfo.getParent(), position);
-                }
-            });
-        } catch (Exception e) {
-            System.err.println("Error updating sidebar role label: " + e.getMessage());
-        }
-    }
-
-    private void searchAndUpdateRoleLabel(javafx.scene.Parent parent, String position) {
-        try {
-            for (javafx.scene.Node node : parent.getChildrenUnmodifiable()) {
-                if (node instanceof Label) {
-                    Label label = (Label) node;
-                    // Look for the label that contains "Administrator" or similar role text
-                    if (label.getText() != null &&
-                            (label.getText().contains("Administrator") ||
-                                    label.getText().contains("Staff") ||
-                                    label.getText().contains("Boss") ||
-                                    label.getText().equals("Administrator"))) {
-                        label.setText(position != null ? position : "Staff Member");
-                        System.out.println("Updated sidebar role label to: " + position);
-                        return;
-                    }
-                } else if (node instanceof javafx.scene.Parent) {
-                    // Recursively search in child containers
-                    searchAndUpdateRoleLabel((javafx.scene.Parent) node, position);
-                }
+        Platform.runLater(() -> {
+            if (lblPositionInfo != null) {
+                lblPositionInfo.setText(position != null ? position : "Staff Member");
             }
-        } catch (Exception e) {
-            System.err.println("Error in searchAndUpdateRoleLabel: " + e.getMessage());
-        }
+        });
     }
 
     private String getTimeAgo(LocalDateTime pastTime) {
@@ -622,6 +644,11 @@ public class DashboardController implements Initializable, SessionAwareControlle
 
     @FXML
     private void showAttendance() {
+        if (!hasPermission("view_attendance")) {
+            showAccessDeniedAlert("Attendance Scanner", "Anda tidak memiliki akses untuk melihat attendance.");
+            return;
+        }
+
         setActiveNavButton(btnAttendance);
         if (lblPageTitle != null) lblPageTitle.setText("Attendance Scanner");
         if (lblPageSubtitle != null) lblPageSubtitle.setText("Scan QR codes for employee attendance tracking");
@@ -631,6 +658,12 @@ public class DashboardController implements Initializable, SessionAwareControlle
 
     @FXML
     private void showEmployees() {
+        // Check if user has permission
+        if (!hasPermission("manage_employees")) {
+            showAccessDeniedAlert("Employee Management", "Anda tidak memiliki akses untuk mengelola pegawai.");
+            return;
+        }
+
         setActiveNavButton(btnEmployees);
         if (lblPageTitle != null) lblPageTitle.setText("Employee Management");
         if (lblPageSubtitle != null) lblPageSubtitle.setText("Manage employee information and QR codes");
@@ -640,6 +673,11 @@ public class DashboardController implements Initializable, SessionAwareControlle
 
     @FXML
     private void showUsers() {
+        if (!hasPermission("manage_users")) {
+            showAccessDeniedAlert("User Management", "Anda tidak memiliki akses untuk mengelola user.");
+            return;
+        }
+
         setActiveNavButton(btnUsers);
         if (lblPageTitle != null) lblPageTitle.setText("User Management");
         if (lblPageSubtitle != null) lblPageSubtitle.setText("Manage system users and their roles");
@@ -649,6 +687,11 @@ public class DashboardController implements Initializable, SessionAwareControlle
 
     @FXML
     public void showArtworks() {
+        if (!hasPermission("manage_artworks")) {
+            showAccessDeniedAlert("Artwork Management", "Anda tidak memiliki akses untuk mengelola artwork.");
+            return;
+        }
+
         setActiveNavButton(btnArtworks);
         if (lblPageTitle != null) lblPageTitle.setText("Artwork Management");
         if (lblPageSubtitle != null) lblPageSubtitle.setText("Kelola koleksi seni dan artefak museum");
@@ -658,6 +701,11 @@ public class DashboardController implements Initializable, SessionAwareControlle
 
     @FXML
     public void showAuctions() {
+        if (!hasPermission("view_auctions")) {
+            showAccessDeniedAlert("Auction Management", "Anda tidak memiliki akses untuk mengelola lelang.");
+            return;
+        }
+
         setActiveNavButton(btnAuctions);
         if (lblPageTitle != null) lblPageTitle.setText("Lelang Terkini");
         if (lblPageSubtitle != null) lblPageSubtitle.setText("Kelola lelang yang sedang berlangsung");
@@ -667,6 +715,12 @@ public class DashboardController implements Initializable, SessionAwareControlle
 
     @FXML
     private void showQRGenerator() {
+        // Check if user has permission
+        if (!hasPermission("generate_qr")) {
+            showAccessDeniedAlert("QR Generator", "Anda tidak memiliki akses untuk generate QR code.");
+            return;
+        }
+
         setActiveNavButton(btnQRGenerator);
         if (lblPageTitle != null) lblPageTitle.setText("QR Code Generator");
         if (lblPageSubtitle != null) lblPageSubtitle.setText("Generate QR codes for employees and artworks");
@@ -681,6 +735,15 @@ public class DashboardController implements Initializable, SessionAwareControlle
         if (lblPageSubtitle != null) lblPageSubtitle.setText("Manage your profile and account settings");
 
         loadAndShowContentWithSession("/org/example/smartmuseum/fxml/profile.fxml");
+    }
+
+    @FXML
+    private void showVideoRoom() {
+        setActiveNavButton(btnVideoRoom);
+        if (lblPageTitle != null) lblPageTitle.setText("Video Conference");
+        if (lblPageSubtitle != null) lblPageSubtitle.setText("Create and manage video calls for visitors");
+
+        loadAndShowContent("/org/example/smartmuseum/fxml/video-room.fxml");
     }
 
     @FXML
@@ -707,6 +770,16 @@ public class DashboardController implements Initializable, SessionAwareControlle
         }
     }
 
+    private void showAccessDeniedAlert(String feature, String message) {
+        Alert alert = new Alert(Alert.AlertType.WARNING);
+        alert.setTitle("Access Denied");
+        alert.setHeaderText("Akses Ditolak - " + feature);
+        alert.setContentText(message);
+        alert.showAndWait();
+
+        System.out.println("❌ Access denied for feature: " + feature);
+    }
+
     private void loadAndShowContent(String fxmlPath) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
@@ -721,6 +794,32 @@ public class DashboardController implements Initializable, SessionAwareControlle
             e.printStackTrace();
             showPlaceholderContent("Error", "Failed to load content: " + e.getMessage());
         }
+    }
+
+    private boolean hasPermission(String permission) {
+        if (sessionContext != null && sessionContext.getSessionManager() != null) {
+            User currentUser = sessionContext.getSessionManager().getCurrentUser();
+
+            if (currentUser != null) {
+                UserRole userRole = currentUser.getRole();
+
+                switch (permission) {
+                    case "manage_employees":
+                    case "generate_qr":
+                        // Only BOSS can access these features
+                        return userRole == UserRole.BOSS;
+                    case "manage_artworks":
+                    case "manage_users":
+                    case "view_attendance":
+                    case "view_auctions":
+                        // Both BOSS and STAFF can access these
+                        return userRole == UserRole.BOSS || userRole == UserRole.STAFF;
+                    default:
+                        return false;
+                }
+            }
+        }
+        return false;
     }
 
     private void loadAndShowContentWithSession(String fxmlPath) {
@@ -778,18 +877,20 @@ public class DashboardController implements Initializable, SessionAwareControlle
             // Clean up resources
             shutdown();
 
+
             // Load login screen
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/smartmuseum/fxml/login.fxml"));
             Parent root = loader.load();
 
             Stage stage = (Stage) lblUserInfo.getScene().getWindow();
-            Scene scene = new Scene(root);
+            Scene scene = new Scene(root, 900, 600);
+
             scene.getStylesheets().add(getClass().getResource("/org/example/smartmuseum/css/main-style.css").toExternalForm());
 
             stage.setScene(scene);
             stage.setTitle("Smart Museum - Login");
-            stage.setMaximized(false);
             stage.centerOnScreen();
+            stage.show();
 
         } catch (IOException e) {
             System.err.println("Error loading login screen: " + e.getMessage());

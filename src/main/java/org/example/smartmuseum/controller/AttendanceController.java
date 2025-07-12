@@ -3,6 +3,7 @@ package org.example.smartmuseum.controller;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
@@ -69,11 +70,15 @@ public class AttendanceController implements Initializable {
     private void setupTable() {
         attendanceData = FXCollections.observableArrayList();
 
-        // Set up table columns with proper cell value factories
-        colEmployeeName.setCellValueFactory(new PropertyValueFactory<>("employeeName"));
-        colAction.setCellValueFactory(new PropertyValueFactory<>("action"));
-        colTimestamp.setCellValueFactory(new PropertyValueFactory<>("timestamp"));
-        colStatus.setCellValueFactory(new PropertyValueFactory<>("status"));
+        // Setup dengan callback manual
+        colEmployeeName.setCellValueFactory(cellData ->
+                new SimpleStringProperty(cellData.getValue().getEmployeeName()));
+        colAction.setCellValueFactory(cellData ->
+                new SimpleStringProperty(cellData.getValue().getAction()));
+        colTimestamp.setCellValueFactory(cellData ->
+                new SimpleStringProperty(cellData.getValue().getTimestamp()));
+        colStatus.setCellValueFactory(cellData ->
+                new SimpleStringProperty(cellData.getValue().getStatus()));
 
         // Set preferred column widths
         colEmployeeName.setPrefWidth(150);
@@ -83,7 +88,6 @@ public class AttendanceController implements Initializable {
 
         tableAttendance.setItems(attendanceData);
 
-        // Debug: Print column setup
         System.out.println("Table columns setup completed");
     }
 
