@@ -76,8 +76,8 @@ Sistem menggunakan 11 tabel yang saling terhubung:
 
 1. Clone repository
 ```bash
-git clone https://github.com/username/senimatic-javafx.git
-cd senimatic-javafx
+git clone https://github.com/RifqiMuhA/SmartMuseum.git 
+cd SmartMuseum
 ```
 
 2. Konfigurasi database
